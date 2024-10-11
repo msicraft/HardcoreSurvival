@@ -1,0 +1,8 @@
+Debug: false
+Setting:
+  DisableEntityVehicleEnter: true
+  DisableBoneMeal: true
+  MendingEnchantChance: 0.001
+  DisableBedExplode: true
+  DeathPenalty:
+    Enabled: true
