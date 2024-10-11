@@ -2,9 +2,11 @@ package me.msicraft.hardcoresurvival.Command;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MainCommand implements CommandExecutor {
@@ -36,6 +38,24 @@ public class MainCommand implements CommandExecutor {
                             return true;
                         } else {
                             sendPermissionMessage(sender);
+                            return false;
+                        }
+                    }
+                    case "deathpenalty" -> {
+                        if (sender.isOp()) {
+                            if (sender instanceof Player player) {
+                                Location location = player.getLocation();
+                                String format = plugin.getDeathPenaltyManager().locationToFormat(location);
+                                plugin.getConfig().set("Setting.DeathPenalty.SpawnLocation", location);
+                                plugin.saveConfig();
+                                player.sendMessage(ChatColor.GREEN + "DeathPenalty 스폰위치가 저장되었습니다");
+                                player.sendMessage(ChatColor.GREEN + "위치: " + format);
+                                plugin.getDeathPenaltyManager().setSpawnLocation(location);
+                                return true;
+                            }
+                        } else {
+                            sendPermissionMessage(sender);
+                            return false;
                         }
                     }
                 }

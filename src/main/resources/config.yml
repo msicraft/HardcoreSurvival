@@ -6,3 +6,10 @@ Setting:
   DisableBedExplode: true
   DeathPenalty:
     Enabled: true
+    SpawnLocation: ''
+  PlayerTaskTick: 10
+  #VillageTrade:
+  #  DisableEnchant:
+  #    Enabled: true
+  #    List:
+  #      - mending

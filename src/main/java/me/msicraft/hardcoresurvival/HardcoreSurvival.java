@@ -3,9 +3,10 @@ package me.msicraft.hardcoresurvival;
 import me.msicraft.hardcoresurvival.Command.MainCommand;
 import me.msicraft.hardcoresurvival.Command.MainTabCompleter;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
-import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyRelatedEvent;
+import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import net.milkbowl.vault.economy.Economy;
@@ -15,6 +16,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,6 +35,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
     private boolean useDebug = false;
+    private int playerTaskTick = 20;
 
     private Economy economy;
 
@@ -89,6 +92,12 @@ public final class HardcoreSurvival extends JavaPlugin {
 
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();
+
+        this.playerTaskTick = getConfig().contains("Setting.PlayerTaskTick") ? getConfig().getInt("Setting.PlayerTaskTick") : 20;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PlayerData playerData = playerDataManager.getPlayerData(player);
+            playerData.updateTask(playerTaskTick);
+        }
     }
 
     private void createConfigFile() {
@@ -131,6 +140,10 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public DeathPenaltyManager getDeathPenaltyManager() {
         return deathPenaltyManager;
+    }
+
+    public int getPlayerTaskTick() {
+        return playerTaskTick;
     }
 
 }

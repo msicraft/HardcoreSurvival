@@ -1,7 +1,10 @@
 package me.msicraft.hardcoresurvival.PlayerData.Event;
 
+import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadEvent;
+import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,6 +36,10 @@ public class PlayerDataRelatedEvent implements Listener {
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
         playerData.loadData();
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(playerData));
+        });
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -43,6 +50,21 @@ public class PlayerDataRelatedEvent implements Listener {
         playerData.saveData();
 
         plugin.getPlayerDataManager().unregisterPlayerData(player);
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(playerData));
+        });
+    }
+
+    @EventHandler
+    public void playerDataLoad(PlayerDataLoadEvent e) {
+        PlayerData playerData = e.getPlayerData();
+        playerData.updateTask(plugin.getPlayerTaskTick());
+    }
+
+    @EventHandler
+    public void playerDataUnload(PlayerDataUnLoadEvent e) {
+        PlayerData playerData = e.getPlayerData();
     }
 
 }

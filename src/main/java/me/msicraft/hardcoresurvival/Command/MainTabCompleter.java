@@ -20,9 +20,11 @@ public class MainTabCompleter implements TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (command.getName().equals("hardcoresurvival")) {
-            if (args.length == 1) {
-                if (sender.isOp()) {
-                    return List.of("reload");
+            if (sender.isOp()) {
+                if (args.length == 1) {
+                    return List.of("reload", "deathpenalty");
+                }
+                if (args.length == 2) {
                 }
             }
         }
