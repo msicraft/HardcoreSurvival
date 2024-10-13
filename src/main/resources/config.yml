@@ -8,8 +8,61 @@ Setting:
     Enabled: true
     SpawnLocation: ''
   PlayerTaskTick: 20
-  #VillageTrade:
-  #  DisableEnchant:
-  #    Enabled: true
-  #    List:
-  #      - mending
+  WorldName:
+    world: "#42ddf5[메인월드]"
+    world_nether: "#f50a0a[지옥]"
+    world_the_end: "#e007ce[엔더]"
+  OreDisguise: # Use MythicMobs
+    Enabled: true
+    List:
+      COAL_ORE:
+        InternalName: "Disguise_CoalOre"
+        Chance: 0.2
+      DEEPSLATE_COAL_ORE:
+        InternalName: "Disguise_DeepslateCoalOre"
+        Chance: 0.2
+      IRON_ORE:
+        InternalName: "Disguise_IronOre"
+        Chance: 0.2
+      DEEPSLATE_IRON_ORE:
+        InternalName: "Disguise_DeepslateIronOre"
+        Chance: 0.2
+      COPPER_ORE:
+        InternalName: "Disguise_CopperOre"
+        Chance: 0.2
+      DEEPSLATE_COPPER_ORE:
+        InternalName: "Disguise_DeepslateCopperOre"
+        Chance: 0.2
+      GOLD_ORE:
+        InternalName: "Disguise_GoldOre"
+        Chance: 0.2
+      DEEPSLATE_GOLD_ORE:
+        InternalName: "Disguise_DeepslateGoldOre"
+        Chance: 0.2
+      REDSTONE_ORE:
+        InternalName: "Disguise_RedstoneOre"
+        Chance: 0.2
+      DEEPSLATE_REDSTONE_ORE:
+        InternalName: "Disguise_DeepslateRedstoneOre"
+        Chance: 0.2
+      EMERALD_ORE:
+        InternalName: "Disguise_EmeraldOre"
+        Chance: 0.2
+      DEEPSLATE_EMERALD_ORE:
+        InternalName: "Disguise_DeepslateEmeraldOre"
+        Chance: 0.2
+      LAPIS_ORE:
+        InternalName: "Disguise_LapisLazuliOre"
+        Chance: 0.2
+      DEEPSLATE_LAPIS_ORE:
+        InternalName: "Disguise_DeepslateLapisOre"
+        Chance: 0.2
+      DIAMOND_ORE:
+        InternalName: "Disguise_DiamondOre"
+        Chance: 0.2
+      DEEPSLATE_DIAMOND_ORE:
+        InternalName: "Disguise_DeepslateDiamondOre"
+        Chance: 0.2
+      NETHER_GOLD_ORE:
+        InternalName: "Disguise_NetherGoldOre"
+        Chance: 0.2

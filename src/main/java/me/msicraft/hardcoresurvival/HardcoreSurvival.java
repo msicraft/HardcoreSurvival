@@ -6,6 +6,8 @@ import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
+import me.msicraft.hardcoresurvival.OreDisguise.Event.OreDisguiseRelatedEvent;
+import me.msicraft.hardcoresurvival.OreDisguise.OreDisguiseManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
@@ -23,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public final class HardcoreSurvival extends JavaPlugin {
 
@@ -34,6 +37,8 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
+    private final List<String> checkPluginNameList = List.of("MythicMobs");
+
     private boolean useDebug = false;
     private int playerTaskTick = 20;
 
@@ -41,6 +46,8 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     private PlayerDataManager playerDataManager;
     private DeathPenaltyManager deathPenaltyManager;
+    private WorldManager worldManager;
+    private OreDisguiseManager oreDisguiseManager;
 
     @Override
     public void onEnable() {
@@ -49,11 +56,22 @@ public final class HardcoreSurvival extends JavaPlugin {
 
         playerDataManager = new PlayerDataManager(this);
         deathPenaltyManager = new DeathPenaltyManager(this);
+        worldManager = new WorldManager(this);
+        oreDisguiseManager = new OreDisguiseManager(this);
 
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        for (String pluginName : checkPluginNameList) {
+            if (pluginManager.getPlugin(pluginName) == null) {
+                getServer().getConsoleSender().sendMessage(PREFIX + ChatColor.RED + pluginName + " 플러그인을 찾을 수 없습니다");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
         }
 
         registeredEvents();
@@ -74,6 +92,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(EntityRelatedEvent.getInstance(), this);
         pluginManager.registerEvents(PlayerRelatedEvent.getInstance(), this);
         pluginManager.registerEvents(new DeathPenaltyRelatedEvent(this), this);
+        pluginManager.registerEvents(new OreDisguiseRelatedEvent(this), this);
     }
 
     public void registeredCommands() {
@@ -89,6 +108,8 @@ public final class HardcoreSurvival extends JavaPlugin {
         this.useDebug = getConfig().contains("Debug") && getConfig().getBoolean("Debug");
 
         deathPenaltyManager.reloadVariables();
+        worldManager.reloadVariables();
+        oreDisguiseManager.reloadVariables();
 
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();
@@ -142,8 +163,16 @@ public final class HardcoreSurvival extends JavaPlugin {
         return deathPenaltyManager;
     }
 
+    public WorldManager getWorldManager() {
+        return worldManager;
+    }
+
     public int getPlayerTaskTick() {
         return playerTaskTick;
+    }
+
+    public OreDisguiseManager getOreDisguiseManager() {
+        return oreDisguiseManager;
     }
 
 }
