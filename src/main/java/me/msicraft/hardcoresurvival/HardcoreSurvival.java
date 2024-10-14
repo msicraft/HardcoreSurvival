@@ -6,6 +6,8 @@ import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
+import me.msicraft.hardcoresurvival.ItemBox.Event.ItemBoxGuiEvent;
+import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.Event.OreDisguiseRelatedEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.OreDisguiseManager;
@@ -49,6 +51,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private DeathPenaltyManager deathPenaltyManager;
     private WorldManager worldManager;
     private OreDisguiseManager oreDisguiseManager;
+    private ItemBoxManager itemBoxManager;
 
     @Override
     public void onEnable() {
@@ -59,7 +62,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         deathPenaltyManager = new DeathPenaltyManager(this);
         worldManager = new WorldManager(this);
         oreDisguiseManager = new OreDisguiseManager(this);
-
+        itemBoxManager = new ItemBoxManager(this);
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
@@ -95,6 +98,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new DeathPenaltyRelatedEvent(this), this);
         pluginManager.registerEvents(new OreDisguiseRelatedEvent(this), this);
         pluginManager.registerEvents(new MenuGuiEvent(this), this);
+        pluginManager.registerEvents(new ItemBoxGuiEvent(this), this);
     }
 
     public void registeredCommands() {
@@ -175,6 +179,10 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public OreDisguiseManager getOreDisguiseManager() {
         return oreDisguiseManager;
+    }
+
+    public ItemBoxManager getItemBoxManager() {
+        return itemBoxManager;
     }
 
 }

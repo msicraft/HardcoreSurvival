@@ -1,10 +1,13 @@
 package me.msicraft.hardcoresurvival.PlayerData.Data;
 
-import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
-import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
+import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
+import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.Task.PlayerTask;
@@ -22,7 +25,6 @@ import java.util.*;
 public class PlayerData {
 
     private final Player player;
-    private final DeathPenaltyChestLog deathPenaltyChestLog;
     private final PlayerDataFile playerDataFile;
 
     private final Map<GuiType, CustomGui> customGuiMap = new HashMap<>();
@@ -32,11 +34,14 @@ public class PlayerData {
     private final List<String> tagList = new ArrayList<>();
 
     private PlayerTask playerTask;
+    private final DeathPenaltyChestLog deathPenaltyChestLog;
+    private final ItemBox itemBox;
 
     public PlayerData(Player player) {
         this.player = player;
         this.playerDataFile = new PlayerDataFile(player);
         this.deathPenaltyChestLog = new DeathPenaltyChestLog(this);
+        this.itemBox = new ItemBox(this);
     }
 
     public void updateTask(int ticks) {
@@ -73,6 +78,11 @@ public class PlayerData {
             }
         });
 
+        playerDataConfig.getStringList("ItemBoxData").forEach(itemBoxDataFormat -> {
+            ItemBoxStack itemBoxStack = ItemBoxStack.fromFormat(itemBoxDataFormat);
+            itemBox.addItemBoxStack(itemBoxStack);
+        });
+
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
         }
@@ -97,8 +107,14 @@ public class PlayerData {
         });
         playerDataConfig.set("DeathPenaltyChestLog", chestLogList);
 
-        playerDataFile.saveConfig();
+        List<String> itemBoxDataList = new ArrayList<>();
+        itemBox.getList().forEach(itemBoxStack -> {
+            String format = itemBoxStack.toFormat();
+            itemBoxDataList.add(format);
+        });
+        playerDataConfig.set("ItemBoxData", itemBoxDataList);
 
+        playerDataFile.saveConfig();
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + player.getName());
         }
@@ -113,6 +129,10 @@ public class PlayerData {
             switch (guiType) {
                 case MAIN -> {
                     customGui = new MenuGui();
+                    customGuiMap.put(guiType, customGui);
+                }
+                case ITEM_BOX -> {
+                    customGui = new ItemBoxGui();
                     customGuiMap.put(guiType, customGui);
                 }
                 default -> {
@@ -195,6 +215,10 @@ public class PlayerData {
 
     public DeathPenaltyChestLog getDeathPenaltyChestLog() {
         return deathPenaltyChestLog;
+    }
+
+    public ItemBox getItemBox() {
+        return itemBox;
     }
 
 }

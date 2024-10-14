@@ -3,15 +3,21 @@ package me.msicraft.hardcoresurvival.Command;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainCommand implements CommandExecutor {
 
@@ -96,8 +102,33 @@ public class MainCommand implements CommandExecutor {
                                                 return false;
                                             }
                                             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target);
-                                            DeathPenaltyManager deathPenaltyManager = plugin.getDeathPenaltyManager();
+                                            ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
+                                            List<Location> list = new ArrayList<>();
+                                            playerData.getDeathPenaltyChestLog().getChestLocationList().forEach(location -> {
+                                                World world = location.getWorld();
+                                                Block block = world.getBlockAt(location);
+                                                String materialName = block.getType().name();
+                                                if (materialName.contains("CHEST")) {
+                                                    Chest chest = (Chest) block.getState();
+                                                    ItemStack[] itemStacks = chest.getBlockInventory().getContents();
+                                                    for (ItemStack itemStack : itemStacks) {
+                                                        itemBoxManager.sendItemStackToItemBox(itemStack, target);
+                                                    }
+                                                    block.setType(Material.AIR);
+                                                } else if (materialName.contains("SHULKER_BOX")) {
+                                                    ShulkerBox shulkerBox = (ShulkerBox) block.getState();
+                                                    ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
+                                                    for (ItemStack itemStack : itemStacks) {
+                                                        itemBoxManager.sendItemStackToItemBox(itemStack, target);
+                                                    }
+                                                    block.setType(Material.AIR);
+                                                }
+                                                list.add(location);
+                                            });
                                             DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
+                                            for (Location location : list) {
+                                                deathPenaltyChestLog.removeLocation(location);
+                                            }
                                         }
                                     }
                                 }

@@ -1,7 +1,7 @@
 package me.msicraft.hardcoresurvival.Menu;
 
-import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Utils.GuiUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;

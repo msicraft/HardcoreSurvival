@@ -1,7 +1,7 @@
 package me.msicraft.hardcoresurvival.Menu.Data;
 
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.ArrayList;
 import java.util.List;

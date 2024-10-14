@@ -25,6 +25,19 @@ public class MainTabCompleter implements TabCompleter {
                     return List.of("reload", "deathpenalty");
                 }
                 if (args.length == 2) {
+                    String var = args[0];
+                    if (var.equalsIgnoreCase("deathpenalty")) {
+                        return List.of("setspawn", "chestlog");
+                    }
+                }
+                if (args.length == 3) {
+                    String var = args[0];
+                    String var2 = args[1];
+                    if (var.equalsIgnoreCase("deathpenalty")) {
+                        if (var2.equalsIgnoreCase("chestlog")) {
+                            return List.of("get", "log-to-ItemBox");
+                        }
+                    }
                 }
             }
         }
