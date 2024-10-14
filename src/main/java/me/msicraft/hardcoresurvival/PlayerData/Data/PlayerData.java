@@ -1,11 +1,16 @@
 package me.msicraft.hardcoresurvival.PlayerData.Data;
 
+import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
+import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.Task.PlayerTask;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -19,6 +24,8 @@ public class PlayerData {
     private final Player player;
     private final DeathPenaltyChestLog deathPenaltyChestLog;
     private final PlayerDataFile playerDataFile;
+
+    private final Map<GuiType, CustomGui> customGuiMap = new HashMap<>();
 
     private final Map<String, Object> tempDataMap = new HashMap<>();
     private final Map<String, Object> dataMap = new HashMap<>();
@@ -95,6 +102,27 @@ public class PlayerData {
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + player.getName());
         }
+    }
+
+    public CustomGui getCustomGui(GuiType guiType) {
+        CustomGui customGui = null;
+        if (customGuiMap.containsKey(guiType)) {
+            customGui = customGuiMap.get(guiType);
+        }
+        if (customGui == null) {
+            switch (guiType) {
+                case MAIN -> {
+                    customGui = new MenuGui();
+                    customGuiMap.put(guiType, customGui);
+                }
+                default -> {
+                    customGui = new MenuGui();
+                    Bukkit.getConsoleSender().sendMessage(HardcoreSurvival.PREFIX + ChatColor.YELLOW + "플레이어: " + player.getName(),
+                            ChatColor.YELLOW + "메뉴 생성중 기본값 사용이 발생하였습니다.");
+                }
+            }
+        }
+        return customGui;
     }
 
     public Player getPlayer() {

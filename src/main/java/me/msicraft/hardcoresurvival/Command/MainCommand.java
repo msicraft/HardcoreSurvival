@@ -66,7 +66,7 @@ public class MainCommand implements CommandExecutor {
                                         return false;
                                     }
                                 }
-                                case "chestlog" -> { //hs deathpenalty chestlog [get, topost] <player>
+                                case "chestlog" -> { //hs deathpenalty chestlog [get, log-to-ItemBox] <player>
                                     String var3 = args[2];
                                     switch (var3) {
                                         case "get" -> {

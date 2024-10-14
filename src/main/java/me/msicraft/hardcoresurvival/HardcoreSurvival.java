@@ -6,6 +6,7 @@ import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
+import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.Event.OreDisguiseRelatedEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.OreDisguiseManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -93,6 +94,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(PlayerRelatedEvent.getInstance(), this);
         pluginManager.registerEvents(new DeathPenaltyRelatedEvent(this), this);
         pluginManager.registerEvents(new OreDisguiseRelatedEvent(this), this);
+        pluginManager.registerEvents(new MenuGuiEvent(this), this);
     }
 
     public void registeredCommands() {
