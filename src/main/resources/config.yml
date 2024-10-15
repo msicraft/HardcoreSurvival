@@ -4,47 +4,61 @@ Setting:
   DisableBoneMeal: true
   MendingEnchantChance: 0.01
   DisableBedExplode: true
+  DisableTrade: true
   DeathPenalty:
     Enabled: true
     SpawnLocation: ''
   PlayerTaskTick: 20
   WorldName:
-    world: "#42ddf5[메인월드]"
-    world_nether: "#f50a0a[지옥]"
-    world_the_end: "#e007ce[엔더]"
+    world: "#00f1ff[메인월드]"
+    world_nether: "#d32a00[지옥]"
+    world_the_end: "#ff1af9[엔더]"
+  DisableUse:
+    Enabled: true
+    List:
+      - chest_minecart
+      - oak_chest_boat
+      - bamboo_chest_raft
+      - spruce_chest_boat
+      - birch_chest_boat
+      - jungle_chest_boat
+      - acacia_chest_boat
+      - dark_oak_chest_boat
+      - mangrove_chest_boat
+      - cherry_chest_boat
   OreDisguise: # Use MythicMobs
     Enabled: true
     List:
       COAL_ORE:
         InternalName: "Disguise_CoalOre"
-        Chance: 0.2
+        Chance: 0.01
       DEEPSLATE_COAL_ORE:
         InternalName: "Disguise_DeepslateCoalOre"
-        Chance: 0.2
+        Chance: 0.01
       IRON_ORE:
         InternalName: "Disguise_IronOre"
-        Chance: 0.2
+        Chance: 0.05
       DEEPSLATE_IRON_ORE:
         InternalName: "Disguise_DeepslateIronOre"
-        Chance: 0.2
+        Chance: 0.05
       COPPER_ORE:
         InternalName: "Disguise_CopperOre"
-        Chance: 0.2
+        Chance: 0.05
       DEEPSLATE_COPPER_ORE:
         InternalName: "Disguise_DeepslateCopperOre"
-        Chance: 0.2
+        Chance: 0.05
       GOLD_ORE:
         InternalName: "Disguise_GoldOre"
-        Chance: 0.2
+        Chance: 0.1
       DEEPSLATE_GOLD_ORE:
         InternalName: "Disguise_DeepslateGoldOre"
-        Chance: 0.2
+        Chance: 0.1
       REDSTONE_ORE:
         InternalName: "Disguise_RedstoneOre"
-        Chance: 0.2
+        Chance: 0.075
       DEEPSLATE_REDSTONE_ORE:
         InternalName: "Disguise_DeepslateRedstoneOre"
-        Chance: 0.2
+        Chance: 0.075
       EMERALD_ORE:
         InternalName: "Disguise_EmeraldOre"
         Chance: 0.2
@@ -53,16 +67,16 @@ Setting:
         Chance: 0.2
       LAPIS_ORE:
         InternalName: "Disguise_LapisLazuliOre"
-        Chance: 0.2
+        Chance: 0.1
       DEEPSLATE_LAPIS_ORE:
         InternalName: "Disguise_DeepslateLapisOre"
-        Chance: 0.2
+        Chance: 0.1
       DIAMOND_ORE:
         InternalName: "Disguise_DiamondOre"
-        Chance: 0.2
+        Chance: 0.25
       DEEPSLATE_DIAMOND_ORE:
         InternalName: "Disguise_DeepslateDiamondOre"
-        Chance: 0.2
+        Chance: 0.25
       NETHER_GOLD_ORE:
         InternalName: "Disguise_NetherGoldOre"
-        Chance: 0.2
+        Chance: 0.15

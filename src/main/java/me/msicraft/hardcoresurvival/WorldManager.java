@@ -26,16 +26,14 @@ public class WorldManager {
             for (String worldName : worldNameKeys) {
                 String path = "Setting.WorldName." + worldName;
                 String displayName = config.getString(path, "[Unknown]");
+                displayName = MessageUtil.translateColorCodes(displayName);
                 worldNameMap.put(worldName, displayName);
             }
         }
     }
 
-    public String getCurrentWorldName(String worldName, boolean applyColorCode) {
+    public String getCurrentWorldName(String worldName) {
         if (worldNameMap.containsKey(worldName)) {
-            if (applyColorCode) {
-                return MessageUtil.translateColorCodes(worldNameMap.get(worldName));
-            }
             return worldNameMap.get(worldName);
         }
         return "[Unknown]";

@@ -2,6 +2,8 @@ package me.msicraft.hardcoresurvival.DeathPenalty;
 
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
+import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class DeathPenaltyManager {
 
@@ -49,11 +52,37 @@ public class DeathPenaltyManager {
             if (materialName.contains("CHEST")) {
                 Chest chest = (Chest) block.getState();
                 chest.getBlockInventory().clear();
-                block.breakNaturally();
+                block.setType(Material.AIR);
             } else if (materialName.contains("SHULKER_BOX")) {
                 ShulkerBox shulkerBox = (ShulkerBox) block.getState();
                 shulkerBox.getInventory().clear();
-                block.breakNaturally();
+                block.setType(Material.AIR);
+            }
+        });
+        deathPenaltyChestLog.reset();
+    }
+
+    public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
+        ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
+        DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
+        deathPenaltyChestLog.getChestLocationList().forEach(location -> {
+            World world = location.getWorld();
+            Block block = world.getBlockAt(location);
+            String materialName = block.getType().name();
+            if (materialName.contains("CHEST")) {
+                Chest chest = (Chest) block.getState();
+                ItemStack[] itemStacks = chest.getBlockInventory().getContents();
+                for (ItemStack itemStack : itemStacks) {
+                    itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                }
+                block.setType(Material.AIR);
+            } else if (materialName.contains("SHULKER_BOX")) {
+                ShulkerBox shulkerBox = (ShulkerBox) block.getState();
+                ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
+                for (ItemStack itemStack : itemStacks) {
+                    itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                }
+                block.setType(Material.AIR);
             }
         });
         deathPenaltyChestLog.reset();

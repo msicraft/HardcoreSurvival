@@ -5,10 +5,8 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.io.File;
+import java.util.*;
 
 public class PlayerDataManager {
 
@@ -43,6 +41,20 @@ public class PlayerDataManager {
 
     public Set<UUID> getUUIDSets() {
         return playerDataMap.keySet();
+    }
+
+    public List<String> getPlayerFileNames() {
+        List<String> list = new ArrayList<>();
+        File file = new File(plugin.getDataFolder() + File.separator + "PlayerData");
+        String[] fileNames = file.list();
+        if (fileNames != null) {
+            for (String fileName : fileNames) {
+                if (fileName.endsWith(".yml")) {
+                    list.add(fileName.replace(".yml", ""));
+                }
+            }
+        }
+        return list;
     }
 
 }

@@ -7,6 +7,7 @@ import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainTabCompleter implements TabCompleter {
@@ -36,6 +37,21 @@ public class MainTabCompleter implements TabCompleter {
                     if (var.equalsIgnoreCase("deathpenalty")) {
                         if (var2.equalsIgnoreCase("chestlog")) {
                             return List.of("get", "log-to-ItemBox");
+                        }
+                    }
+                }
+                if (args.length == 4) {
+                    String var = args[0];
+                    String var2 = args[1];
+                    String var3 = args[2];
+                    if (var.equalsIgnoreCase("deathpenalty")) {
+                        if (var2.equalsIgnoreCase("chestlog")) {
+                            if (var3.equalsIgnoreCase("log-to-ItemBox")) {
+                                List<String> list = new ArrayList<>();
+                                list.add("all-players");
+                                list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
+                                return list;
+                            }
                         }
                     }
                 }

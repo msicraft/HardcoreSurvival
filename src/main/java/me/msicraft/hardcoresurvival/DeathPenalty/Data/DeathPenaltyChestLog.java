@@ -1,6 +1,5 @@
 package me.msicraft.hardcoresurvival.DeathPenalty.Data;
 
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.Location;
 
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ public class DeathPenaltyChestLog {
 
     private final List<Location> chestLocationList = new ArrayList<>();
 
-    public DeathPenaltyChestLog(PlayerData playerData) {
+    public DeathPenaltyChestLog() {
     }
 
     public void addLocation(Location location) {

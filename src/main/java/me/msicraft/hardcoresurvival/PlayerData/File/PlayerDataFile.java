@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.PlayerData.File;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 public class PlayerDataFile {
 
-    private final Player player;
+    private final OfflinePlayer player;
     private final HardcoreSurvival plugin = HardcoreSurvival.getPlugin();
 
     private final String folderName = "PlayerData";
@@ -28,6 +29,28 @@ public class PlayerDataFile {
             createFile(player);
         }
         this.config = YamlConfiguration.loadConfiguration(this.file);
+    }
+
+    public PlayerDataFile(OfflinePlayer offlinePlayer) {
+        this.player = offlinePlayer;
+        String fileS = offlinePlayer.getUniqueId() + ".yml";
+        this.file = new File(plugin.getDataFolder() + File.separator + folderName, fileS);
+        if (!file.exists()) {
+            createFile(offlinePlayer);
+        }
+        this.config = YamlConfiguration.loadConfiguration(this.file);
+    }
+
+    private void createFile(OfflinePlayer offlinePlayer) {
+        if(!this.file.exists()) {
+            try {
+                YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(this.file);
+                yamlConfiguration.set("Name", offlinePlayer.getName());
+                yamlConfiguration.save(this.file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void createFile(Player player) {
@@ -81,7 +104,7 @@ public class PlayerDataFile {
         }
     }
 
-    public Player getPlayer() {
+    public OfflinePlayer getPlayer() {
         return player;
     }
 

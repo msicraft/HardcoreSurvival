@@ -3,7 +3,8 @@ package me.msicraft.hardcoresurvival.PlayerData.Task;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.WorldManager;
-import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -37,16 +38,16 @@ public class PlayerTask extends BukkitRunnable {
         }
         Location location = player.getLocation();
         String worldName = location.getWorld().getName();
-        String currentWorldName = worldManager.getCurrentWorldName(worldName, true);
+        String currentWorldName = worldManager.getCurrentWorldName(worldName);
         String tabListString = player.getName() + " " + currentWorldName;
 
         player.setPlayerListName(tabListString);
 
-        String sb = ChatColor.BOLD + "" + ChatColor.AQUA + currentWorldName
+        String sb =  currentWorldName
                 + ChatColor.WHITE + " | " + ChatColor.GREEN +  "X: " + location.getBlockX() +
                 " Y: " + location.getBlockY() + " Z: " + location.getBlockZ()
                 + ChatColor.WHITE + " | " + ChatColor.GOLD  + worldManager.timeTo24Format(location.getWorld().getTime());
-        player.sendActionBar(Component.text(sb));
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(sb));
     }
 
 }

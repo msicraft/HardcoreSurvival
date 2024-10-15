@@ -3,6 +3,7 @@ package me.msicraft.hardcoresurvival.ItemBox.Event;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -17,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Iterator;
 
 public class ItemBoxGuiEvent implements Listener {
 
@@ -77,11 +80,27 @@ public class ItemBoxGuiEvent implements Listener {
                             MenuGui menuGui = (MenuGui) playerData.getCustomGui(GuiType.MAIN);
                             player.openInventory(menuGui.getInventory());
                         }
+                        case "TakeAll" -> {
+                            ItemBox itemBox = playerData.getItemBox();
+                            Iterator<ItemBoxStack> iterator = itemBox.getList().iterator();
+                            while (iterator.hasNext()) {
+                                int emptySlot = player.getInventory().firstEmpty();
+                                if (emptySlot == -1) {
+                                    player.sendMessage(ChatColor.RED + "인벤토리에 충분한 공간이 없습니다");
+                                    break;
+                                }
+                                ItemBoxStack itemBoxStack = iterator.next();
+                                player.getInventory().setItem(emptySlot, itemBoxStack.getItemStack());
+                                iterator.remove();
+                            }
+                            player.closeInventory();
+                            player.sendMessage(ChatColor.GREEN + "우편함으로부터 아이템을 받았습니다");
+                        }
                         default -> {
                             ItemBox itemBox = playerData.getItemBox();
                             int index = Integer.parseInt(data);
                             if (e.isLeftClick()) {
-                                if (itemBox.receiveItemBoxStack(index)) {
+                                if (itemBox.receiveItemBoxStack(index, player)) {
                                     player.sendMessage(ChatColor.GREEN + "우편함으로부터 해당 아이템을 받았습니다");
                                 } else {
                                     player.sendMessage(ChatColor.RED + "인벤토리에 빈 공간이 없거나 잘못된 값이 입력되었습니다");

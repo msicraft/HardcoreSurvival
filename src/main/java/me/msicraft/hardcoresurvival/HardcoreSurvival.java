@@ -88,6 +88,10 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+            playerData.saveData();
+        }
     }
 
     public void registeredEvents() {

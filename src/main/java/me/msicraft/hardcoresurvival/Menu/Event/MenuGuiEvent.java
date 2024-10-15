@@ -69,7 +69,7 @@ public class MenuGuiEvent implements Listener {
                         if (data != null) {
                             switch (data) {
                                 case "item-box" -> {
-                                    player.sendMessage("d: " + data);
+                                    plugin.getItemBoxManager().openItemBox(playerData);
                                 }
                             }
                         }

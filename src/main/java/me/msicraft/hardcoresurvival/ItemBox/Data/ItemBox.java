@@ -1,6 +1,5 @@
 package me.msicraft.hardcoresurvival.ItemBox.Data;
 
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -8,11 +7,9 @@ import java.util.List;
 
 public class ItemBox {
 
-    private final PlayerData playerData;
     private final List<ItemBoxStack> list = new ArrayList<>();
 
-    public ItemBox(PlayerData playerData) {
-        this.playerData = playerData;
+    public ItemBox() {
     }
 
     public void addItemBoxStack(ItemBoxStack itemBoxStack) {
@@ -35,10 +32,9 @@ public class ItemBox {
         return list.get(index);
     }
 
-    public boolean receiveItemBoxStack(int index) {
+    public boolean receiveItemBoxStack(int index, Player player) {
         if (index >= 0 && index < list.size()) {
             ItemBoxStack itemBoxStack = list.get(index);
-            Player player = playerData.getPlayer();
             int slot = player.getInventory().firstEmpty();
             if (slot != -1) {
                 player.getInventory().addItem(itemBoxStack.getItemStack());

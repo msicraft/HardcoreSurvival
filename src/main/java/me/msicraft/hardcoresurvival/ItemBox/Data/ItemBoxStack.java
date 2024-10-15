@@ -24,7 +24,8 @@ public class ItemBoxStack {
         guiStack = new ItemStack(itemStack);
         ItemMeta itemMeta = guiStack.getItemMeta();
         List<Component> lore = List.of(Component.text(ChatColor.YELLOW + "좌 클릭: 받기"),
-                Component.text(ChatColor.YELLOW + "우 클릭: 버리기"), Component.text(""),
+                Component.text(ChatColor.YELLOW + "우 클릭: 버리기"),
+                Component.text(""),
                 Component.text(ChatColor.GRAY + "받은 시간: " + TimeUtil.getTimeToFormat(receivedTime)),
                 Component.text(ChatColor.GRAY + "제공자: " + ChatColor.BOLD + ChatColor.GOLD  +  provider));
         itemMeta.lore(lore);

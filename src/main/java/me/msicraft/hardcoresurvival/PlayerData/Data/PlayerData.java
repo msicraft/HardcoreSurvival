@@ -1,47 +1,28 @@
 package me.msicraft.hardcoresurvival.PlayerData.Data;
 
-import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
-import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
-import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.Task.PlayerTask;
-import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class PlayerData {
+public class PlayerData extends OfflinePlayerData {
 
     private final Player player;
-    private final PlayerDataFile playerDataFile;
-
     private final Map<GuiType, CustomGui> customGuiMap = new HashMap<>();
-
     private final Map<String, Object> tempDataMap = new HashMap<>();
-    private final Map<String, Object> dataMap = new HashMap<>();
-    private final List<String> tagList = new ArrayList<>();
-
     private PlayerTask playerTask;
-    private final DeathPenaltyChestLog deathPenaltyChestLog;
-    private final ItemBox itemBox;
 
     public PlayerData(Player player) {
+        super(player);
         this.player = player;
-        this.playerDataFile = new PlayerDataFile(player);
-        this.deathPenaltyChestLog = new DeathPenaltyChestLog(this);
-        this.itemBox = new ItemBox(this);
     }
 
     public void updateTask(int ticks) {
@@ -50,74 +31,6 @@ public class PlayerData {
         }
         playerTask = new PlayerTask(player);
         playerTask.runTaskTimer(HardcoreSurvival.getPlugin(), 0, ticks);
-    }
-
-    public void loadData() {
-        FileConfiguration playerDataConfig = playerDataFile.getConfig();
-
-        List<String> tags = playerDataConfig.getStringList("Tags");
-        tagList.addAll(tags);
-
-        ConfigurationSection dataSection = playerDataConfig.getConfigurationSection("Data");
-        if (dataSection!= null) {
-            Set<String> keys = dataSection.getKeys(false);
-            for (String key : keys) {
-                Object object = playerDataConfig.get("Data." + key);
-                dataMap.put(key, object);
-            }
-        }
-
-        DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        playerDataConfig.getStringList("DeathPenaltyChestLog").forEach(format -> {
-            Location location = deathPenaltyManager.formatToLocation(format);
-            if (location != null) {
-                Block block = location.getBlock();
-                if (deathPenaltyManager.isContainerMaterial(block.getType())) {
-                    deathPenaltyChestLog.addLocation(location);
-                }
-            }
-        });
-
-        playerDataConfig.getStringList("ItemBoxData").forEach(itemBoxDataFormat -> {
-            ItemBoxStack itemBoxStack = ItemBoxStack.fromFormat(itemBoxDataFormat);
-            itemBox.addItemBoxStack(itemBoxStack);
-        });
-
-        if (HardcoreSurvival.getPlugin().useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
-        }
-    }
-
-    public void saveData() {
-        FileConfiguration playerDataConfig = playerDataFile.getConfig();
-
-        playerDataConfig.set("Tags", tagList);
-
-        Set<String> dataKeys = dataMap.keySet();
-        for (String key : dataKeys) {
-            Object value = dataMap.get(key);
-            playerDataConfig.set("Data." + key, value);
-        }
-
-        DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        List<String> chestLogList = new ArrayList<>();
-        deathPenaltyChestLog.getChestLocationList().forEach(location -> {
-            String format = deathPenaltyManager.locationToFormat(location);
-            chestLogList.add(format);
-        });
-        playerDataConfig.set("DeathPenaltyChestLog", chestLogList);
-
-        List<String> itemBoxDataList = new ArrayList<>();
-        itemBox.getList().forEach(itemBoxStack -> {
-            String format = itemBoxStack.toFormat();
-            itemBoxDataList.add(format);
-        });
-        playerDataConfig.set("ItemBoxData", itemBoxDataList);
-
-        playerDataFile.saveConfig();
-        if (HardcoreSurvival.getPlugin().useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + player.getName());
-        }
     }
 
     public CustomGui getCustomGui(GuiType guiType) {
@@ -145,12 +58,12 @@ public class PlayerData {
         return customGui;
     }
 
-    public Player getPlayer() {
-        return player;
+    public PlayerTask getPlayerTask() {
+        return playerTask;
     }
 
-    public PlayerDataFile getPlayerDataFile() {
-        return playerDataFile;
+    public Player getPlayer() {
+        return player;
     }
 
     public void setTempData(String key, Object object) {
@@ -175,50 +88,6 @@ public class PlayerData {
 
     public void removeTempData(String key) {
         tempDataMap.remove(key);
-    }
-
-    public void setData(String key, Object object) {
-        dataMap.put(key, object);
-    }
-
-    public Object getData(String key) {
-        return dataMap.getOrDefault(key, null);
-    }
-
-    public Object getData(String key, Object def) {
-        Object object = getData(key);
-        if (!hasData(key) || object == null) {
-            return def;
-        }
-        return object;
-    }
-
-    public boolean hasData(String key) {
-        return dataMap.containsKey(key);
-    }
-
-    public void removeData(String key) {
-        dataMap.remove(key);
-    }
-
-    public boolean hasTag(String key) {
-        return tagList.contains(key);
-    }
-
-    public void addTag(String key) {
-        tagList.add(key);
-    }
-
-    public void removeTag(String key) {
-        tagList.remove(key);
-    }
-
-    public DeathPenaltyChestLog getDeathPenaltyChestLog() {
-        return deathPenaltyChestLog;
-    }
-
-    public ItemBox getItemBox() {
-        return itemBox;
     }
 
 }

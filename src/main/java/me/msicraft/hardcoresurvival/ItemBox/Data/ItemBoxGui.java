@@ -44,6 +44,9 @@ public class ItemBoxGui extends CustomGui {
         itemStack = GuiUtil.createItemStack(Material.BARRIER, "뒤로", GuiUtil.EMPTY_LORE, -1,
                 SELECT_KEY, "Back");
         gui.setItem(45, itemStack);
+        itemStack = GuiUtil.createItemStack(Material.HOPPER, "모두 받기", GuiUtil.EMPTY_LORE, -1,
+                SELECT_KEY, "TakeAll");
+        gui.setItem(53, itemStack);
 
         List<ItemBoxStack> itemBoxList = playerData.getItemBox().getList();
         int maxSize = itemBoxList.size();
