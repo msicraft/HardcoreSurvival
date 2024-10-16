@@ -1,0 +1,119 @@
+package me.msicraft.hardcoresurvival.Shop.Data;
+
+import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.Utils.MathUtil;
+import org.bukkit.inventory.ItemStack;
+
+public class ShopItem {
+
+    public enum ItemType {
+        NONE, MYTHICMOBS
+    }
+
+    private final String id;
+    private ItemStack itemStack;
+    private ItemStack guiItemStack;
+
+    private ItemType itemType;
+    private boolean useStaticPrice = false;
+    private int stock = 0;
+    private int basePrice = -1;
+    private int price = -1;
+
+    public ShopItem(ItemType itemType, boolean useStaticPrice, ItemStack itemStack, String id, int stock, int basePrice, int price) {
+        this.itemType = itemType;
+        this.useStaticPrice = useStaticPrice;
+        this.itemStack = itemStack;
+        this.id = id;
+        this.stock = stock;
+        this.basePrice = basePrice;
+        this.price = price;
+    }
+
+    public void updatePrice(ShopManager shopManager) {
+        if (useStaticPrice) {
+            price = basePrice;
+            return;
+        }
+        if (basePrice < 0) {
+            return;
+        }
+
+        int maxPrice = (int) (basePrice * shopManager.getMaxPricePercent());
+        int minPrice = (int) (basePrice * shopManager.getMinPricePercent());
+        if (minPrice < 0) {
+            minPrice = 1;
+        }
+
+        double changeV = shopManager.getPerValueChangeMaxPercent();
+        double randomChangeValue = MathUtil.getRangeRandomDouble(changeV, -changeV);
+        if (randomChangeValue < 0) {
+            randomChangeValue = Math.abs(randomChangeValue);
+            price = (int) (price - (price * randomChangeValue));
+            if (price < minPrice) {
+                price = minPrice;
+            }
+        } else {
+            price = (int) (price + (price * randomChangeValue));
+            if (price > maxPrice) {
+                price = maxPrice;
+            }
+        }
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
+    }
+
+    public boolean isUseStaticPrice() {
+        return useStaticPrice;
+    }
+
+    public void setUseStaticPrice(boolean useStaticPrice) {
+        this.useStaticPrice = useStaticPrice;
+    }
+
+    public ItemStack getItemStack() {
+        return itemStack;
+    }
+
+    public void setItemStack(ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public int getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(int basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public int getPrice(boolean isPerPrice) {
+        if (isPerPrice) {
+            return price / itemStack.getAmount();
+        }
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+}

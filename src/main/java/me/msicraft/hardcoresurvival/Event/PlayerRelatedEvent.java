@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -44,6 +45,7 @@ public class PlayerRelatedEvent implements Listener {
     private boolean disableBedExplode = false;
     private boolean disableUse;
     private final List<Material> disableUseMaterials = new ArrayList<>();
+    private int shieldCooldownTick = -1;
 
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
@@ -52,6 +54,7 @@ public class PlayerRelatedEvent implements Listener {
         this.mendingEnchantChance = config.contains("Setting.MendingEnchantChance") ? config.getDouble("Setting.MendingEnchantChance") : 0.0;
         this.disableBedExplode = config.contains("Setting.DisableBedExplode") && config.getBoolean("Setting.DisableBedExplode");
         this.disableUse = config.contains("Setting.DisableUse.Enabled") && config.getBoolean("Setting.DisableUse.Enabled");
+        this.shieldCooldownTick = config.contains("Setting.ShieldCooldownTick") ? config.getInt("Setting.ShieldCooldownTick") : -1;
         config.getStringList("Setting.DisableUse.List").forEach(materialName -> {
             Material material = Material.getMaterial(materialName.toUpperCase());
             if (material != null) {
@@ -161,6 +164,22 @@ public class PlayerRelatedEvent implements Listener {
             return;
         }
         e.getCommands().clear();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void applyShieldCooldown(EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player player) {
+            if (shieldCooldownTick != -1) {
+                if (player.isBlocking()) {
+                    player.setCooldown(Material.SHIELD, shieldCooldownTick);
+
+                    if (plugin.useDebug()) {
+                        MessageUtil.sendDebugMessage("ApplyShieldCooldown",
+                                "Player: " + player.getName() + " | Ticks: " + shieldCooldownTick);
+                    }
+                }
+            }
+        }
     }
 
 }

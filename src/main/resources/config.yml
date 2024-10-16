@@ -9,6 +9,7 @@ Setting:
     Enabled: true
     SpawnLocation: ''
   PlayerTaskTick: 20
+  ShieldCooldownTick: 30
   WorldName:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"

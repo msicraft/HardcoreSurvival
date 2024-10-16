@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.Command;
 
+import io.lumine.mythic.bukkit.MythicBukkit;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
@@ -13,6 +14,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -39,6 +41,12 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
+                    case "test" -> {
+                        if (sender instanceof Player player) {
+                            ItemStack handStack = player.getInventory().getItemInMainHand();
+                            player.sendMessage("test: " + handStack.isSimilar(MythicBukkit.inst().getItemManager().getItemStack("TestIteM")));
+                        }
+                    }
                     case "reload" -> {
                         if (sender.isOp()) {
                             plugin.reloadVariables();

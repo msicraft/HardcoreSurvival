@@ -39,8 +39,8 @@ public class PlayerTask extends BukkitRunnable {
         Location location = player.getLocation();
         String worldName = location.getWorld().getName();
         String currentWorldName = worldManager.getCurrentWorldName(worldName);
-        String tabListString = player.getName() + " " + currentWorldName;
 
+        String tabListString = player.getName() + " " + currentWorldName;
         player.setPlayerListName(tabListString);
 
         String sb =  currentWorldName

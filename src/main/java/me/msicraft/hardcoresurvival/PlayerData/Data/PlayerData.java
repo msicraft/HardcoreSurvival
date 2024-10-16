@@ -6,6 +6,7 @@ import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.Task.PlayerTask;
+import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -46,6 +47,10 @@ public class PlayerData extends OfflinePlayerData {
                 }
                 case ITEM_BOX -> {
                     customGui = new ItemBoxGui();
+                    customGuiMap.put(guiType, customGui);
+                }
+                case SHOP -> {
+                    customGui = new ShopGui(HardcoreSurvival.getPlugin());
                     customGuiMap.put(guiType, customGui);
                 }
                 default -> {

@@ -14,6 +14,8 @@ import me.msicraft.hardcoresurvival.OreDisguise.OreDisguiseManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
+import me.msicraft.hardcoresurvival.Shop.Menu.Event.ShopGuiEvent;
+import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,6 +54,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private WorldManager worldManager;
     private OreDisguiseManager oreDisguiseManager;
     private ItemBoxManager itemBoxManager;
+    private ShopManager shopManager;
 
     @Override
     public void onEnable() {
@@ -63,6 +66,8 @@ public final class HardcoreSurvival extends JavaPlugin {
         worldManager = new WorldManager(this);
         oreDisguiseManager = new OreDisguiseManager(this);
         itemBoxManager = new ItemBoxManager(this);
+        shopManager = new ShopManager(this);
+
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
@@ -103,6 +108,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new OreDisguiseRelatedEvent(this), this);
         pluginManager.registerEvents(new MenuGuiEvent(this), this);
         pluginManager.registerEvents(new ItemBoxGuiEvent(this), this);
+        pluginManager.registerEvents(new ShopGuiEvent(this), this);
     }
 
     public void registeredCommands() {
@@ -120,6 +126,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         deathPenaltyManager.reloadVariables();
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
+        shopManager.reloadVariables();
 
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();
@@ -189,4 +196,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         return itemBoxManager;
     }
 
+    public ShopManager getShopManager() {
+        return shopManager;
+    }
 }

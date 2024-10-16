@@ -34,6 +34,7 @@ public class MenuGuiEvent implements Listener {
         ItemStack handStack = player.getInventory().getItemInMainHand();
         if (handStack != null && handStack.getType() == Material.AIR) {
             if (player.isSneaking()) {
+                e.setCancelled(true);
                 PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
                 PlayerData playerData = playerDataManager.getPlayerData(player);
                 CustomGui customGui = playerData.getCustomGui(GuiType.MAIN);
