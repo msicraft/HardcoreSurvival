@@ -10,6 +10,7 @@ Setting:
     SpawnLocation: ''
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
+  CombatSeconds: 10
   WorldName:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"

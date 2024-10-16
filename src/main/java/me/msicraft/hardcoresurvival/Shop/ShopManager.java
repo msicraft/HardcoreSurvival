@@ -115,10 +115,14 @@ public class ShopManager extends CustomGuiManager {
                 ItemStack itemStack = null;
                 ShopItem shopItem;
                 switch (itemType) {
-                    case NONE -> itemStack = config.getItemStack(path + ".ItemStack");
+                    case VANILLA -> itemStack = config.getItemStack(path + ".ItemStack");
                     case MYTHICMOBS -> {
-                        String internalName = config.getString(path + ".MythicMobsItemInternalName", null);
+                        String internalName = config.getString(path + ".InternalName", null);
                         itemStack = MythicBukkit.inst().getItemManager().getItemStack(internalName);
+                    }
+                    case CUSTOM_ITEM -> {
+                        String internalName = config.getString(path + ".InternalName", null);
+                        itemStack = plugin.getCustomItemManager().getCustomItem(internalName).getItemStack();
                     }
                 }
                 if (itemStack == null || itemStack.getType() == Material.AIR) {
@@ -166,12 +170,16 @@ public class ShopManager extends CustomGuiManager {
             config.set(path + ".Stock", shopItem.getStock());
             ItemStack itemStack = shopItem.getItemStack();
             switch (shopItem.getItemType()) {
-                case NONE -> {
+                case VANILLA -> {
                     config.set(path + ".ItemStack", itemStack);
                 }
                 case MYTHICMOBS -> {
                     String internalName = MythicBukkit.inst().getItemManager().getMythicTypeFromItem(itemStack);
-                    config.set(path + ".MythicMobsItemInternalName", internalName);
+                    config.set(path + ".InternalName", internalName);
+                }
+                case CUSTOM_ITEM -> {
+                    String internalName = plugin.getCustomItemManager().getCustomItemInternalName(itemStack);
+                    config.set(path + ".InternalName", internalName);
                 }
             }
         }

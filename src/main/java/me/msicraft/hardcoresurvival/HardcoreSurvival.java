@@ -2,6 +2,8 @@ package me.msicraft.hardcoresurvival;
 
 import me.msicraft.hardcoresurvival.Command.MainCommand;
 import me.msicraft.hardcoresurvival.Command.MainTabCompleter;
+import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
+import me.msicraft.hardcoresurvival.CustomItem.Event.CustomItemRelatedEvent;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
@@ -46,6 +48,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;
+    private int combatSeconds = 10;
 
     private Economy economy;
 
@@ -55,6 +58,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private OreDisguiseManager oreDisguiseManager;
     private ItemBoxManager itemBoxManager;
     private ShopManager shopManager;
+    private CustomItemManager customItemManager;
 
     @Override
     public void onEnable() {
@@ -67,6 +71,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         oreDisguiseManager = new OreDisguiseManager(this);
         itemBoxManager = new ItemBoxManager(this);
         shopManager = new ShopManager(this);
+        customItemManager = new CustomItemManager(this);
 
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -97,6 +102,8 @@ public final class HardcoreSurvival extends JavaPlugin {
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
             playerData.saveData();
         }
+
+        shopManager.saveShopData();
     }
 
     public void registeredEvents() {
@@ -109,6 +116,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new MenuGuiEvent(this), this);
         pluginManager.registerEvents(new ItemBoxGuiEvent(this), this);
         pluginManager.registerEvents(new ShopGuiEvent(this), this);
+        pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
     }
 
     public void registeredCommands() {
@@ -121,16 +129,18 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public void reloadVariables() {
         reloadConfig();
-        this.useDebug = getConfig().contains("Debug") && getConfig().getBoolean("Debug");
 
         deathPenaltyManager.reloadVariables();
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
         shopManager.reloadVariables();
+        customItemManager.reloadVariables();
 
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();
 
+        this.useDebug = getConfig().contains("Debug") && getConfig().getBoolean("Debug");
+        this.combatSeconds = getConfig().contains("Setting.CombatSeconds") ? getConfig().getInt("Setting.CombatSeconds") : 10;
         this.playerTaskTick = getConfig().contains("Setting.PlayerTaskTick") ? getConfig().getInt("Setting.PlayerTaskTick") : 20;
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData playerData = playerDataManager.getPlayerData(player);
@@ -199,4 +209,13 @@ public final class HardcoreSurvival extends JavaPlugin {
     public ShopManager getShopManager() {
         return shopManager;
     }
+
+    public CustomItemManager getCustomItemManager() {
+        return customItemManager;
+    }
+
+    public int getCombatSeconds() {
+        return combatSeconds;
+    }
+
 }

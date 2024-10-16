@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -65,6 +66,14 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler
     public void playerDataUnload(PlayerDataUnLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void playerCombatUpdate(EntityDamageByEntityEvent e) {
+        if (e.getDamager() instanceof Player player) {
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+            playerData.updateCombat();
+        }
     }
 
 }

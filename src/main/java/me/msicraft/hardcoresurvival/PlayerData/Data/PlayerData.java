@@ -5,6 +5,7 @@ import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
+import me.msicraft.hardcoresurvival.PlayerData.Task.CombatTask;
 import me.msicraft.hardcoresurvival.PlayerData.Task.PlayerTask;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ public class PlayerData extends OfflinePlayerData {
     private final Map<GuiType, CustomGui> customGuiMap = new HashMap<>();
     private final Map<String, Object> tempDataMap = new HashMap<>();
     private PlayerTask playerTask;
+    private CombatTask combatTask;
 
     public PlayerData(Player player) {
         super(player);
@@ -94,5 +96,22 @@ public class PlayerData extends OfflinePlayerData {
     public void removeTempData(String key) {
         tempDataMap.remove(key);
     }
+
+    public void setCombatTask(CombatTask combatTask) {
+        this.combatTask = combatTask;
+    }
+
+    public boolean isInCombat() {
+        return this.combatTask != null;
+    }
+
+    public void updateCombat() {
+        if (isInCombat()) {
+            combatTask.update();
+        } else {
+            combatTask = new CombatTask(this);
+        }
+    }
+
 
 }

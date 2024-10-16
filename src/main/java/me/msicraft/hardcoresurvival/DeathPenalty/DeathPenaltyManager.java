@@ -10,10 +10,12 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 public class DeathPenaltyManager {
 
@@ -86,6 +88,52 @@ public class DeathPenaltyManager {
             }
         });
         deathPenaltyChestLog.reset();
+    }
+
+    private final Vector xVector = new Vector(1, 0, 0);
+    private final Vector xVector2 = new Vector(-1, 0, 0);
+    private final Vector zVector = new Vector(0, 0, 1);
+    private final Vector zVector2 = new Vector(0, 0, -1);
+
+    public Location getOtherChestLocation(Block block, org.bukkit.block.data.type.Chest chestTypeData) {
+       String materialName = block.getType().name();
+       if (materialName.contains("CHEST")) {
+           BlockFace blockFace = chestTypeData.getFacing();
+           org.bukkit.block.data.type.Chest.Type chestType = chestTypeData.getType();
+           Location location = null;
+           switch (blockFace) {
+               case EAST -> {
+                   if (chestType == org.bukkit.block.data.type.Chest.Type.LEFT) {
+                       location = block.getLocation().add(zVector);
+                   } else {
+                       location = block.getLocation().add(zVector2);
+                   }
+               }
+               case NORTH -> {
+                   if (chestType == org.bukkit.block.data.type.Chest.Type.LEFT) {
+                       location = block.getLocation().add(xVector);
+                   } else {
+                       location = block.getLocation().add(xVector2);
+                   }
+               }
+               case WEST -> {
+                   if (chestType == org.bukkit.block.data.type.Chest.Type.LEFT) {
+                       location = block.getLocation().add(zVector2);
+                   } else {
+                       location = block.getLocation().add(zVector);
+                   }
+               }
+               case SOUTH -> {
+                   if (chestType == org.bukkit.block.data.type.Chest.Type.LEFT) {
+                       location = block.getLocation().add(xVector2);
+                   } else {
+                       location = block.getLocation().add(xVector);
+                   }
+               }
+           }
+           return location;
+       }
+       return null;
     }
 
     public boolean isEnabled() {

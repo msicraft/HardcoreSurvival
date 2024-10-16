@@ -44,8 +44,8 @@ public class PlayerTask extends BukkitRunnable {
         player.setPlayerListName(tabListString);
 
         String sb =  currentWorldName
-                + ChatColor.WHITE + " | " + ChatColor.GREEN +  "X: " + location.getBlockX() +
-                " Y: " + location.getBlockY() + " Z: " + location.getBlockZ()
+                + ChatColor.WHITE + ChatColor.GREEN + " | XYZ: " + location.getBlockX()
+                + " " + location.getBlockY() + " " + location.getBlockZ()
                 + ChatColor.WHITE + " | " + ChatColor.GOLD  + worldManager.timeTo24Format(location.getWorld().getTime());
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(sb));
     }

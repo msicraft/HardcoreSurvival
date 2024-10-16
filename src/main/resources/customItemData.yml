@@ -1,0 +1,9 @@
+CustomItem:
+  ReturnScroll:
+    Material: Paper
+    CustomModelData: -1
+    DisplayName: "&a귀환 주문서"
+    Lore:
+      - "&f우클릭으로 사용시 스폰지점으로 이동"
+      - ""
+      - "&c전투중 사용 불가"

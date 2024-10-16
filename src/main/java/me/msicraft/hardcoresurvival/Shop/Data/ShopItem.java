@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 public class ShopItem {
 
     public enum ItemType {
-        NONE, MYTHICMOBS
+        VANILLA, MYTHICMOBS, CUSTOM_ITEM
     }
 
     private final String id;
