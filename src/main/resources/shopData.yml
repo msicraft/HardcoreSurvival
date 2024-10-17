@@ -1,8 +1,10 @@
 Setting:
   Enabled: true
+  Radius: 25
   UpdateSeconds: 3600
   MaxPricePercent: 1.25
   MinPricePercent: 0.75
   PerValueChangeMaxPercent: 0.1
+  CenterLocation:
 
 Items:

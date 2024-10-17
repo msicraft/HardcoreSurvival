@@ -4,10 +4,11 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
+import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,6 +41,7 @@ public class MenuGuiEvent implements Listener {
                 CustomGui customGui = playerData.getCustomGui(GuiType.MAIN);
                 if (customGui instanceof MenuGui menuGui) {
                     player.openInventory(menuGui.getInventory());
+                    menuGui.setMain();
                 }
             }
         }
@@ -65,12 +67,48 @@ public class MenuGuiEvent implements Listener {
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 if (itemMeta != null) {
                     PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
-                    if (dataContainer.has(new NamespacedKey(plugin, "MenuGui_Main"))) {
-                        String data = dataContainer.get(new NamespacedKey(plugin, "MenuGui_Main"), PersistentDataType.STRING);
+                    if (dataContainer.has(MenuGui.MENU_KEY)) {
+                        String data = dataContainer.get(MenuGui.MENU_KEY, PersistentDataType.STRING);
                         if (data != null) {
                             switch (data) {
+                                case "personal-settings" -> {
+                                    player.openInventory(menuGui.getInventory());
+                                    menuGui.setPersonalSettings();
+                                }
                                 case "item-box" -> {
                                     plugin.getItemBoxManager().openItemBox(playerData);
+                                }
+                                case "shop" -> {
+                                    plugin.getShopManager().openShopInventory(player, ShopGui.Type.BUY);
+                                }
+                            }
+                        }
+                    } else if (dataContainer.has(MenuGui.PERSONAL_SETTINGS_KEY)) {
+                        String data = dataContainer.get(MenuGui.PERSONAL_SETTINGS_KEY, PersistentDataType.STRING);
+                        if (data != null) {
+                            switch (data) {
+                                case "Back" -> {
+                                    player.openInventory(menuGui.getInventory());
+                                    menuGui.setMain();
+                                }
+                                default -> {
+                                    PersonalOption personalOption = PersonalOption.valueOf(data);
+                                    switch (personalOption) {
+                                        case DISPLAY_ACTIONBAR -> {
+                                            if (e.isLeftClick()) {
+                                                boolean b = (boolean) playerData.getPersonalOption(personalOption);
+                                                if (b) {
+                                                    playerData.setPersonalOption(personalOption, false);
+                                                } else {
+                                                    playerData.setPersonalOption(personalOption, true);
+                                                }
+                                            } else if (e.isRightClick()) {
+                                                playerData.setPersonalOption(personalOption, personalOption.getBaseValue());
+                                            }
+                                        }
+                                    }
+                                    player.openInventory(menuGui.getInventory());
+                                    menuGui.setPersonalSettings();
                                 }
                             }
                         }

@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.PlayerData.Task;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.WorldManager;
 import net.md_5.bungee.api.ChatMessageType;
@@ -43,11 +44,14 @@ public class PlayerTask extends BukkitRunnable {
         String tabListString = player.getName() + " " + currentWorldName;
         player.setPlayerListName(tabListString);
 
-        String sb =  currentWorldName
-                + ChatColor.WHITE + ChatColor.GREEN + " | XYZ: " + location.getBlockX()
-                + " " + location.getBlockY() + " " + location.getBlockZ()
-                + ChatColor.WHITE + " | " + ChatColor.GOLD  + worldManager.timeTo24Format(location.getWorld().getTime());
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(sb));
+        boolean displayActionBar = (boolean) plugin.getPlayerDataManager().getPlayerData(player).getPersonalOption(PersonalOption.DISPLAY_ACTIONBAR, true);
+        if (displayActionBar) {
+            String sb = currentWorldName
+                    + ChatColor.WHITE + ChatColor.GREEN + " | XYZ: " + location.getBlockX()
+                    + " " + location.getBlockY() + " " + location.getBlockZ()
+                    + ChatColor.WHITE + " | " + ChatColor.GOLD + worldManager.timeTo24Format(location.getWorld().getTime());
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(sb));
+        }
     }
 
 }

@@ -24,6 +24,7 @@ public class OfflinePlayerData {
 
     private final Map<String, Object> dataMap = new HashMap<>();
     private final List<String> tagList = new ArrayList<>();
+    private final Map<PersonalOption, Object> personalOptionMap = new HashMap<>();
 
     private final DeathPenaltyChestLog deathPenaltyChestLog;
     private final ItemBox itemBox;
@@ -68,6 +69,20 @@ public class OfflinePlayerData {
             itemBox.addItemBoxStack(itemBoxStack);
         });
 
+        PersonalOption[] personalOptions = PersonalOption.values();
+        for (PersonalOption option : personalOptions) {
+            String path = "PersonalOption." + option.name();
+            if (playerDataConfig.contains(path)) {
+                switch (option) {
+                    case DISPLAY_ACTIONBAR -> {
+                        personalOptionMap.put(option, playerDataConfig.getBoolean(path, (boolean) option.getBaseValue()));
+                    }
+                }
+            } else {
+                setPersonalOption(option, option.getBaseValue());
+            }
+        }
+
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + offlinePlayer.getName());
         }
@@ -100,6 +115,17 @@ public class OfflinePlayerData {
             itemBoxDataList.add(format);
         });
         playerDataConfig.set("ItemBoxData", itemBoxDataList);
+
+        PersonalOption[] personalOptions = PersonalOption.values();
+        for (PersonalOption option : personalOptions) {
+            Object object = personalOptionMap.get(option);
+            String path = "PersonalOption." + option.name();
+            switch (option) {
+                case DISPLAY_ACTIONBAR -> {
+                    playerDataConfig.set(path, object);
+                }
+            }
+        }
 
         playerDataFile.saveConfig();
 
@@ -146,6 +172,18 @@ public class OfflinePlayerData {
 
     public void removeData(String key) {
         dataMap.remove(key);
+    }
+
+    public void setPersonalOption(PersonalOption personalOption, Object value) {
+        personalOptionMap.put(personalOption, value);
+    }
+
+    public Object getPersonalOption(PersonalOption personalOption) {
+        return personalOptionMap.get(personalOption);
+    }
+
+    public Object getPersonalOption(PersonalOption personalOption, Object def) {
+        return personalOptionMap.getOrDefault(personalOption, def);
     }
 
     public Set<String> getDataKeySet() {

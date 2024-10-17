@@ -22,8 +22,10 @@ public class ItemBoxGui extends CustomGui {
     public static final NamespacedKey SELECT_KEY = new NamespacedKey(HardcoreSurvival.getPlugin(), "ItemBoxGui_Select");
 
     private final Inventory gui;
+    private final PlayerData playerData;
 
-    public ItemBoxGui() {
+    public ItemBoxGui(PlayerData playerData) {
+        this.playerData = playerData;
         this.gui = Bukkit.createInventory(this, 54, Component.text("아이템 우편함"));
     }
 

@@ -1,5 +1,7 @@
 Debug: false
 Setting:
+  DisableNether: true
+  DisableEnderWorld: true
   DisableEntityVehicleEnter: true
   DisableBoneMeal: true
   MendingEnchantChance: 0.01

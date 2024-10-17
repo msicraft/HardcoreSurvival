@@ -32,7 +32,7 @@ public class MainTabCompleter implements TabCompleter {
                     if (var.equalsIgnoreCase("deathpenalty")) {
                         return List.of("setspawn", "chestlog");
                     } else if (var.equalsIgnoreCase("shop")) {
-                        return List.of("register", "unregister");
+                        return List.of("register", "unregister", "setcenter");
                     } else if (var.equalsIgnoreCase("customitem")) {
                         return List.copyOf(plugin.getCustomItemManager().getInternalNames());
                     } else if (var.equalsIgnoreCase("gui")) {

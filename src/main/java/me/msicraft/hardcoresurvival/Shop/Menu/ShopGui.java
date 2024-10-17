@@ -29,13 +29,16 @@ public class ShopGui extends CustomGui {
         BUY, SELL
     }
 
+    private final PlayerData playerData;
+
     public static final NamespacedKey SELL_KEY = new NamespacedKey(HardcoreSurvival.getPlugin(), "ShopGui_Sell");
     public static final NamespacedKey BUY_KEY = new NamespacedKey(HardcoreSurvival.getPlugin(), "ShopGui_Buy");
     private final Inventory gui;
     private final HardcoreSurvival plugin;
 
-    public ShopGui(HardcoreSurvival plugin) {
+    public ShopGui(HardcoreSurvival plugin, PlayerData playerData) {
         this.plugin = plugin;
+        this.playerData = playerData;
         this.gui = Bukkit.createInventory(this, 54, Component.text("Shop"));
     }
 

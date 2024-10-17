@@ -7,12 +7,14 @@ import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Shop.Data.SellItem;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
+import me.msicraft.hardcoresurvival.Shop.Data.ShopRegion;
 import me.msicraft.hardcoresurvival.Shop.File.ShopDataFile;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopTask;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -36,6 +38,8 @@ public class ShopManager extends CustomGuiManager {
     private double maxPricePercent = 0.0;
     private double minPricePercent = 0.0;
     private double perValueChangeMaxPercent = 0.0;
+    private int radius = 10;
+    private final ShopRegion shopRegion;
 
     private boolean isShopMaintenance = false;
     private ShopTask shopTask = null;
@@ -43,6 +47,7 @@ public class ShopManager extends CustomGuiManager {
     public ShopManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
         this.shopDataFile = new ShopDataFile(plugin);
+        this.shopRegion = new ShopRegion(null, 0);
     }
 
     public void sendMaintenanceMessage(Player player) {
@@ -87,6 +92,15 @@ public class ShopManager extends CustomGuiManager {
         this.maxPricePercent = config.getDouble("Setting.MaxPricePercent", 0.0);
         this.minPricePercent = config.getDouble("Setting.MinPricePercent", 0.0);
         this.perValueChangeMaxPercent = config.getDouble("Setting.PerValueChangeMaxPercent", 0.0);
+        this.radius = config.getInt("Setting.Radius", 10);
+        Location centerLocation = config.getLocation("Setting.CenterLocation", null);
+        if (centerLocation != null) {
+            shopRegion.update(centerLocation, radius);
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("Shop CenterLocation update", "Shop region: " + shopRegion.toString());
+            }
+        }
 
         loadShopData();
 
@@ -321,4 +335,11 @@ public class ShopManager extends CustomGuiManager {
         return isEnabled;
     }
 
+    public ShopRegion getShopRegion() {
+        return shopRegion;
+    }
+
+    public int getShopRegionRadius() {
+        return radius;
+    }
 }

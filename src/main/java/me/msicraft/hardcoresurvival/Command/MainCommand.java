@@ -49,12 +49,6 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer("msicraftz");
-                        System.out.println("Name: " + offlinePlayer.getName());
-                        System.out.println("UUID: " + offlinePlayer.getUniqueId().toString());
-                        OfflinePlayer offlinePlayer1 = Bukkit.getOfflinePlayer("da1d9vxllqqf");
-                        System.out.println("Name: " + offlinePlayer1.getName());
-                        System.out.println("UUId: "+ offlinePlayer1.getUniqueId());
                     }
                     case "reload" -> {
                         if (sender.isOp()) {
@@ -143,7 +137,7 @@ public class MainCommand implements CommandExecutor {
                         }
                         return true;
                     }
-                    case "shop" -> { //hs shop [register, unregister, open] <id> <itemType> <basePrice>
+                    case "shop" -> { //hs shop [register, unregister, setcenter] <id> <itemType> <basePrice>
                         if (!sender.isOp()) {
                             return false;
                         }
@@ -151,6 +145,14 @@ public class MainCommand implements CommandExecutor {
                         try {
                             ShopManager shopManager = plugin.getShopManager();
                             switch (var2) {
+                                case "setcenter" -> {
+                                    if (sender instanceof Player player) {
+                                        Location location = player.getLocation();
+                                        shopManager.getShopRegion().update(location, shopManager.getShopRegionRadius());
+                                        shopManager.getShopDataFile().getConfig().set("Setting.CenterLocation", location);
+                                        shopManager.getShopDataFile().saveConfig();
+                                    }
+                                }
                                 case "register" -> {
                                     if (sender instanceof Player player) {
                                         ItemStack itemStack = player.getInventory().getItemInMainHand();
@@ -267,18 +269,28 @@ public class MainCommand implements CommandExecutor {
                                                 plugin.getPlayerDataManager().getPlayerFileNames().forEach(uuidS -> {
                                                     UUID uuid = UUID.fromString(uuidS);
                                                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                                    OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
-                                                    offlinePlayerData.loadData();
-                                                    deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
-                                                    offlinePlayerData.saveData();
+                                                    if (offlinePlayer.isOnline()) {
+                                                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
+                                                        deathPenaltyManager.sendChestLogToItemBox(playerData);
+                                                    } else {
+                                                        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                                        offlinePlayerData.loadData();
+                                                        deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
+                                                        offlinePlayerData.saveData();
+                                                    }
                                                 });
                                             } else {
                                                 UUID uuid = UUID.fromString(targetS);
                                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
-                                                offlinePlayerData.loadData();
-                                                deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
-                                                offlinePlayerData.saveData();
+                                                if (offlinePlayer.isOnline()) {
+                                                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
+                                                    deathPenaltyManager.sendChestLogToItemBox(playerData);
+                                                } else {
+                                                    OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                                    offlinePlayerData.loadData();
+                                                    deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
+                                                    offlinePlayerData.saveData();
+                                                }
                                             }
                                         }
                                     }

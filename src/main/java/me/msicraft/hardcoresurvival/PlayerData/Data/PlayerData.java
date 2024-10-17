@@ -44,19 +44,19 @@ public class PlayerData extends OfflinePlayerData {
         if (customGui == null) {
             switch (guiType) {
                 case MAIN -> {
-                    customGui = new MenuGui();
+                    customGui = new MenuGui(this);
                     customGuiMap.put(guiType, customGui);
                 }
                 case ITEM_BOX -> {
-                    customGui = new ItemBoxGui();
+                    customGui = new ItemBoxGui(this);
                     customGuiMap.put(guiType, customGui);
                 }
                 case SHOP -> {
-                    customGui = new ShopGui(HardcoreSurvival.getPlugin());
+                    customGui = new ShopGui(HardcoreSurvival.getPlugin(), this);
                     customGuiMap.put(guiType, customGui);
                 }
                 default -> {
-                    customGui = new MenuGui();
+                    customGui = new MenuGui(this);
                     Bukkit.getConsoleSender().sendMessage(HardcoreSurvival.PREFIX + ChatColor.YELLOW + "플레이어: " + player.getName(),
                             ChatColor.YELLOW + "메뉴 생성중 기본값 사용이 발생하였습니다.");
                 }

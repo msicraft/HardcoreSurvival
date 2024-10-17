@@ -138,7 +138,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     public void reloadVariables() {
         reloadConfig();
 
-        playerDataManager.reloadVariables();
+        //playerDataManager.reloadVariables();
         deathPenaltyManager.reloadVariables();
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
