@@ -37,10 +37,10 @@ public class ItemBoxGui extends CustomGui {
         ItemStack itemStack;
         itemStack = GuiUtil.createItemStack(Material.ARROW, "다음 페이지", GuiUtil.EMPTY_LORE, -1,
                 SELECT_KEY, "Next");
-        gui.setItem(48, itemStack);
+        gui.setItem(50, itemStack);
         itemStack = GuiUtil.createItemStack(Material.ARROW, "이전 페이지", GuiUtil.EMPTY_LORE, -1,
                 SELECT_KEY, "Previous");
-        gui.setItem(50, itemStack);
+        gui.setItem(48, itemStack);
         itemStack = GuiUtil.createItemStack(Material.BARRIER, "뒤로", GuiUtil.EMPTY_LORE, -1,
                 SELECT_KEY, "Back");
         gui.setItem(45, itemStack);

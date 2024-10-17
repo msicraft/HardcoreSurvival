@@ -56,20 +56,18 @@ public class ShopGui extends CustomGui {
     public void setShopBuyInv(Player player) {
         ItemStack itemStack;
         itemStack = GuiUtil.createItemStack(Material.ARROW, "다음 페이지", GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Next");
-        gui.setItem(48, itemStack);
-        itemStack = GuiUtil.createItemStack(Material.ARROW, "이전 페이지", GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Previous");
         gui.setItem(50, itemStack);
+        itemStack = GuiUtil.createItemStack(Material.ARROW, "이전 페이지", GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Previous");
+        gui.setItem(48, itemStack);
         itemStack = GuiUtil.createItemStack(Material.CHEST, "아이템 판매", GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Sell");
         gui.setItem(53, itemStack);
-        itemStack = GuiUtil.createItemStack(Material.BARRIER, "뒤로", GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Back");
-        gui.setItem(45, itemStack);
 
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
         ShopManager shopManager = plugin.getShopManager();
 
         List<String> internalNames = shopManager.getInternalNameList();
         int maxSize = internalNames.size();
-        int page = (int) playerData.getTempData("ShopGui_Buy_Page");
+        int page = (int) playerData.getTempData("ShopGui_Buy_Page", 0);
         int guiCount = 0;
         int lastCount = page * 45;
 
@@ -91,7 +89,11 @@ public class ShopGui extends CustomGui {
                 List<Component> lore = new ArrayList<>();
                 lore.add(Component.text(ChatColor.WHITE + "현재 가격: " + shopItem.getPrice(false)
                         + " (개당 가격: " + shopItem.getPrice(true) + ")"));
-                lore.add(Component.text(ChatColor.WHITE + "남은 재고: " + shopItem.getStock()));
+                if (shopItem.isUnlimitStock()) {
+                    lore.add(Component.text(ChatColor.WHITE + "남은 재고: 무제한"));
+                } else {
+                    lore.add(Component.text(ChatColor.WHITE + "남은 재고: " + shopItem.getStock()));
+                }
                 lore.add(Component.text(""));
                 lore.add(Component.text(ChatColor.YELLOW + "선택된 개수: " + selectCount));
                 lore.add(Component.text(""));
@@ -101,6 +103,7 @@ public class ShopGui extends CustomGui {
                 dataContainer.set(BUY_KEY, PersistentDataType.STRING, internalName);
 
                 if (itemMeta.hasLore()) {
+                    lore.add(Component.text(""));
                     lore.addAll(itemMeta.lore());
                 }
                 itemMeta.lore(lore);
@@ -123,7 +126,7 @@ public class ShopGui extends CustomGui {
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
         ShopManager shopManager = plugin.getShopManager();
         int totalPrice = 0;
-        SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItemSlot", null);
+        SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItems", null);
         if (sellItems != null) {
             int size = sellItems.length;
             for (int i = 0; i < size; i++) {

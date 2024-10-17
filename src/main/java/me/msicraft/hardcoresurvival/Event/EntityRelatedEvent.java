@@ -9,7 +9,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 
@@ -32,12 +34,14 @@ public class EntityRelatedEvent implements Listener {
 
     private boolean disableEntityVehicleEnter = false;
     private boolean disableTrade = false;
+    private double breedChance = 0;
 
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
 
         this.disableEntityVehicleEnter = config.contains("Setting.DisableEntityVehicleEnter") && config.getBoolean("Setting.DisableEntityVehicleEnter");
         this.disableTrade = config.contains("Setting.DisableTrade") && config.getBoolean("Setting.DisableTrade");
+        this.breedChance = config.contains("Setting.BreedChance") ? config.getDouble("Setting.BreedChance") : 0;
     }
 
     @EventHandler
@@ -69,25 +73,14 @@ public class EntityRelatedEvent implements Listener {
                 MessageUtil.sendDebugMessage("DisableTrade", "Player: " + player.getName());
             }
         }
-        /*
-        int index = e.getIndex();
-        MerchantRecipe merchantRecipe = e.getMerchant().getRecipe(index);
-        ItemStack resultItemStack = merchantRecipe.getResult();
-        if (resultItemStack.getType() == Material.ENCHANTED_BOOK) {
-            EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) resultItemStack.getItemMeta();
-            if (enchantmentStorageMeta.hasStoredEnchant(Enchantment.MENDING)) {
-                e.setCancelled(true);
-                Player player = (Player) e.getWhoClicked();
-                player.closeInventory();
-                player.sendMessage(ChatColor.RED + "해당 거래를 사용할 수 없습니다");
+    }
 
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("DisableMendingTrade", "Player: " + player.getName());
-                }
-            }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void disableBreedEvent(EntityBreedEvent e) {
+        double random = Math.random();
+        if (random <= breedChance) {
+            e.setCancelled(true);
         }
-
-         */
     }
 
 }

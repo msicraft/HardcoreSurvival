@@ -11,6 +11,7 @@ Setting:
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10
+  BreedChance: 0.1
   WorldName:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"
@@ -82,3 +83,7 @@ Setting:
       NETHER_GOLD_ORE:
         InternalName: "Disguise_NetherGoldOre"
         Chance: 0.15
+Whitelist:
+  Enabled: true
+  Message: "&c접속 권한이 없습니다"
+  List:

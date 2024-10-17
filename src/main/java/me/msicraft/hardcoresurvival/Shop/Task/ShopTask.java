@@ -21,10 +21,11 @@ public class ShopTask extends BukkitRunnable {
         this.plugin = plugin;
         this.shopManager = shopManager;
         this.updateSeconds = updateSeconds;
+        this.seconds = updateSeconds;
 
-        this.maintenanceSeconds = updateSeconds - 60;
-        if (maintenanceSeconds <= 0) {
-            this.maintenanceSeconds = (int) (updateSeconds - (updateSeconds * 0.1));
+        this.maintenanceSeconds = 60;
+        if (seconds < maintenanceSeconds) {
+            maintenanceSeconds = (int) (updateSeconds - (updateSeconds * 0.1));
         }
 
         if (plugin.useDebug()) {
@@ -40,7 +41,8 @@ public class ShopTask extends BukkitRunnable {
         seconds--;
         if (!isMaintenance && seconds <= maintenanceSeconds) {
             if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("ShopTask", "Start-Maintenance");
+                MessageUtil.sendDebugMessage("ShopTask", "Start-Maintenance",
+                        "Seconds: " + seconds, "MaintenanceSeconds: " + maintenanceSeconds);
             }
 
             Bukkit.getScheduler().runTask(plugin, shopManager::closeShopInventory);

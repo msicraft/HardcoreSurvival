@@ -12,17 +12,18 @@ public class ShopItem {
 
     private final String id;
     private ItemStack itemStack;
-    private ItemStack guiItemStack;
 
     private ItemType itemType;
     private boolean useStaticPrice = false;
+    private boolean unlimitStock = false;
     private int stock = 0;
     private int basePrice = -1;
     private int price = -1;
 
-    public ShopItem(ItemType itemType, boolean useStaticPrice, ItemStack itemStack, String id, int stock, int basePrice, int price) {
+    public ShopItem(ItemType itemType, boolean useStaticPrice, boolean unlimitStock, ItemStack itemStack, String id, int stock, int basePrice, int price) {
         this.itemType = itemType;
         this.useStaticPrice = useStaticPrice;
+        this.unlimitStock = unlimitStock;
         this.itemStack = itemStack;
         this.id = id;
         this.stock = stock;
@@ -61,6 +62,13 @@ public class ShopItem {
         }
     }
 
+    public boolean hasEnoughStock(int stock) {
+        if (unlimitStock) {
+            return true;
+        }
+        return this.stock >= stock;
+    }
+
     public ItemType getItemType() {
         return itemType;
     }
@@ -97,6 +105,10 @@ public class ShopItem {
         this.stock = stock;
     }
 
+    public void addStock(int stock) {
+        this.stock = this.stock + stock;
+    }
+
     public int getBasePrice() {
         return basePrice;
     }
@@ -114,6 +126,26 @@ public class ShopItem {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public boolean isUnlimitStock() {
+        return unlimitStock;
+    }
+
+    public void setUnlimitStock(boolean unlimitStock) {
+        this.unlimitStock = unlimitStock;
+    }
+
+    public String asString() {
+        return "ShopItem{" +
+                "id='" + id + '\'' +
+                ", itemType=" + itemType.name() +
+                ", useStaticPrice=" + useStaticPrice +
+                ", unlimitStock=" + unlimitStock +
+                ", stock=" + stock +
+                ", basePrice=" + basePrice +
+                ", price=" + price +
+                '}';
     }
 
 }

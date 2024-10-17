@@ -2,12 +2,12 @@ package me.msicraft.hardcoresurvival.CustomItem.Data;
 
 import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -28,7 +28,7 @@ public abstract class CustomItem {
         update(customItemDataFile);
     }
 
-    public abstract void applyAbility(Player player);
+    public abstract void cast(PlayerData playerData, ItemStack useItemStack);
 
     public void update(CustomItemDataFile customItemDataFile) {
         this.itemStack = createItemStack(customItemDataFile);

@@ -2,8 +2,6 @@ package me.msicraft.hardcoresurvival.Shop.Menu.Event;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
-import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Shop.Data.SellItem;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
@@ -122,7 +120,7 @@ public class ShopGuiEvent implements Listener {
                 String data = dataContainer.get(ShopGui.BUY_KEY, PersistentDataType.STRING);
                 if (data != null) {
                     int maxPage = shopManager.getInternalNameList().size() / 45;
-                    int current = (int) playerData.getTempData("ShopGui_Buy_Page", 1);
+                    int current = (int) playerData.getTempData("ShopGui_Buy_Page", 0);
                     switch (data) {
                         case "Next" -> {
                             int next = current + 1;
@@ -143,10 +141,6 @@ public class ShopGuiEvent implements Listener {
                         case "Sell" -> {
                             shopManager.openShopInventory(player, ShopGui.Type.SELL);
                         }
-                        case "Back" -> {
-                            MenuGui menuGui = (MenuGui) playerData.getCustomGui(GuiType.MAIN);
-                            player.openInventory(menuGui.getInventory());
-                        }
                         case "Page" -> {
                             return;
                         }
@@ -155,7 +149,7 @@ public class ShopGuiEvent implements Listener {
                                 ShopItem shopItem = shopManager.getShopItem(data);
                                 if (shopItem != null) {
                                     int amount = (int) playerData.getTempData("ShopGui_" + data + "_SelectCount", 1);
-                                    //shopManager.buyShopItem(player, data, amount);
+                                    shopManager.buyShopItem(player, data, amount);
                                 }
                             } else if (e.isRightClick()) {
                                 player.sendMessage(ChatColor.GRAY + "========================================");
@@ -178,7 +172,7 @@ public class ShopGuiEvent implements Listener {
                             shopManager.openShopInventory(player, ShopGui.Type.BUY);
                         }
                         case "SellConfirm" -> {
-                            //shopManager.sellShopItem(player);
+                            shopManager.sellShopItem(player);
                         }
                     }
                     return;
@@ -189,7 +183,7 @@ public class ShopGuiEvent implements Listener {
                 InventoryType inventoryType = e.getClickedInventory().getType();
                 ItemStack selectItemStack = e.getCurrentItem();
                 if (selectItemStack != null && selectItemStack.getType() != Material.AIR) {
-                    SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItemSlot", null);
+                    SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItems", null);
                     if (sellItems == null) {
                         sellItems = new SellItem[45];
                     }
@@ -231,7 +225,7 @@ public class ShopGuiEvent implements Listener {
                             }
                         }
                     }
-                    playerData.setTempData("ShopGui_SellItemSlot", sellItems);
+                    playerData.setTempData("ShopGui_SellItems", sellItems);
                     shopManager.openShopInventory(player, ShopGui.Type.SELL);
                 }
             }

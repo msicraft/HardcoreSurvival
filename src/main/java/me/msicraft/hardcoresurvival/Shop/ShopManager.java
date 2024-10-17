@@ -5,6 +5,7 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGuiManager;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import me.msicraft.hardcoresurvival.Shop.Data.SellItem;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.File.ShopDataFile;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
@@ -97,6 +98,16 @@ public class ShopManager extends CustomGuiManager {
         setShopMaintenance(false);
     }
 
+    public void registerShopItem(ShopItem shopItem) {
+        shopItemMap.put(shopItem.getId(), shopItem);
+        internalNameList.add(shopItem.getId());
+    }
+
+    public void unregisterShopItem(String id) {
+        shopItemMap.remove(id);
+        internalNameList.remove(id);
+    }
+
     public void loadShopData() {
         FileConfiguration config = shopDataFile.getConfig();
         ConfigurationSection section = config.getConfigurationSection("Items");
@@ -109,6 +120,7 @@ public class ShopManager extends CustomGuiManager {
                 String path = "Items." + key;
                 ShopItem.ItemType itemType = ShopItem.ItemType.valueOf(config.getString(path + ".ItemType").toUpperCase());
                 boolean useStaticPrice = config.getBoolean(path + ".UseStaticPrice", false);
+                boolean unlimitStock = config.getBoolean(path + ".UnlimitStock", false);
                 int basePrice = config.getInt(path + ".BasePrice", -1);
                 int price = config.getInt(path + ".Price", -1);
                 int stock = config.getInt(path + ".Stock", 0);
@@ -127,17 +139,22 @@ public class ShopManager extends CustomGuiManager {
                 }
                 if (itemStack == null || itemStack.getType() == Material.AIR) {
                     fail++;
+                    if (plugin.useDebug()) {
+                        MessageUtil.sendDebugMessage("Shop Invalid ItemStack", "Key: " + key);
+                    }
                     continue;
                 }
                 if (shopItemMap.containsKey(key)) {
                     shopItem = shopItemMap.get(key);
+                    shopItem.setItemType(itemType);
                     shopItem.setItemStack(itemStack);
                     shopItem.setUseStaticPrice(useStaticPrice);
+                    shopItem.setUnlimitStock(unlimitStock);
                     shopItem.setBasePrice(basePrice);
                     shopItem.setPrice(price);
                     shopItem.setStock(stock);
                 } else {
-                    shopItem = new ShopItem(itemType, useStaticPrice, itemStack, key, stock, basePrice, price);
+                    shopItem = new ShopItem(itemType, useStaticPrice, unlimitStock, itemStack, key, stock, basePrice, price);
                 }
                 shopItemMap.put(key, shopItem);
                 internalNameList.add(key);
@@ -165,6 +182,7 @@ public class ShopManager extends CustomGuiManager {
             String path = "Items." + key;
             config.set(path + ".ItemType", shopItem.getItemType().name());
             config.set(path + ".UseStaticPrice", shopItem.isUseStaticPrice());
+            config.set(path + ".UnlimitStock", shopItem.isUnlimitStock());
             config.set(path + ".BasePrice", shopItem.getBasePrice());
             config.set(path + ".Price", shopItem.getPrice(false));
             config.set(path + ".Stock", shopItem.getStock());
@@ -187,6 +205,60 @@ public class ShopManager extends CustomGuiManager {
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("ShopData saved", "Count: " + sets.size());
+        }
+    }
+
+    public void buyShopItem(Player player, String id, int amount) {
+        ShopItem shopItem = getShopItem(id);
+        if (shopItem != null) {
+            if (!shopItem.hasEnoughStock(amount)) {
+                player.sendMessage(ChatColor.RED + "아이템의 재고가 부족합니다");
+                return;
+            }
+            double totalPrice = shopItem.getPrice(true) * amount;
+            double playerBalance = plugin.getEconomy().getBalance(player);
+            if (playerBalance < totalPrice) {
+                player.sendMessage(ChatColor.RED + "충분한 돈이 없습니다");
+                return;
+            }
+            plugin.getEconomy().withdrawPlayer(player, totalPrice);
+            if (!shopItem.isUnlimitStock()) {
+                shopItem.addStock(-amount);
+            }
+
+            ItemStack itemStack = shopItem.getItemStack();
+            for (int i = 0; i<amount; i++) {
+                player.getInventory().addItem(itemStack);
+            }
+            player.sendMessage(ChatColor.GREEN + "아이템을 구매하였습니다");
+        } else {
+            player.sendMessage(ChatColor.RED + "해당 아이템이 존재하지 않습니다");
+        }
+    }
+
+    public void sellShopItem(Player player) {
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+        SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItems", null);
+        if (sellItems != null) {
+            double totalPrice = 0;
+            for (SellItem sellItem : sellItems) {
+                if (sellItem != null) {
+                    ShopItem shopItem = getShopItem(sellItem.getId());
+                    totalPrice = totalPrice + sellItem.getTotalPrice();
+
+                    if (!shopItem.isUnlimitStock()) {
+                        int amount = sellItem.getItemStack().getAmount();
+                        shopItem.addStock(amount);
+                    }
+                }
+            }
+            plugin.getEconomy().depositPlayer(player, totalPrice);
+            playerData.setTempData("ShopGui_SellItems", null);
+
+            player.sendMessage(ChatColor.GREEN + "모든 아이템이 판매되었습니다.");
+            openShopInventory(player, ShopGui.Type.SELL);
+        } else {
+            player.sendMessage(ChatColor.RED + "판매할 아이템이 없습니다.");
         }
     }
 

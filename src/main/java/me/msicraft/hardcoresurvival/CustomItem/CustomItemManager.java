@@ -75,6 +75,10 @@ public class CustomItemManager {
         return null;
     }
 
+    public Set<String> getInternalNames() {
+        return customItemMap.keySet();
+    }
+
     public boolean hasCustomItem(String internalName) {
         return customItemMap.containsKey(internalName);
     }

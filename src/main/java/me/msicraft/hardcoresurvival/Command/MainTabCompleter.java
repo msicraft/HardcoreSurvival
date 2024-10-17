@@ -1,6 +1,8 @@
 package me.msicraft.hardcoresurvival.Command;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
+import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -23,12 +25,22 @@ public class MainTabCompleter implements TabCompleter {
         if (command.getName().equals("hardcoresurvival")) {
             if (sender.isOp()) {
                 if (args.length == 1) {
-                    return List.of("reload", "deathpenalty");
+                    return List.of("reload", "deathpenalty", "shop", "customitem", "gui");
                 }
                 if (args.length == 2) {
                     String var = args[0];
                     if (var.equalsIgnoreCase("deathpenalty")) {
                         return List.of("setspawn", "chestlog");
+                    } else if (var.equalsIgnoreCase("shop")) {
+                        return List.of("register", "unregister");
+                    } else if (var.equalsIgnoreCase("customitem")) {
+                        return List.copyOf(plugin.getCustomItemManager().getInternalNames());
+                    } else if (var.equalsIgnoreCase("gui")) {
+                        List<String> list = new ArrayList<>();
+                        for (GuiType guiType : GuiType.values()) {
+                            list.add(guiType.name());
+                        }
+                        return list;
                     }
                 }
                 if (args.length == 3) {
@@ -37,6 +49,10 @@ public class MainTabCompleter implements TabCompleter {
                     if (var.equalsIgnoreCase("deathpenalty")) {
                         if (var2.equalsIgnoreCase("chestlog")) {
                             return List.of("get", "log-to-ItemBox");
+                        }
+                    } else if (var.equalsIgnoreCase("shop")) {
+                        if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
+                            return plugin.getShopManager().getInternalNameList();
                         }
                     }
                 }
@@ -52,6 +68,23 @@ public class MainTabCompleter implements TabCompleter {
                                 list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
                                 return list;
                             }
+                        }
+                    } else if (var.equalsIgnoreCase("shop")) {
+                        if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
+                            List<String> list = new ArrayList<>();
+                            for (ShopItem.ItemType itemType : ShopItem.ItemType.values()) {
+                                list.add(itemType.name());
+                            }
+                            return list;
+                        }
+                    }
+                }
+                if (args.length == 5) {
+                    String var = args[0];
+                    String var2 = args[1];
+                    if (var.equalsIgnoreCase("shop")) {
+                        if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
+                            return List.of("<basePrice>");
                         }
                     }
                 }

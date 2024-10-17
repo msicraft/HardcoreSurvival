@@ -3,6 +3,7 @@ package me.msicraft.hardcoresurvival.CustomItem.Event;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,7 +40,8 @@ public class CustomItemRelatedEvent implements Listener {
                     CustomItem customItem = customItemManager.getCustomItem(internalName);
                     if (customItem != null) {
                         Player player = e.getPlayer();
-                        customItem.applyAbility(player);
+                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                        customItem.cast(playerData, itemStack);
 
                         if (plugin.useDebug()) {
                             MessageUtil.sendDebugMessage("CustomItemUse",

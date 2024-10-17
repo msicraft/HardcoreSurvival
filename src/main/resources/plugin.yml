@@ -6,3 +6,4 @@ depend: [Vault, MythicMobs]
 commands:
   hardcoresurvival:
     description: 'Main commands'
+    aliases: [hs]

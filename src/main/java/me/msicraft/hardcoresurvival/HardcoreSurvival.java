@@ -32,6 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class HardcoreSurvival extends JavaPlugin {
@@ -104,6 +105,13 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
 
         shopManager.saveShopData();
+
+        List<String> whiteList = new ArrayList<>();
+        playerDataManager.getWhiteList().forEach(uuid -> {
+            whiteList.add(uuid.toString());
+        });
+        getConfig().set("Whitelist.List", whiteList);
+        saveConfig();
     }
 
     public void registeredEvents() {
@@ -130,10 +138,10 @@ public final class HardcoreSurvival extends JavaPlugin {
     public void reloadVariables() {
         reloadConfig();
 
+        playerDataManager.reloadVariables();
         deathPenaltyManager.reloadVariables();
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
-        shopManager.reloadVariables();
         customItemManager.reloadVariables();
 
         EntityRelatedEvent.getInstance().reloadVariables();
@@ -146,6 +154,8 @@ public final class HardcoreSurvival extends JavaPlugin {
             PlayerData playerData = playerDataManager.getPlayerData(player);
             playerData.updateTask(playerTaskTick);
         }
+
+        shopManager.reloadVariables();
     }
 
     private void createConfigFile() {

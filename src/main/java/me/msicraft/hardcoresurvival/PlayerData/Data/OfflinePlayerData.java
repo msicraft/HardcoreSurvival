@@ -17,6 +17,8 @@ import java.util.*;
 
 public class OfflinePlayerData {
 
+    private boolean isStreamer = false;
+
     private final OfflinePlayer offlinePlayer;
     private final PlayerDataFile playerDataFile;
 
@@ -35,6 +37,8 @@ public class OfflinePlayerData {
 
     public void loadData() {
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
+
+        isStreamer = playerDataConfig.contains("Streamer") && playerDataConfig.getBoolean("Streamer");
 
         List<String> tags = playerDataConfig.getStringList("Tags");
         tagList.addAll(tags);
@@ -72,6 +76,8 @@ public class OfflinePlayerData {
     public void saveData() {
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
 
+        playerDataConfig.set("Streamer", isStreamer);
+
         playerDataConfig.set("Tags", tagList);
 
         Set<String> dataKeys = dataMap.keySet();
@@ -100,6 +106,14 @@ public class OfflinePlayerData {
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + offlinePlayer.getName());
         }
+    }
+
+    public boolean isStreamer() {
+        return isStreamer;
+    }
+
+    public void setStreamer(boolean streamer) {
+        isStreamer = streamer;
     }
 
     public OfflinePlayer getOfflinePlayer() {
