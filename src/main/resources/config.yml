@@ -1,7 +1,5 @@
 Debug: false
 Setting:
-  DisableNether: true
-  DisableEnderWorld: true
   DisableEntityVehicleEnter: true
   DisableBoneMeal: true
   MendingEnchantChance: 0.01
@@ -10,6 +8,7 @@ Setting:
   DeathPenalty:
     Enabled: true
     SpawnLocation: ''
+    LoseBalancePercent: 0.25
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10
@@ -85,7 +84,10 @@ Setting:
       NETHER_GOLD_ORE:
         InternalName: "Disguise_NetherGoldOre"
         Chance: 0.15
+Streamer:
+  MaxInviteCount: 5
+  List:
 Whitelist:
   Enabled: true
-  Message: "&c접속 권한이 없습니다"
+  Message: "&c접속 권한이 없습니다. 스트리머 또는 관리자에게 문의해주세요"
   List:

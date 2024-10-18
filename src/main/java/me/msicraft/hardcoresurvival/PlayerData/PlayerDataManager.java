@@ -1,11 +1,13 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -16,6 +18,8 @@ public class PlayerDataManager {
     private final HardcoreSurvival plugin;
 
     private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
+
+    private final List<UUID> streamerList = new ArrayList<>();
     private final List<UUID> whiteList = new ArrayList<>();
 
     private boolean useWhiteList = false;
@@ -26,6 +30,11 @@ public class PlayerDataManager {
     }
 
     public void reloadVariables() {
+        plugin.getConfig().getStringList("Streamer.List").forEach(s -> {
+            UUID uuid = UUID.fromString(s);
+            streamerList.add(uuid);
+        });
+
         this.useWhiteList = plugin.getConfig().contains("Whitelist.Enabled") && plugin.getConfig().getBoolean("Whitelist.Enabled");
         String wMessage = plugin.getConfig().getString("Whitelist.Message", null);
         if (wMessage != null) {
@@ -48,6 +57,37 @@ public class PlayerDataManager {
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("WhiteList loaded successfully", "Size: " + whiteList.size());
+        }
+    }
+
+    public void saveData() {
+        List<String> whiteList = new ArrayList<>();
+        getWhiteListUUIDs().forEach(uuid -> {
+            whiteList.add(uuid.toString());
+        });
+        plugin.getConfig().set("Whitelist.List", whiteList);
+
+        List<String> streamerList = new ArrayList<>();
+        getStreamerList().forEach(uuid -> {
+            streamerList.add(uuid.toString());
+        });
+        plugin.getConfig().set("Streamer.List", streamerList);
+
+        plugin.saveConfig();
+    }
+
+    public void inviteViewer(Player streamer, OfflinePlayer viewer) {
+        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(viewer);
+        offlinePlayerData.loadData();
+        offlinePlayerData.setGuildUUID(streamer.getUniqueId());
+        offlinePlayerData.saveData();
+        addWhiteList(viewer.getUniqueId());
+    }
+
+    public void kickViewer(OfflinePlayer viewer) {
+        if (viewer.isOnline()) {
+            Player player = viewer.getPlayer();
+            player.kick(Component.text("스트리머에 의해 추방당하였습니다"));
         }
     }
 
@@ -95,11 +135,19 @@ public class PlayerDataManager {
     }
 
     public void addWhiteList(Player player) {
-        whiteList.add(player.getUniqueId());
+        addWhiteList(player.getUniqueId());
+    }
+
+    public void addWhiteList(UUID uuid) {
+        whiteList.add(uuid);
     }
 
     public void removeWhiteList(Player player) {
-        whiteList.remove(player.getUniqueId());
+        removeWhiteList(player.getUniqueId());
+    }
+
+    public void removeWhiteList(UUID uuid) {
+        whiteList.remove(uuid);
     }
 
     public boolean isUseWhiteList() {
@@ -110,8 +158,24 @@ public class PlayerDataManager {
         return whitelistMessage;
     }
 
-    public List<UUID> getWhiteList() {
+    public List<UUID> getWhiteListUUIDs() {
         return whiteList;
+    }
+
+    public void addStreamer(UUID uuid) {
+        streamerList.add(uuid);
+    }
+
+    public void removeStreamer(UUID uuid) {
+        streamerList.remove(uuid);
+    }
+
+    public boolean isStreamer(UUID uuid) {
+        return streamerList.contains(uuid);
+    }
+
+    public List<UUID> getStreamerList() {
+        return streamerList;
     }
 
 }

@@ -4,6 +4,9 @@ import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadEvent;
 import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,14 +20,26 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class PlayerDataRelatedEvent implements Listener {
 
     private final HardcoreSurvival plugin;
+    private final PlayerDataManager playerDataManager;
 
     public PlayerDataRelatedEvent(HardcoreSurvival plugin) {
         this.plugin = plugin;
+        this.playerDataManager = plugin.getPlayerDataManager();
     }
 
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent e) {
         Player player = e.getPlayer();
+
+        if (!playerDataManager.hasWhiteList(player)) {
+            e.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+            e.kickMessage(Component.text(plugin.getPlayerDataManager().getWhitelistMessage()));
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("WhiteList-Disable Join", "Player: " + player.getName());
+            }
+            return;
+        }
 
         if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
             plugin.getPlayerDataManager().registerPlayerData(player);
@@ -34,7 +49,7 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+        PlayerData playerData = playerDataManager.getPlayerData(player);
 
         playerData.loadData();
 
@@ -47,10 +62,11 @@ public class PlayerDataRelatedEvent implements Listener {
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+        PlayerData playerData = playerDataManager.getPlayerData(player);
+        playerData.setLastLogin(System.currentTimeMillis());
         playerData.saveData();
 
-        plugin.getPlayerDataManager().unregisterPlayerData(player);
+        playerDataManager.unregisterPlayerData(player);
 
         Bukkit.getScheduler().runTask(plugin, () -> {
             Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(playerData));
@@ -61,6 +77,12 @@ public class PlayerDataRelatedEvent implements Listener {
     public void playerDataLoad(PlayerDataLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
         playerData.updateTask(plugin.getPlayerTaskTick());
+        playerData.setLastLogin(System.currentTimeMillis());
+
+        if (playerData.getGuildUUID() == null) {
+            playerData.getPlayer().kick(Component.text("접속 권한이 없거나 길드-UUID 가 없습니다"));
+            return;
+        }
     }
 
     @EventHandler
@@ -71,7 +93,7 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void playerCombatUpdate(EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player player) {
-            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+            PlayerData playerData = playerDataManager.getPlayerData(player);
             playerData.updateCombat();
         }
     }

@@ -60,27 +60,54 @@ public class MainCommand implements CommandExecutor {
                             return false;
                         }
                     }
-                    case "whitelist" -> { //hs whitelist [add, remove] <target>
+                    case "streamer" -> { //hs streamer [add, remove, list] <target> //스트리머 용
                         if (!sender.isOp()) {
                             return false;
                         }
                         PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
                         switch (args[1]) {
                             case "add" -> {
-                                String targetName = args[2];
-                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(targetName);
-                                UUID targetUniqueId = Bukkit.getOfflinePlayer(targetName).getUniqueId();
-                                sender.sendMessage(ChatColor.GREEN + targetName + "을 whitelist에 추가하였습니다.");
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
+                                UUID uuid = offlinePlayer.getUniqueId();
+                                if (playerDataManager.isStreamer(uuid)) {
+                                    sender.sendMessage(ChatColor.RED + "해당 플레이어는 이미 스트리머로 등록되어있습니다 -> " + offlinePlayer.getName());
+                                    return false;
+                                }
+                                playerDataManager.addStreamer(uuid);
+                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머로 등록되었습니다");
+                                sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
+                                sender.sendMessage(ChatColor.GREEN + "UUID: " + uuid.toString());
+                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                offlinePlayerData.loadData();
+                                offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
+                                offlinePlayerData.saveData();
+                                return true;
                             }
                             case "remove" -> {
-                                String targetName = args[2];
-                                UUID targetUniqueId = Bukkit.getOfflinePlayer(targetName).getUniqueId();
-                                //plugin.getWhitelistManager().removePlayer(targetUniqueId);
-                                sender.sendMessage(ChatColor.GREEN + targetName + "을 whitelist에서 제거하였습니다.");
+                                UUID uuid = UUID.fromString(args[2]);
+                                if (!playerDataManager.isStreamer(uuid)) {
+                                    sender.sendMessage(ChatColor.RED + "해당 플레이어는 스트리머에 등록되어있지 않습니다");
+                                    return false;
+                                }
+                                playerDataManager.removeStreamer(uuid);
+                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머에서 제거되었습니다");
+
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                offlinePlayerData.loadData();
+                                offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
+                                offlinePlayerData.saveData();
+                                return true;
                             }
-                            default -> {
-                                sender.sendMessage(ChatColor.RED + "/hardcoresurvival whitelist [add, remove] <target>");
+                            case "list" -> {
+                                sender.sendMessage("Streamer List: ");
+                                playerDataManager.getStreamerList().forEach(uuid -> {
+                                    sender.sendMessage("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
+                                    sender.sendMessage("UUID: " + uuid.toString());
+                                });
+                                return true;
                             }
+                            default -> {}
                         }
                     }
                     case "customitem" -> { //hs customitem <internalName> <target> <amount>
@@ -109,6 +136,7 @@ public class MainCommand implements CommandExecutor {
                             target.getInventory().addItem(itemStack);
                         }
                     }
+                    /*
                     case "gui" -> { //hs gui <guiType> <target>
                         GuiType guiType = GuiType.valueOf(args[1]);
                         Player target = Bukkit.getPlayer(args[2]);
@@ -137,6 +165,8 @@ public class MainCommand implements CommandExecutor {
                         }
                         return true;
                     }
+
+                     */
                     case "shop" -> { //hs shop [register, unregister, setcenter] <id> <itemType> <basePrice>
                         if (!sender.isOp()) {
                             return false;

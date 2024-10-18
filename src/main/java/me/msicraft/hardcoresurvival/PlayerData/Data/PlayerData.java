@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.PlayerData.Data;
 
+import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
@@ -53,6 +54,10 @@ public class PlayerData extends OfflinePlayerData {
                 }
                 case SHOP -> {
                     customGui = new ShopGui(HardcoreSurvival.getPlugin(), this);
+                    customGuiMap.put(guiType, customGui);
+                }
+                case GUILD -> {
+                    customGui = new GuildGui(HardcoreSurvival.getPlugin(), this);
                     customGuiMap.put(guiType, customGui);
                 }
                 default -> {

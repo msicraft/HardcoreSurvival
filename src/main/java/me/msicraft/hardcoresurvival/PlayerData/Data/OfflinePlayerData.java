@@ -17,8 +17,6 @@ import java.util.*;
 
 public class OfflinePlayerData {
 
-    private boolean isStreamer = false;
-
     private final OfflinePlayer offlinePlayer;
     private final PlayerDataFile playerDataFile;
 
@@ -28,6 +26,10 @@ public class OfflinePlayerData {
 
     private final DeathPenaltyChestLog deathPenaltyChestLog;
     private final ItemBox itemBox;
+
+    private long lastLogin;
+    private UUID guildUUID;
+    private int guildInviteCount;
 
     public OfflinePlayerData(OfflinePlayer offlinePlayer) {
         this.offlinePlayer = offlinePlayer;
@@ -39,7 +41,13 @@ public class OfflinePlayerData {
     public void loadData() {
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
 
-        isStreamer = playerDataConfig.contains("Streamer") && playerDataConfig.getBoolean("Streamer");
+        this.lastLogin = playerDataConfig.getLong("LastLogin", System.currentTimeMillis());
+        String guildUUIDS = playerDataConfig.getString("Guild.UUID", null);
+        if (guildUUIDS == null) {
+            MessageUtil.sendDebugMessage("Invalid Guild UUID", "Player: " + offlinePlayer.getName());
+        } else {
+            this.guildUUID = UUID.fromString(guildUUIDS);
+        }
 
         List<String> tags = playerDataConfig.getStringList("Tags");
         tagList.addAll(tags);
@@ -91,8 +99,8 @@ public class OfflinePlayerData {
     public void saveData() {
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
 
-        playerDataConfig.set("Streamer", isStreamer);
-
+        playerDataConfig.set("LastLogin", lastLogin);
+        playerDataConfig.set("Guild.UUID", guildUUID.toString());
         playerDataConfig.set("Tags", tagList);
 
         Set<String> dataKeys = dataMap.keySet();
@@ -132,14 +140,6 @@ public class OfflinePlayerData {
         if (HardcoreSurvival.getPlugin().useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + offlinePlayer.getName());
         }
-    }
-
-    public boolean isStreamer() {
-        return isStreamer;
-    }
-
-    public void setStreamer(boolean streamer) {
-        isStreamer = streamer;
     }
 
     public OfflinePlayer getOfflinePlayer() {
@@ -204,6 +204,22 @@ public class OfflinePlayerData {
 
     public List<String> getTagList() {
         return tagList;
+    }
+
+    public UUID getGuildUUID() {
+        return guildUUID;
+    }
+
+    public void setGuildUUID(UUID guildUUID) {
+        this.guildUUID = guildUUID;
+    }
+
+    public long getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(long lastLogin) {
+        this.lastLogin = lastLogin;
     }
 
     public DeathPenaltyChestLog getDeathPenaltyChestLog() {

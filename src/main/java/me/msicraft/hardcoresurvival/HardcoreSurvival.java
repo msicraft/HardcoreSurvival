@@ -8,6 +8,7 @@ import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
+import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.ItemBox.Event.ItemBoxGuiEvent;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
@@ -60,6 +61,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private ItemBoxManager itemBoxManager;
     private ShopManager shopManager;
     private CustomItemManager customItemManager;
+    private GuildManager guildManager;
 
     @Override
     public void onEnable() {
@@ -71,8 +73,9 @@ public final class HardcoreSurvival extends JavaPlugin {
         worldManager = new WorldManager(this);
         oreDisguiseManager = new OreDisguiseManager(this);
         itemBoxManager = new ItemBoxManager(this);
-        shopManager = new ShopManager(this);
         customItemManager = new CustomItemManager(this);
+        shopManager = new ShopManager(this);
+        guildManager = new GuildManager(this);
 
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -105,13 +108,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
 
         shopManager.saveShopData();
-
-        List<String> whiteList = new ArrayList<>();
-        playerDataManager.getWhiteList().forEach(uuid -> {
-            whiteList.add(uuid.toString());
-        });
-        getConfig().set("Whitelist.List", whiteList);
-        saveConfig();
+        playerDataManager.saveData();
     }
 
     public void registeredEvents() {
@@ -138,7 +135,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     public void reloadVariables() {
         reloadConfig();
 
-        //playerDataManager.reloadVariables();
+        playerDataManager.reloadVariables();
         deathPenaltyManager.reloadVariables();
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
@@ -228,4 +225,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         return combatSeconds;
     }
 
+    public GuildManager getGuildManager() {
+        return guildManager;
+    }
 }

@@ -1,7 +1,6 @@
 package me.msicraft.hardcoresurvival.Command;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,7 +24,7 @@ public class MainTabCompleter implements TabCompleter {
         if (command.getName().equals("hardcoresurvival")) {
             if (sender.isOp()) {
                 if (args.length == 1) {
-                    return List.of("reload", "deathpenalty", "shop", "customitem", "gui");
+                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer");
                 }
                 if (args.length == 2) {
                     String var = args[0];
@@ -35,13 +34,18 @@ public class MainTabCompleter implements TabCompleter {
                         return List.of("register", "unregister", "setcenter");
                     } else if (var.equalsIgnoreCase("customitem")) {
                         return List.copyOf(plugin.getCustomItemManager().getInternalNames());
-                    } else if (var.equalsIgnoreCase("gui")) {
+                    } else if (var.equalsIgnoreCase("streamer")) {
+                        return List.of("add", "remove", "list");
+                    }
+                    /*else if (var.equalsIgnoreCase("gui")) {
                         List<String> list = new ArrayList<>();
                         for (GuiType guiType : GuiType.values()) {
                             list.add(guiType.name());
                         }
                         return list;
                     }
+
+                     */
                 }
                 if (args.length == 3) {
                     String var = args[0];
@@ -53,6 +57,14 @@ public class MainTabCompleter implements TabCompleter {
                     } else if (var.equalsIgnoreCase("shop")) {
                         if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
                             return plugin.getShopManager().getInternalNameList();
+                        }
+                    } else if (var.equalsIgnoreCase("streamer")) {
+                        if (var2.equalsIgnoreCase("remove")) {
+                            List<String> list = new ArrayList<>();
+                            plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
+                                list.add(uuid.toString());
+                            });
+                            return list;
                         }
                     }
                 }

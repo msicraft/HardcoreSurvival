@@ -22,6 +22,7 @@ public class DeathPenaltyManager {
     private final HardcoreSurvival plugin;
     private boolean isEnabled = false;
     private Location spawnLocation = null;
+    private double loseBalancePercent = 0;
 
     public DeathPenaltyManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -30,6 +31,7 @@ public class DeathPenaltyManager {
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
         this.spawnLocation = plugin.getConfig().contains("Setting.DeathPenalty.SpawnLocation") ? plugin.getConfig().getLocation("Setting.DeathPenalty.SpawnLocation") : null;
+        this.loseBalancePercent = plugin.getConfig().contains("Setting.DeathPenalty.LoseBalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.LoseBalancePercent") : 0;
     }
 
     public boolean isContainerMaterial(Material material) {
@@ -46,6 +48,14 @@ public class DeathPenaltyManager {
         player.setExp(0);
         player.getInventory().clear();
         player.getEnderChest().clear();
+
+        double balance = plugin.getEconomy().getBalance(player);
+        plugin.getEconomy().withdrawPlayer(player, balance);
+        int i = (int) balance;
+        if (i < 0) {
+            i = 0;
+        }
+        plugin.getEconomy().depositPlayer(player, i);
 
         DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationList().forEach(location -> {
