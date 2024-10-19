@@ -11,7 +11,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -70,21 +69,24 @@ public class GuildGui extends CustomGui {
             PersistentDataContainer dataContainer = skullMeta.getPersistentDataContainer();
             dataContainer.set(MAIN_KEY, PersistentDataType.STRING, memberUUID.toString());
 
+            skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
             skullMeta.displayName(Component.text(ChatColor.GREEN + offlinePlayer.getName()));
             lore.add(Component.text(ChatColor.YELLOW + "좌 클릭: 추방"));
-            lore.add(Component.text(ChatColor.YELLOW + "우 클릭: 임시 추방"));
+            lore.add(Component.text(ChatColor.YELLOW + "우 클릭: 임시 추방 (임시 추방 취소)")); //-1 사용시 취소
             lore.add(Component.text(""));
             if (offlinePlayer.isOnline()) {
                 lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.GREEN + "온라인"));
             } else {
                 OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
                 offlinePlayerData.loadData();
-                lore.add(Component.text(ChatColor.GRAY + "현재 상태: " +ChatColor.RED + "오프라인"));
+                lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.RED + "오프라인"));
                 lore.add(Component.text(ChatColor.GRAY + "마지막 접속시간: " + TimeUtil.getTimeToFormat(offlinePlayerData.getLastLogin())));
+                if (guild.isTempKickMember(memberUUID)) {
+                    lore.add(Component.text(ChatColor.RED + ""));
+                    lore.add(Component.text(ChatColor.GRAY + "임시 추방 만료 기간: " + TimeUtil.getTimeToFormat(guild.getTempKickTime(memberUUID))));
+                }
             }
-
-            skullMeta.setPlayerProfile(offlinePlayer.getPlayerProfile());
-
+            skullMeta.lore(lore);
             memberStack.setItemMeta(skullMeta);
             gui.setItem(guiCount, memberStack);
             guiCount++;

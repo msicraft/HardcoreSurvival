@@ -1,7 +1,6 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
@@ -30,6 +29,7 @@ public class PlayerDataManager {
     }
 
     public void reloadVariables() {
+        streamerList.clear();
         plugin.getConfig().getStringList("Streamer.List").forEach(s -> {
             UUID uuid = UUID.fromString(s);
             streamerList.add(uuid);
@@ -40,8 +40,8 @@ public class PlayerDataManager {
         if (wMessage != null) {
             this.whitelistMessage = MessageUtil.translateColorCodes(wMessage);
         }
-        whiteList.clear();
 
+        whiteList.clear();
         List<String> uuidList = plugin.getConfig().getStringList("Whitelist.List");
         for (String uuidString : uuidList) {
             UUID uuid = UUID.fromString(uuidString);
@@ -49,7 +49,7 @@ public class PlayerDataManager {
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (hasWhiteList(player)) {
+            if (hasWhiteList(player) || player.isOp()) {
                 continue;
             }
             player.kick(Component.text(whitelistMessage));
@@ -74,21 +74,6 @@ public class PlayerDataManager {
         plugin.getConfig().set("Streamer.List", streamerList);
 
         plugin.saveConfig();
-    }
-
-    public void inviteViewer(Player streamer, OfflinePlayer viewer) {
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(viewer);
-        offlinePlayerData.loadData();
-        offlinePlayerData.setGuildUUID(streamer.getUniqueId());
-        offlinePlayerData.saveData();
-        addWhiteList(viewer.getUniqueId());
-    }
-
-    public void kickViewer(OfflinePlayer viewer) {
-        if (viewer.isOnline()) {
-            Player player = viewer.getPlayer();
-            player.kick(Component.text("스트리머에 의해 추방당하였습니다"));
-        }
     }
 
     public void registerPlayerData(Player player) {
@@ -130,8 +115,12 @@ public class PlayerDataManager {
         return list;
     }
 
-    public boolean hasWhiteList(Player player) {
-        return whiteList.contains(player.getUniqueId());
+    public boolean hasWhiteList(OfflinePlayer offlinePlayer) {
+        return hasWhiteList(offlinePlayer.getUniqueId());
+    }
+
+    public boolean hasWhiteList(UUID uuid) {
+        return whiteList.contains(uuid);
     }
 
     public void addWhiteList(Player player) {

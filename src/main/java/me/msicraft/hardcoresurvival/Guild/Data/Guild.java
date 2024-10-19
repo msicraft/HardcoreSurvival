@@ -1,13 +1,8 @@
 package me.msicraft.hardcoresurvival.Guild.Data;
 
-import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
 
@@ -18,28 +13,31 @@ public class Guild {
 
     private final Map<UUID, Long> tempKickMap = new HashMap<>();
 
-    private int inviteCount = 0;
+    private int inviteCount;
 
-    public Guild(OfflinePlayer leaderPlayer) {
-        this.leaderPlayer = leaderPlayer;
-        members.add(leaderPlayer.getUniqueId());
+    public Guild(OfflinePlayerData offlinePlayerData) {
+        this.leaderPlayer = offlinePlayerData.getOfflinePlayer();
+
+        FileConfiguration config = offlinePlayerData.getPlayerDataFile().getConfig();
+        this.inviteCount = config.getInt("Guild.InviteCount", 0);
+        config.getStringList("Guild.MemberList").forEach(s -> {
+            UUID uuid = UUID.fromString(s);
+            if (!members.contains(uuid)) {
+                members.add(uuid);
+            }
+        });
+        config.getStringList("Guild.TempKickList").forEach(format -> {
+            String[] split = format.split(":");
+            UUID target = UUID.fromString(split[0]);
+            long time = Long.parseLong(split[1]);
+            tempKickMap.put(target, time);
+        });
     }
 
-    public void loadGuildData() {
-        if (leaderPlayer.isOnline()) {
-            return;
-        }
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(leaderPlayer);
-        offlinePlayerData.loadData();
-    }
-
-    public void saveGuildData() {
-    }
-
-    public void applyTempKickMember(UUID target, int seconds) {
+    public void applyTempKick(UUID target, int seconds) {
         long time = System.currentTimeMillis() + (seconds * 1000L);
         if (tempKickMap.containsKey(target)) {
-            time = time + tempKickMap.get(target);
+            time = tempKickMap.get(target) + (seconds * 1000L);
         }
         tempKickMap.put(target, time);
     }
@@ -54,6 +52,10 @@ public class Guild {
 
     public long getTempKickTime(UUID target) {
         return tempKickMap.getOrDefault(target, 0L);
+    }
+
+    public Set<UUID> getTempKickList() {
+        return tempKickMap.keySet();
     }
 
     public OfflinePlayer getLeaderPlayer() {

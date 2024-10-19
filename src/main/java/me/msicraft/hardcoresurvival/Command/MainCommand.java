@@ -5,16 +5,14 @@ import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
+import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
-import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
-import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
-import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -73,6 +71,7 @@ public class MainCommand implements CommandExecutor {
                                     sender.sendMessage(ChatColor.RED + "해당 플레이어는 이미 스트리머로 등록되어있습니다 -> " + offlinePlayer.getName());
                                     return false;
                                 }
+                                playerDataManager.addWhiteList(uuid);
                                 playerDataManager.addStreamer(uuid);
                                 sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머로 등록되었습니다");
                                 sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
@@ -81,6 +80,10 @@ public class MainCommand implements CommandExecutor {
                                 offlinePlayerData.loadData();
                                 offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
                                 offlinePlayerData.saveData();
+
+                                Guild guild = new Guild(offlinePlayerData);
+                                guild.addMember(uuid);
+                                plugin.getGuildManager().registerGuild(uuid, guild);
                                 return true;
                             }
                             case "remove" -> {
@@ -89,14 +92,29 @@ public class MainCommand implements CommandExecutor {
                                     sender.sendMessage(ChatColor.RED + "해당 플레이어는 스트리머에 등록되어있지 않습니다");
                                     return false;
                                 }
+                                playerDataManager.removeWhiteList(uuid);
                                 playerDataManager.removeStreamer(uuid);
                                 sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머에서 제거되었습니다");
-
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.isOnline()) {
+                                    offlinePlayer.getPlayer().kick(Component.text(ChatColor.RED + "접속권한이 제거되었습니다"));
+                                }
                                 OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
                                 offlinePlayerData.loadData();
-                                offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
+                                offlinePlayerData.setGuildUUID(null);
                                 offlinePlayerData.saveData();
+                                Guild guild = plugin.getGuildManager().getGuild(uuid);
+                                guild.getMembers().forEach(memberUUID -> {
+                                    OfflinePlayer memberO = Bukkit.getOfflinePlayer(memberUUID);
+                                    if (memberO.isOnline()) {
+                                        memberO.getPlayer().kick(Component.text(ChatColor.RED + "스트리머의 접속권한이 제거되어 관련 플레이어의 접속권한도 제거되었습니다"));
+                                    }
+                                    OfflinePlayerData memberData = new OfflinePlayerData(memberO);
+                                    memberData.loadData();
+                                    memberData.setGuildUUID(null);
+                                    memberData.saveData();
+                                });
+                                plugin.getGuildManager().removeGuild(uuid);
                                 return true;
                             }
                             case "list" -> {
@@ -136,37 +154,6 @@ public class MainCommand implements CommandExecutor {
                             target.getInventory().addItem(itemStack);
                         }
                     }
-                    /*
-                    case "gui" -> { //hs gui <guiType> <target>
-                        GuiType guiType = GuiType.valueOf(args[1]);
-                        Player target = Bukkit.getPlayer(args[2]);
-                        if (target == null) {
-                            if (sender instanceof Player p) {
-                                target = p;
-                            } else {
-                                sender.sendMessage(ChatColor.RED + "플레이어를 찾을 수 없습니다.");
-                                return false;
-                            }
-                        }
-                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target);
-                        switch (guiType) {
-                            case MAIN -> {
-                                CustomGui customGui = playerData.getCustomGui(GuiType.MAIN);
-                                if (customGui instanceof MenuGui menuGui) {
-                                    target.openInventory(menuGui.getInventory());
-                                }
-                            }
-                            case ITEM_BOX -> {
-                                plugin.getItemBoxManager().openItemBox(playerData);
-                            }
-                            case SHOP -> {
-                                plugin.getShopManager().openShopInventory(target, ShopGui.Type.BUY);
-                            }
-                        }
-                        return true;
-                    }
-
-                     */
                     case "shop" -> { //hs shop [register, unregister, setcenter] <id> <itemType> <basePrice>
                         if (!sender.isOp()) {
                             return false;

@@ -9,6 +9,7 @@ import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
 import me.msicraft.hardcoresurvival.Guild.GuildManager;
+import me.msicraft.hardcoresurvival.Guild.Menu.Event.GuildGuiEvent;
 import me.msicraft.hardcoresurvival.ItemBox.Event.ItemBoxGuiEvent;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
@@ -33,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public final class HardcoreSurvival extends JavaPlugin {
@@ -46,7 +46,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
-    private final List<String> checkPluginNameList = List.of("MythicMobs");
+    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault");
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;
@@ -98,6 +98,8 @@ public final class HardcoreSurvival extends JavaPlugin {
         reloadVariables();
 
         getServer().getConsoleSender().sendMessage(PREFIX + ChatColor.GREEN + "플러그인이 활성화 되었습니다");
+
+        guildManager.loadGuild();
     }
 
     @Override
@@ -109,6 +111,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
         shopManager.saveShopData();
         playerDataManager.saveData();
+        guildManager.saveGuild();
     }
 
     public void registeredEvents() {
@@ -122,6 +125,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new ItemBoxGuiEvent(this), this);
         pluginManager.registerEvents(new ShopGuiEvent(this), this);
         pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
+        pluginManager.registerEvents(new GuildGuiEvent(this),this);
     }
 
     public void registeredCommands() {
@@ -140,6 +144,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         worldManager.reloadVariables();
         oreDisguiseManager.reloadVariables();
         customItemManager.reloadVariables();
+        guildManager.reloadVariables();
 
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();

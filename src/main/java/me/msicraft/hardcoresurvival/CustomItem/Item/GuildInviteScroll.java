@@ -2,32 +2,26 @@ package me.msicraft.hardcoresurvival.CustomItem.Item;
 
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
-import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class ReturnScroll extends CustomItem {
+public class GuildInviteScroll extends CustomItem {
 
-    public ReturnScroll(String id, CustomItemDataFile customItemDataFile) {
+    public GuildInviteScroll(String id, CustomItemDataFile customItemDataFile) {
         super(id, customItemDataFile);
     }
 
     @Override
     public void rightClick(PlayerData playerData, ItemStack useItemStack) {
         Player player = playerData.getPlayer();
-        if (playerData.isInCombat()) {
-            player.sendMessage(ChatColor.RED + "전투중에는 사용 불가능합니다");
-            return;
-        }
-        Location spawnLocation = HardcoreSurvival.getPlugin().getDeathPenaltyManager().getSpawnLocation();
-        if (spawnLocation == null) {
-            player.sendMessage(ChatColor.RED + "스폰위치가 존재하지 않습니다");
-            return;
-        }
-        player.teleport(spawnLocation);
+        player.sendMessage(ChatColor.GRAY + "========================================");
+        player.sendMessage(ChatColor.GRAY + "초대할 플레이어 이름을 입력해주세요");
+        player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
+        player.sendMessage(ChatColor.GRAY + "========================================");
+
+        playerData.setTempData("GuildInviteScroll_Chat_Edit", getId());
         useItemStack.setAmount(useItemStack.getAmount() - 1);
     }
 

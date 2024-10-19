@@ -8,7 +8,7 @@ Setting:
   DeathPenalty:
     Enabled: true
     SpawnLocation: ''
-    LoseBalancePercent: 0.25
+    BalancePercent: 0.25
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10
@@ -89,5 +89,5 @@ Streamer:
   List:
 Whitelist:
   Enabled: true
-  Message: "&c접속 권한이 없습니다. 스트리머 또는 관리자에게 문의해주세요"
+  Message: "&c접속 권한이 없습니다. 스트리머를 통해 접속권한을 획득할 수 있습니다"
   List:

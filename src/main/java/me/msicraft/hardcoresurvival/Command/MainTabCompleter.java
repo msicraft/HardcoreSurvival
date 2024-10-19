@@ -37,15 +37,6 @@ public class MainTabCompleter implements TabCompleter {
                     } else if (var.equalsIgnoreCase("streamer")) {
                         return List.of("add", "remove", "list");
                     }
-                    /*else if (var.equalsIgnoreCase("gui")) {
-                        List<String> list = new ArrayList<>();
-                        for (GuiType guiType : GuiType.values()) {
-                            list.add(guiType.name());
-                        }
-                        return list;
-                    }
-
-                     */
                 }
                 if (args.length == 3) {
                     String var = args[0];

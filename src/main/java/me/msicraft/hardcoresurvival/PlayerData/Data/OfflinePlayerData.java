@@ -29,7 +29,9 @@ public class OfflinePlayerData {
 
     private long lastLogin;
     private UUID guildUUID;
-    private int guildInviteCount;
+
+    private boolean ignoreDeathPenalty = false;
+    private long lastIgnoreDeathPenaltyTime;
 
     public OfflinePlayerData(OfflinePlayer offlinePlayer) {
         this.offlinePlayer = offlinePlayer;
@@ -48,6 +50,9 @@ public class OfflinePlayerData {
         } else {
             this.guildUUID = UUID.fromString(guildUUIDS);
         }
+
+        this.ignoreDeathPenalty = playerDataConfig.getBoolean("IgnoreDeathPenalty", false);
+        this.lastIgnoreDeathPenaltyTime = playerDataConfig.getLong("LastIgnoreDeathPenaltyTime", (System.currentTimeMillis() - (1000L * 3600)));
 
         List<String> tags = playerDataConfig.getStringList("Tags");
         tagList.addAll(tags);
@@ -90,17 +95,21 @@ public class OfflinePlayerData {
                 setPersonalOption(option, option.getBaseValue());
             }
         }
-
-        if (HardcoreSurvival.getPlugin().useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + offlinePlayer.getName());
-        }
     }
 
     public void saveData() {
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
 
         playerDataConfig.set("LastLogin", lastLogin);
-        playerDataConfig.set("Guild.UUID", guildUUID.toString());
+        if (guildUUID == null) {
+            playerDataConfig.set("Guild", null);
+        } else {
+            playerDataConfig.set("Guild.UUID", guildUUID.toString());
+        }
+
+        playerDataConfig.set("IgnoreDeathPenalty", ignoreDeathPenalty);
+        playerDataConfig.set("LastIgnoreDeathPenaltyTime", lastIgnoreDeathPenaltyTime);
+
         playerDataConfig.set("Tags", tagList);
 
         Set<String> dataKeys = dataMap.keySet();
@@ -136,10 +145,6 @@ public class OfflinePlayerData {
         }
 
         playerDataFile.saveConfig();
-
-        if (HardcoreSurvival.getPlugin().useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Saved", "Player: " + offlinePlayer.getName());
-        }
     }
 
     public OfflinePlayer getOfflinePlayer() {
@@ -228,6 +233,22 @@ public class OfflinePlayerData {
 
     public ItemBox getItemBox() {
         return itemBox;
+    }
+
+    public boolean isIgnoreDeathPenalty() {
+        return ignoreDeathPenalty;
+    }
+
+    public void setIgnoreDeathPenalty(boolean ignoreDeathPenalty) {
+        this.ignoreDeathPenalty = ignoreDeathPenalty;
+    }
+
+    public long getLastIgnoreDeathPenaltyTime() {
+        return lastIgnoreDeathPenaltyTime;
+    }
+
+    public void setLastIgnoreDeathPenaltyTime(long lastIgnoreDeathPenaltyTime) {
+        this.lastIgnoreDeathPenaltyTime = lastIgnoreDeathPenaltyTime;
     }
 
 }

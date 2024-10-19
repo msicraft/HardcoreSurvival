@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.Menu.Event;
 
+import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
@@ -80,6 +81,11 @@ public class MenuGuiEvent implements Listener {
                                 }
                                 case "shop" -> {
                                     plugin.getShopManager().openShopInventory(player, ShopGui.Type.BUY);
+                                }
+                                case "Guild" -> {
+                                    GuildGui guildGui = (GuildGui) playerData.getCustomGui(GuiType.GUILD);
+                                    player.openInventory(guildGui.getInventory());
+                                    guildGui.setMain();
                                 }
                             }
                         }

@@ -28,7 +28,8 @@ public abstract class CustomItem {
         update(customItemDataFile);
     }
 
-    public abstract void cast(PlayerData playerData, ItemStack useItemStack);
+    public abstract void rightClick(PlayerData playerData, ItemStack useItemStack);
+    public abstract void leftClick(PlayerData playerData, ItemStack useItemStack);
 
     public void update(CustomItemDataFile customItemDataFile) {
         this.itemStack = createItemStack(customItemDataFile);
@@ -51,6 +52,10 @@ public abstract class CustomItem {
         String displayName = config.getString(path + ".DisplayName",  null);
         if (displayName != null) {
             itemMeta.displayName(Component.text(MessageUtil.translateColorCodes(displayName)));
+        }
+        int maxStackSize = config.getInt(path + ".MaxStackSize", -1);
+        if (maxStackSize != -1) {
+            itemMeta.setMaxStackSize(maxStackSize);
         }
         List<Component> lore = new ArrayList<>();
         config.getStringList(path + ".Lore").forEach(s -> {

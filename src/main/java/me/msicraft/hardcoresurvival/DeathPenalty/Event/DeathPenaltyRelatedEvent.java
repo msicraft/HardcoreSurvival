@@ -6,10 +6,7 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.TileState;
@@ -140,6 +137,16 @@ public class DeathPenaltyRelatedEvent implements Listener {
         if (deathPenaltyManager.isEnabled()) {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+
+            if (playerData.isIgnoreDeathPenalty()) {
+                e.setKeepInventory(true);
+                e.setKeepLevel(true);
+
+                if (plugin.useDebug()) {
+                    MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
+                }
+                return;
+            }
             e.getItemsToKeep().clear();
             e.getDrops().clear();
             e.setDroppedExp(0);
@@ -156,7 +163,15 @@ public class DeathPenaltyRelatedEvent implements Listener {
         if (deathPenaltyManager.isEnabled()) {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-            deathPenaltyManager.applyDeathPenalty(playerData);
+
+            if (playerData.isIgnoreDeathPenalty()) {
+                playerData.setIgnoreDeathPenalty(false);
+                playerData.setLastIgnoreDeathPenaltyTime(System.currentTimeMillis());
+
+                player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
+            } else {
+                deathPenaltyManager.applyDeathPenalty(playerData);
+            }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Location spawnLocation = deathPenaltyManager.getSpawnLocation();

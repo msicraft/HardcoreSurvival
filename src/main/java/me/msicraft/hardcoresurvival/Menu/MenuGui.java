@@ -42,6 +42,11 @@ public class MenuGui extends CustomGui {
                     MENU_KEY, "shop");
             gui.setItem(19, itemStack);
         }
+        if (HardcoreSurvival.getPlugin().getPlayerDataManager().isStreamer(playerData.getPlayer().getUniqueId())) {
+            itemStack = GuiUtil.createItemStack(Material.PAPER, "시청자 관리", GuiUtil.EMPTY_LORE, -1,
+                    MENU_KEY, "Guild");
+            gui.setItem(1, itemStack);
+        }
     }
 
     private static final int[] optionSlots = new int[]{

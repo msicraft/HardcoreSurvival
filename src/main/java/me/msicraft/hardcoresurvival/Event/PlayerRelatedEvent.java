@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -165,33 +166,16 @@ public class PlayerRelatedEvent implements Listener {
         e.getCommands().clear();
     }
 
-    /*
     @EventHandler(priority = EventPriority.HIGHEST)
     public void applyShieldCooldown(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player) {
             if (shieldCooldownTick != -1) {
-                if (player.isBlocking()) {
+                if (player.getActiveItem().getType() == Material.SHIELD) {
                     player.setCooldown(Material.SHIELD, shieldCooldownTick);
-                    System.out.println("test: " + player.getActiveItemHand());
-                    EquipmentSlot slot = player.getActiveItemHand();
-                    ItemStack shield;
-                    if (slot == EquipmentSlot.HAND) {
-                        shield = player.getInventory().getItemInMainHand();
-                    } else {
-                        shield = player.getInventory().getItemInOffHand();
-                    }
-                    player.getInventory().setItem(slot, GuiUtil.AIR_STACK);
-                    player.getInventory().setItem(slot, shield);
-
-                    if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("ApplyShieldCooldown",
-                                "Player: " + player.getName() + " | Ticks: " + shieldCooldownTick);
-                    }
+                    player.clearActiveItem();
                 }
             }
         }
     }
-
-     */
 
 }

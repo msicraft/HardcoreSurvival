@@ -22,7 +22,7 @@ public class DeathPenaltyManager {
     private final HardcoreSurvival plugin;
     private boolean isEnabled = false;
     private Location spawnLocation = null;
-    private double loseBalancePercent = 0;
+    private double balancePercent = 0;
 
     public DeathPenaltyManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -31,7 +31,7 @@ public class DeathPenaltyManager {
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
         this.spawnLocation = plugin.getConfig().contains("Setting.DeathPenalty.SpawnLocation") ? plugin.getConfig().getLocation("Setting.DeathPenalty.SpawnLocation") : null;
-        this.loseBalancePercent = plugin.getConfig().contains("Setting.DeathPenalty.LoseBalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.LoseBalancePercent") : 0;
+        this.balancePercent = plugin.getConfig().contains("Setting.DeathPenalty.BalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.BalancePercent") : 0;
     }
 
     public boolean isContainerMaterial(Material material) {
@@ -51,7 +51,7 @@ public class DeathPenaltyManager {
 
         double balance = plugin.getEconomy().getBalance(player);
         plugin.getEconomy().withdrawPlayer(player, balance);
-        int i = (int) balance;
+        int i = (int) (balance * balancePercent);
         if (i < 0) {
             i = 0;
         }
@@ -78,8 +78,7 @@ public class DeathPenaltyManager {
         ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
         DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationList().forEach(location -> {
-            World world = location.getWorld();
-            Block block = world.getBlockAt(location);
+            Block block = location.getBlock();
             String materialName = block.getType().name();
             if (materialName.contains("CHEST")) {
                 Chest chest = (Chest) block.getState();
