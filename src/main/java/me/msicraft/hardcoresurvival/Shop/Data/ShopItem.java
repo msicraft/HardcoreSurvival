@@ -2,6 +2,7 @@ package me.msicraft.hardcoresurvival.Shop.Data;
 
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MathUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
 public class ShopItem {
@@ -60,6 +61,20 @@ public class ShopItem {
                 price = maxPrice;
             }
         }
+    }
+
+    public String getChangePercentString() {
+        String changePercent;
+        if (price < basePrice) {
+            int c = (int) ((1 - ((double) price / basePrice)) * 100.0);
+            changePercent =  ChatColor.BOLD + "" + ChatColor.BLUE + "(-" + c + "%)";
+        } else if (price > basePrice) {
+            int c = (int) ((((double) price / basePrice) - 1.0) * 100.0);
+            changePercent = ChatColor.BOLD + "" + ChatColor.RED + "(+" + c + "%)";
+        } else {
+            changePercent = ChatColor.BOLD + "" + ChatColor.WHITE + "(+0%)";
+        }
+        return changePercent;
     }
 
     public boolean hasEnoughStock(int stock) {

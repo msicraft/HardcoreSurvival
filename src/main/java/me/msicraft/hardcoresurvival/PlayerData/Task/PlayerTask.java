@@ -47,7 +47,7 @@ public class PlayerTask extends BukkitRunnable {
         boolean displayActionBar = (boolean) plugin.getPlayerDataManager().getPlayerData(player).getPersonalOption(PersonalOption.DISPLAY_ACTIONBAR, true);
         if (displayActionBar) {
             String sb = currentWorldName
-                    + ChatColor.WHITE + ChatColor.GREEN + " | XYZ: " + location.getBlockX()
+                    + ChatColor.WHITE  + " | XYZ: " + ChatColor.GREEN + location.getBlockX()
                     + " " + location.getBlockY() + " " + location.getBlockZ()
                     + ChatColor.WHITE + " | " + ChatColor.GOLD + worldManager.timeTo24Format(location.getWorld().getTime());
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(sb));

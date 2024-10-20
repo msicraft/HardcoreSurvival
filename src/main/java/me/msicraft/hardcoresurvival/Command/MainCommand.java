@@ -47,6 +47,7 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
+                        sender.sendMessage("Viewers: " + plugin.getShopManager().getViewers());
                     }
                     case "reload" -> {
                         if (sender.isOp()) {
@@ -191,6 +192,7 @@ public class MainCommand implements CommandExecutor {
                                         FileConfiguration config = shopManager.getShopDataFile().getConfig();
                                         config.set(path + ".ItemType", shopItem.getItemType().name());
                                         config.set(path + ".UseStaticPrice", shopItem.isUseStaticPrice());
+                                        config.set(path + ".UnlimitStock", shopItem.isUnlimitStock());
                                         config.set(path + ".BasePrice", shopItem.getBasePrice());
                                         config.set(path + ".Price", shopItem.getPrice(false));
                                         config.set(path + ".Stock", shopItem.getStock());

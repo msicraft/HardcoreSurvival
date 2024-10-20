@@ -10,6 +10,10 @@ public abstract class CustomGuiManager {
 
     private final List<UUID> viewers = new ArrayList<>();
 
+    public boolean hasViewer(UUID uuid) {
+        return viewers.contains(uuid);
+    }
+
     public void addViewer(UUID uuid) {
         viewers.add(uuid);
     }

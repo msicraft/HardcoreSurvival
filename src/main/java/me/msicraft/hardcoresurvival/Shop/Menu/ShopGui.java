@@ -91,7 +91,7 @@ public class ShopGui extends CustomGui {
                 PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
                 List<Component> lore = new ArrayList<>();
                 lore.add(Component.text(ChatColor.WHITE + "현재 가격: " + shopItem.getPrice(false)
-                        + " (개당 가격: " + shopItem.getPrice(true) + ")"));
+                        + " (개당 가격: " + shopItem.getPrice(true) + ") " + shopItem.getChangePercentString()));
                 if (shopItem.isUnlimitStock()) {
                     lore.add(Component.text(ChatColor.WHITE + "남은 재고: 무제한"));
                 } else {

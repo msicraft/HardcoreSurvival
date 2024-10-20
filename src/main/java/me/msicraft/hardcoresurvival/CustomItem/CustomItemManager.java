@@ -5,6 +5,7 @@ import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
 import me.msicraft.hardcoresurvival.CustomItem.Item.GuildInviteScroll;
 import me.msicraft.hardcoresurvival.CustomItem.Item.ProtectDeathPenalty;
 import me.msicraft.hardcoresurvival.CustomItem.Item.ReturnScroll;
+import me.msicraft.hardcoresurvival.CustomItem.Item.RollBackScroll;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Material;
@@ -50,6 +51,7 @@ public class CustomItemManager {
                         case "ReturnScroll" -> customItem = new ReturnScroll(internalName, customItemDataFile);
                         case "GuildInviteScroll" -> customItem = new GuildInviteScroll(internalName, customItemDataFile);
                         case "ProtectDeathPenalty" -> customItem = new ProtectDeathPenalty(internalName, customItemDataFile);
+                        case "RollBackScroll" -> customItem = new RollBackScroll(internalName, customItemDataFile);
                     }
                 }
                 if (customItem != null) {

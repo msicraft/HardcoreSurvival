@@ -71,7 +71,7 @@ public class ShopGuiEvent implements Listener {
         if (topInventory.getHolder(false) instanceof ShopGui shopGui) {
             Player player = (Player) e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-            SellItem[] sellItemSlots = (SellItem[]) playerData.getTempData("ShopGui_SellItemSlot", null);
+            SellItem[] sellItemSlots = (SellItem[]) playerData.getTempData("ShopGui_SellItems", null);
             if (sellItemSlots != null) {
                 for (SellItem sellItem : sellItemSlots) {
                     if (sellItem != null) {
@@ -84,7 +84,7 @@ public class ShopGuiEvent implements Listener {
                     }
                 }
             }
-            playerData.setTempData("ShopGui_SellItemSlot", null);
+            playerData.setTempData("ShopGui_SellItems", null);
 
             if (reason != InventoryCloseEvent.Reason.CANT_USE) {
                 ShopManager shopManager = plugin.getShopManager();
@@ -150,6 +150,8 @@ public class ShopGuiEvent implements Listener {
                                 if (shopItem != null) {
                                     int amount = (int) playerData.getTempData("ShopGui_" + data + "_SelectCount", 1);
                                     shopManager.buyShopItem(player, data, amount);
+
+                                    shopManager.openShopInventory(player, ShopGui.Type.BUY);
                                 }
                             } else if (e.isRightClick()) {
                                 player.sendMessage(ChatColor.GRAY + "========================================");

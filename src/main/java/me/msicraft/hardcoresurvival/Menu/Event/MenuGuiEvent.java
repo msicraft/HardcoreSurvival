@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.Menu.Event;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
@@ -9,6 +10,9 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,6 +34,16 @@ public class MenuGuiEvent implements Listener {
         this.plugin = plugin;
     }
 
+    private void openMainMenu(Player player) {
+        PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
+        PlayerData playerData = playerDataManager.getPlayerData(player);
+        CustomGui customGui = playerData.getCustomGui(GuiType.MAIN);
+        if (customGui instanceof MenuGui menuGui) {
+            player.openInventory(menuGui.getInventory());
+            menuGui.setMain();
+        }
+    }
+
     @EventHandler
     public void menuOpenEvent(PlayerSwapHandItemsEvent e) {
         Player player = e.getPlayer();
@@ -37,14 +51,32 @@ public class MenuGuiEvent implements Listener {
         if (handStack != null && handStack.getType() == Material.AIR) {
             if (player.isSneaking()) {
                 e.setCancelled(true);
-                PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
-                PlayerData playerData = playerDataManager.getPlayerData(player);
-                CustomGui customGui = playerData.getCustomGui(GuiType.MAIN);
-                if (customGui instanceof MenuGui menuGui) {
-                    player.openInventory(menuGui.getInventory());
-                    menuGui.setMain();
-                }
+                openMainMenu(player);
             }
+        }
+    }
+
+    @EventHandler
+    public void menuChatEditEvent(AsyncChatEvent e) {
+        Player player = e.getPlayer();
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+        String a = (String) playerData.getTempData("Menu_auction_sell", null);
+        if (a != null) {
+            e.setCancelled(true);
+            String message = PlainTextComponentSerializer.plainText().serialize(e.message());
+            if (message.equalsIgnoreCase("cancel")) {
+                playerData.removeTempData("Menu_auction_sell");
+                Bukkit.getScheduler().runTask(plugin, ()-> {
+                    openMainMenu(player);
+                });
+                return;
+            }
+            int price = Integer.parseInt(message.replaceAll("[^0-9]", ""));
+            playerData.removeTempData("Menu_auction_sell");
+            Bukkit.getScheduler().runTask(plugin, ()-> {
+                Bukkit.getServer().dispatchCommand(player, "ah sell " + price);
+                openMainMenu(player);
+            });
         }
     }
 
@@ -86,6 +118,19 @@ public class MenuGuiEvent implements Listener {
                                     GuildGui guildGui = (GuildGui) playerData.getCustomGui(GuiType.GUILD);
                                     player.openInventory(guildGui.getInventory());
                                     guildGui.setMain();
+                                }
+                                case "auction" -> {
+                                    if (e.isLeftClick()) {
+                                        Bukkit.getServer().dispatchCommand(player, "ah");
+                                    } else if (e.isRightClick()) {
+                                        player.sendMessage(ChatColor.GRAY + "========================================");
+                                        player.sendMessage(ChatColor.GRAY + "손에 있는 아이템을 경매장에 등록합니다");
+                                        player.sendMessage(ChatColor.GRAY + "가격을 입력해주세요");
+                                        player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
+                                        player.sendMessage(ChatColor.GRAY + "========================================");
+                                        player.closeInventory();
+                                        playerData.setTempData("Menu_auction_sell", "none");
+                                    }
                                 }
                             }
                         }

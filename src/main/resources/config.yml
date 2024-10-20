@@ -58,10 +58,10 @@ Setting:
         InternalName: "Disguise_DeepslateGoldOre"
         Chance: 0.1
       REDSTONE_ORE:
-        InternalName: "Disguise_RedstoneOre"
+        InternalName: "Disguise_RedStoneOre"
         Chance: 0.075
       DEEPSLATE_REDSTONE_ORE:
-        InternalName: "Disguise_DeepslateRedstoneOre"
+        InternalName: "Disguise_DeepslateRedStoneOre"
         Chance: 0.075
       EMERALD_ORE:
         InternalName: "Disguise_EmeraldOre"
@@ -70,7 +70,7 @@ Setting:
         InternalName: "Disguise_DeepslateEmeraldOre"
         Chance: 0.2
       LAPIS_ORE:
-        InternalName: "Disguise_LapisLazuliOre"
+        InternalName: "Disguise_LapisOre"
         Chance: 0.1
       DEEPSLATE_LAPIS_ORE:
         InternalName: "Disguise_DeepslateLapisOre"

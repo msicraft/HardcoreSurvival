@@ -27,6 +27,10 @@ public class ReturnScroll extends CustomItem {
             player.sendMessage(ChatColor.RED + "스폰위치가 존재하지 않습니다");
             return;
         }
+        if (!spawnLocation.getWorld().getName().equals(player.getWorld().getName())) {
+            player.sendMessage(ChatColor.RED + "같은 월드내에서만 이동가능합니다");
+            return;
+        }
         player.teleport(spawnLocation);
         useItemStack.setAmount(useItemStack.getAmount() - 1);
     }

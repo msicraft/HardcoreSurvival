@@ -2,28 +2,42 @@ CustomItem:
   ReturnScroll:
     Material: Paper
     CustomModelData: 1
-    DisplayName: "&a귀환 주문서"
+    DisplayName: "&a귀환 스크롤"
     MaxStackSize: 1
     Lore:
-      - "&f우클릭으로 사용시 스폰지점으로 이동"
+      - "&f우 클릭: 스폰지점으로 이동"
       - ""
       - "&c전투중 사용 불가"
+      - "&c같은 월드내에서만 이동가능"
   GuildInviteScroll:
     Material: Paper
     CustomModelData: 2
     DisplayName: "&a초대장"
     MaxStackSize: 1
     Lore:
-      - "&f우클릭으로 사용시 플레이어를 초대할 수 있습니다"
+      - "&f우 클릭: 플레이어를 초대할 수 있습니다"
+      - ""
+      - "&c정확한 플레이어 이름을 입력해주세요"
   ProtectDeathPenalty:
     Material: Paper
     CustomModelData: 3
     DisplayName: "&a죽음 패널티 면역 크리스탈"
     MaxStackSize: 1
     Lore:
-      - "&f우클릭으로 사용시 죽음 패널티를 1번 받지않습니다"
+      - "&f우 클릭: 죽음 패널티를 1회 보호"
       - ""
       - "&c전투중 사용 불가"
       - ""
       - "&c쿨타임: 60분"
-      - "&f쿨타임은 패널티가 발동 후 부터 카운트됩니다"
+      - "&c쿨타임은 패널티가 발동 후 부터 적용됩니다"
+  RollBackScroll:
+    Material: BOOK
+    CustomModelData: -1
+    DisplayName: "&a롤백 스크롤"
+    MaxStackSize: 1
+    Lore:
+      - "&f좌 클릭: 현재위치 저장"
+      - "&f우 클릭: 저장된 위치로 이동"
+      - ""
+      - "&c전투중 사용불가"
+      - "&c저장위치가 존재할경우 새로운 위치를 저장할 수 없습니다"

@@ -63,6 +63,9 @@ public class ShopManager extends CustomGuiManager {
                 sendMaintenanceMessage(player);
             }
         }
+        if (plugin.useDebug()) {
+            MessageUtil.sendDebugMessage("ShopGui-Close All Viewers", "Size: " + viewers.size());
+        }
         removeAll();
     }
 
@@ -72,7 +75,9 @@ public class ShopManager extends CustomGuiManager {
             sendMaintenanceMessage(player);
             return;
         }
-        addViewer(player);
+        if (!hasViewer(player.getUniqueId())) {
+            addViewer(player);
+        }
 
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
         ShopGui shopGui = (ShopGui) playerData.getCustomGui(GuiType.SHOP);
@@ -126,8 +131,6 @@ public class ShopManager extends CustomGuiManager {
         FileConfiguration config = shopDataFile.getConfig();
         ConfigurationSection section = config.getConfigurationSection("Items");
         if (section != null) {
-            int success = 0;
-            int fail = 0;
             internalNameList.clear();
             Set<String> keys = section.getKeys(false);
             for (String key : keys) {
@@ -152,7 +155,6 @@ public class ShopManager extends CustomGuiManager {
                     }
                 }
                 if (itemStack == null || itemStack.getType() == Material.AIR) {
-                    fail++;
                     if (plugin.useDebug()) {
                         MessageUtil.sendDebugMessage("Shop Invalid ItemStack", "Key: " + key);
                     }
@@ -172,11 +174,6 @@ public class ShopManager extends CustomGuiManager {
                 }
                 shopItemMap.put(key, shopItem);
                 internalNameList.add(key);
-                success++;
-            }
-
-            if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("ShopData loaded", "Success: " + success + " | Fail: " + fail);
             }
         } else {
             shopItemMap.clear();

@@ -36,6 +36,10 @@ public class MenuGui extends CustomGui {
         itemStack = GuiUtil.createItemStack(Material.CHEST, "아이템 우편함", GuiUtil.EMPTY_LORE, -1,
                 MENU_KEY, "item-box");
         gui.setItem(11, itemStack);
+        itemStack = GuiUtil.createItemStack(Material.ENDER_CHEST, "경매장",
+                List.of(ChatColor.YELLOW + "좌 클릭: 열기", ChatColor.YELLOW + "우 클릭: 아이템 등록"), -1,
+                MENU_KEY, "auction");
+        gui.setItem(12, itemStack);
         Location location = playerData.getPlayer().getLocation();
         if (HardcoreSurvival.getPlugin().getShopManager().getShopRegion().contains(location)) {
             itemStack = GuiUtil.createItemStack(Material.CHEST, "상점", GuiUtil.EMPTY_LORE, -1,

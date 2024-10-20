@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival;
 
+import me.msicraft.hardcoresurvival.API.MythicMobs.MythicMobsRegisterEvent;
 import me.msicraft.hardcoresurvival.Command.MainCommand;
 import me.msicraft.hardcoresurvival.Command.MainTabCompleter;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
@@ -126,6 +127,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new ShopGuiEvent(this), this);
         pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildGuiEvent(this),this);
+        pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
     }
 
     public void registeredCommands() {
