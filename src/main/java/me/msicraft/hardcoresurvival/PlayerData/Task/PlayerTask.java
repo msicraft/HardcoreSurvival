@@ -23,7 +23,7 @@ public class PlayerTask extends BukkitRunnable {
         this.worldManager = plugin.getWorldManager();
 
         if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerTask-Create", "Player: " + player.getName());
+            MessageUtil.sendDebugMessage("PlayerTask-Start", "Player: " + player.getName());
         }
     }
 

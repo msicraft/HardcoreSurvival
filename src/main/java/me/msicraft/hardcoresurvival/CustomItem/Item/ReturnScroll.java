@@ -16,27 +16,29 @@ public class ReturnScroll extends CustomItem {
     }
 
     @Override
-    public void rightClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean rightClick(PlayerData playerData, ItemStack useItemStack) {
         Player player = playerData.getPlayer();
         if (playerData.isInCombat()) {
             player.sendMessage(ChatColor.RED + "전투중에는 사용 불가능합니다");
-            return;
+            return false;
         }
         Location spawnLocation = HardcoreSurvival.getPlugin().getDeathPenaltyManager().getSpawnLocation();
         if (spawnLocation == null) {
             player.sendMessage(ChatColor.RED + "스폰위치가 존재하지 않습니다");
-            return;
+            return false;
         }
         if (!spawnLocation.getWorld().getName().equals(player.getWorld().getName())) {
             player.sendMessage(ChatColor.RED + "같은 월드내에서만 이동가능합니다");
-            return;
+            return false;
         }
         player.teleport(spawnLocation);
         useItemStack.setAmount(useItemStack.getAmount() - 1);
+        return true;
     }
 
     @Override
-    public void leftClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean leftClick(PlayerData playerData, ItemStack useItemStack) {
+        return true;
     }
 
 }

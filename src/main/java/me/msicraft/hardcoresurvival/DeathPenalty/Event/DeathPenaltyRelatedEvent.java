@@ -138,7 +138,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
-            if (playerData.isIgnoreDeathPenalty()) {
+            if ((boolean) playerData.getData("IgnoreDeathPenalty", false)) {
                 e.setKeepInventory(true);
                 e.setKeepLevel(true);
 
@@ -164,9 +164,9 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
-            if (playerData.isIgnoreDeathPenalty()) {
-                playerData.setIgnoreDeathPenalty(false);
-                playerData.setLastIgnoreDeathPenaltyTime(System.currentTimeMillis());
+            if ((boolean) playerData.getData("IgnoreDeathPenalty", false)) {
+                playerData.setData("IgnoreDeathPenalty", true);
+                playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
 
                 player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
             } else {

@@ -79,18 +79,10 @@ public class PlayerDataManager {
     public void registerPlayerData(Player player) {
         PlayerData playerData = new PlayerData(player);
         playerDataMap.put(player.getUniqueId(), playerData);
-
-        if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Registered", "Player: " + player.getName());
-        }
     }
 
     public void unregisterPlayerData(Player player) {
         playerDataMap.remove(player.getUniqueId());
-
-        if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData UnRegistered", "Player: " + player.getName());
-        }
     }
 
     public PlayerData getPlayerData(Player player) {

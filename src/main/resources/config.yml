@@ -89,5 +89,5 @@ Streamer:
   List:
 Whitelist:
   Enabled: true
-  Message: "&c접속 권한이 없습니다. 스트리머를 통해 접속권한을 획득할 수 있습니다"
+  Message: "&c접속 권한이 없습니다."
   List:

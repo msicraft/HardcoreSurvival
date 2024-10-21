@@ -24,7 +24,7 @@ public class MainTabCompleter implements TabCompleter {
         if (command.getName().equals("hardcoresurvival")) {
             if (sender.isOp()) {
                 if (args.length == 1) {
-                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer");
+                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer", "itembox", "info");
                 }
                 if (args.length == 2) {
                     String var = args[0];
@@ -36,6 +36,8 @@ public class MainTabCompleter implements TabCompleter {
                         return List.copyOf(plugin.getCustomItemManager().getInternalNames());
                     } else if (var.equalsIgnoreCase("streamer")) {
                         return List.of("add", "remove", "list");
+                    } else if (var.equalsIgnoreCase("itembox")) {
+                        return List.of("give");
                     }
                 }
                 if (args.length == 3) {
@@ -57,6 +59,11 @@ public class MainTabCompleter implements TabCompleter {
                             });
                             return list;
                         }
+                    } else if (var.equalsIgnoreCase("itembox")) {
+                        List<String> list = new ArrayList<>();
+                        list.add("all-players");
+                        list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
+                        return list;
                     }
                 }
                 if (args.length == 4) {

@@ -30,9 +30,6 @@ public class OfflinePlayerData {
     private long lastLogin;
     private UUID guildUUID;
 
-    private boolean ignoreDeathPenalty = false;
-    private long lastIgnoreDeathPenaltyTime;
-
     public OfflinePlayerData(OfflinePlayer offlinePlayer) {
         this.offlinePlayer = offlinePlayer;
         this.playerDataFile = new PlayerDataFile(offlinePlayer);
@@ -51,14 +48,11 @@ public class OfflinePlayerData {
             this.guildUUID = UUID.fromString(guildUUIDS);
         }
 
-        this.ignoreDeathPenalty = playerDataConfig.getBoolean("IgnoreDeathPenalty", false);
-        this.lastIgnoreDeathPenaltyTime = playerDataConfig.getLong("LastIgnoreDeathPenaltyTime", (System.currentTimeMillis() - (1000L * 3600)));
-
         List<String> tags = playerDataConfig.getStringList("Tags");
         tagList.addAll(tags);
 
         ConfigurationSection dataSection = playerDataConfig.getConfigurationSection("Data");
-        if (dataSection!= null) {
+        if (dataSection != null) {
             Set<String> keys = dataSection.getKeys(false);
             for (String key : keys) {
                 Object object = playerDataConfig.get("Data." + key);
@@ -106,9 +100,6 @@ public class OfflinePlayerData {
         } else {
             playerDataConfig.set("Guild.UUID", guildUUID.toString());
         }
-
-        playerDataConfig.set("IgnoreDeathPenalty", ignoreDeathPenalty);
-        playerDataConfig.set("LastIgnoreDeathPenaltyTime", lastIgnoreDeathPenaltyTime);
 
         playerDataConfig.set("Tags", tagList);
 
@@ -233,22 +224,6 @@ public class OfflinePlayerData {
 
     public ItemBox getItemBox() {
         return itemBox;
-    }
-
-    public boolean isIgnoreDeathPenalty() {
-        return ignoreDeathPenalty;
-    }
-
-    public void setIgnoreDeathPenalty(boolean ignoreDeathPenalty) {
-        this.ignoreDeathPenalty = ignoreDeathPenalty;
-    }
-
-    public long getLastIgnoreDeathPenaltyTime() {
-        return lastIgnoreDeathPenaltyTime;
-    }
-
-    public void setLastIgnoreDeathPenaltyTime(long lastIgnoreDeathPenaltyTime) {
-        this.lastIgnoreDeathPenaltyTime = lastIgnoreDeathPenaltyTime;
     }
 
 }

@@ -111,10 +111,6 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler
     public void playerDataUnload(PlayerDataUnLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
-
-        if (HardcoreSurvival.getPlugin().useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Unloaded", "Player: " + playerData.getPlayer().getName());
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

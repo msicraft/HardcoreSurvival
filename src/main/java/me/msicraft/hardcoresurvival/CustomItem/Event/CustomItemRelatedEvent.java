@@ -95,18 +95,22 @@ public class CustomItemRelatedEvent implements Listener {
                     PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
                     Action action = e.getAction();
                     if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-                        customItem.leftClick(playerData, itemStack);
+                        boolean success = customItem.leftClick(playerData, itemStack);
 
                         if (plugin.useDebug()) {
                             MessageUtil.sendDebugMessage("CustomItemUse-LeftClick",
-                                    "Player: " + player.getName(), "CustomItem: " + internalName);
+                                    "Player: " + player.getName(),
+                                    "CustomItem: " + internalName,
+                                    "Success: " + success);
                         }
                     } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                        customItem.rightClick(playerData, itemStack);
+                        boolean success = customItem.rightClick(playerData, itemStack);
 
                         if (plugin.useDebug()) {
                             MessageUtil.sendDebugMessage("CustomItemUse-RightClick",
-                                    "Player: " + player.getName(), "CustomItem: " + internalName);
+                                    "Player: " + player.getName(),
+                                    "CustomItem: " + internalName,
+                                    "Success: " + success);
                         }
                     }
                 }

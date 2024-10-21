@@ -14,7 +14,7 @@ public class GuildInviteScroll extends CustomItem {
     }
 
     @Override
-    public void rightClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean rightClick(PlayerData playerData, ItemStack useItemStack) {
         Player player = playerData.getPlayer();
         player.sendMessage(ChatColor.GRAY + "========================================");
         player.sendMessage(ChatColor.GRAY + "초대할 플레이어 이름을 입력해주세요");
@@ -23,10 +23,12 @@ public class GuildInviteScroll extends CustomItem {
 
         playerData.setTempData("GuildInviteScroll_Chat_Edit", getId());
         useItemStack.setAmount(useItemStack.getAmount() - 1);
+        return true;
     }
 
     @Override
-    public void leftClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean leftClick(PlayerData playerData, ItemStack useItemStack) {
+        return true;
     }
 
 }

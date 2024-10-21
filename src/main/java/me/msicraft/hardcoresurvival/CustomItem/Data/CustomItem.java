@@ -28,8 +28,8 @@ public abstract class CustomItem {
         update(customItemDataFile);
     }
 
-    public abstract void rightClick(PlayerData playerData, ItemStack useItemStack);
-    public abstract void leftClick(PlayerData playerData, ItemStack useItemStack);
+    public abstract boolean rightClick(PlayerData playerData, ItemStack useItemStack);
+    public abstract boolean leftClick(PlayerData playerData, ItemStack useItemStack);
 
     public void update(CustomItemDataFile customItemDataFile) {
         this.itemStack = createItemStack(customItemDataFile);

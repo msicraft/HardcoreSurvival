@@ -51,6 +51,12 @@ public class MenuGui extends CustomGui {
                     MENU_KEY, "Guild");
             gui.setItem(1, itemStack);
         }
+        String nickName = (String) playerData.getData("NickName");
+        if (nickName == null) {
+            itemStack = GuiUtil.createItemStack(Material.NAME_TAG, "닉네임 변경", List.of("최초 1회 변경 가능합니다"), -1,
+                    MENU_KEY, "NickName");
+            gui.setItem(2, itemStack);
+        }
     }
 
     private static final int[] optionSlots = new int[]{

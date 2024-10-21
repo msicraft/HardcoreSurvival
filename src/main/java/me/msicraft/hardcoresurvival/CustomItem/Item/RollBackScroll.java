@@ -28,38 +28,39 @@ public class RollBackScroll extends CustomItem {
     }
 
     @Override
-    public void rightClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean rightClick(PlayerData playerData, ItemStack useItemStack) {
         Player player = playerData.getPlayer();
         if (playerData.isInCombat()) {
             player.sendMessage(ChatColor.RED + "전투중에는 사용 불가능합니다");
-            return;
+            return false;
         }
         PersistentDataContainer useDataContainer = useItemStack.getItemMeta().getPersistentDataContainer();
         if (!useDataContainer.has(ROLLBACK_SCROLL_KEY)) {
             player.sendMessage(ChatColor.RED + "저장위치가 존재하지 않습니다");
-            return;
+            return false;
         }
         String locationString = useDataContainer.get(ROLLBACK_SCROLL_KEY, PersistentDataType.STRING);
         if (locationString == null) {
             player.sendMessage(ChatColor.RED + "{none-1} 에러가 발생했습니다. 관리자에게 문의해주세요");
-            return;
+            return false;
         }
         Location location = formatToString(locationString);
         if (!location.getWorld().getName().equals(player.getWorld().getName())) {
             player.sendMessage(ChatColor.RED + "같은 월드내에서만 이동가능합니다");
-            return;
+            return false;
         }
         player.teleport(location);
         useItemStack.setAmount(useItemStack.getAmount() - 1);
+        return true;
     }
 
     @Override
-    public void leftClick(PlayerData playerData, ItemStack useItemStack) {
+    public boolean leftClick(PlayerData playerData, ItemStack useItemStack) {
         PersistentDataContainer useDataContainer = useItemStack.getItemMeta().getPersistentDataContainer();
         Player player = playerData.getPlayer();
         if (useDataContainer.has(ROLLBACK_SCROLL_KEY)) {
             player.sendMessage(ChatColor.RED + "이미 저장위치가 존재합니다");
-            return;
+            return false;
         }
         Location location = player.getLocation();
         ItemStack clone = useItemStack.clone();
@@ -80,6 +81,7 @@ public class RollBackScroll extends CustomItem {
         useItemStack.setAmount(useItemStack.getAmount() - 1);
         player.getInventory().addItem(clone);
         player.sendMessage(ChatColor.GREEN + "현재 위치가 저장되었습니다");
+        return true;
     }
 
     private String locationToFormat(Location location) {

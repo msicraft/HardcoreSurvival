@@ -7,6 +7,7 @@ import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
@@ -22,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 public class MainCommand implements CommandExecutor {
@@ -47,7 +49,23 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
-                        sender.sendMessage("Viewers: " + plugin.getShopManager().getViewers());
+                        /*
+                        int max = Integer.parseInt(args[1]);
+                        long start = System.currentTimeMillis();
+                        for (int i = 0; i<max; i++) {
+                            plugin.getPlayerDataManager().getPlayerFileNames().forEach(uuidS -> {
+                                UUID uuid = UUID.fromString(uuidS);
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                offlinePlayerData.loadData();
+                                offlinePlayerData.saveData();
+                            });
+                        }
+                        long end = System.currentTimeMillis();
+                        System.out.println("Max: " + max);
+                        System.out.println("Time: " + (end - start));
+
+                         */
                     }
                     case "reload" -> {
                         if (sender.isOp()) {
@@ -58,6 +76,19 @@ public class MainCommand implements CommandExecutor {
                             sendPermissionMessage(sender);
                             return false;
                         }
+                    }
+                    case "info" -> {
+                        if (!sender.isOp()) {
+                            return false;
+                        }
+                        Player player = Bukkit.getPlayer(args[1]);
+                        if (player == null) {
+                            sender.sendMessage(ChatColor.RED + "플레이어를 찾을 수 없습니다");
+                            return false;
+                        }
+                        sender.sendMessage("Player: " + player.getName());
+                        sender.sendMessage("UUID: " + player.getUniqueId());
+                        return true;
                     }
                     case "streamer" -> { //hs streamer [add, remove, list] <target> //스트리머 용
                         if (!sender.isOp()) {
@@ -233,6 +264,56 @@ public class MainCommand implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "/hardcoresurvival shop [register, unregister] <id> <itemType> <basePrice>");
                             return false;
                         }
+                    }
+                    case "itembox" -> { //hs itembox give <target>
+                       if (!sender.isOp()) {
+                           return false;
+                       }
+                       if (sender instanceof Player player) {
+                           ItemStack itemStack = player.getInventory().getItemInMainHand();
+                           if (itemStack == null || itemStack.getType() == Material.AIR) {
+                               return false;
+                           }
+                           ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
+                           switch (args[1]) {
+                               case "give" -> {
+                                   String target = args[2];
+                                   if (target.equalsIgnoreCase("all-players")) {
+                                       List<String> list = plugin.getPlayerDataManager().getPlayerFileNames();
+                                       for (String uuidS : list) {
+                                           UUID uuid = UUID.fromString(uuidS);
+                                           OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                           if (offlinePlayer.isOnline()) {
+                                               PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
+                                               itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
+                                           } else {
+                                               OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                               offlinePlayerData.loadData();
+                                               itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                                               offlinePlayerData.saveData();
+                                           }
+                                       }
+                                       sender.sendMessage(ChatColor.GREEN + "총 " + list.size() + " 명의 플레이어에게 아이템을 보냈습니다");
+                                   } else {
+                                       UUID uuid = UUID.fromString(target);
+                                       OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                       if (offlinePlayer.isOnline()) {
+                                           PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
+                                           itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
+                                       } else {
+                                           OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                           offlinePlayerData.loadData();
+                                           itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                                           offlinePlayerData.saveData();
+                                       }
+                                       sender.sendMessage(ChatColor.GREEN + "해당 플레이어에게 아이템을 보냈습니다");
+                                       sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
+                                   }
+                               }
+                               default -> {
+                               }
+                           }
+                       }
                     }
                     case "deathpenalty" -> {
                         if (!sender.isOp()) {
