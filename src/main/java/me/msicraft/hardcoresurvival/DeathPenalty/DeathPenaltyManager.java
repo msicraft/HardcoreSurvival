@@ -75,27 +75,32 @@ public class DeathPenaltyManager {
     }
 
     public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
+        long start = System.currentTimeMillis();
         ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
         DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationList().forEach(location -> {
             Block block = location.getBlock();
-            String materialName = block.getType().name();
-            if (materialName.contains("CHEST")) {
-                Chest chest = (Chest) block.getState();
-                ItemStack[] itemStacks = chest.getBlockInventory().getContents();
-                for (ItemStack itemStack : itemStacks) {
-                    itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+            if (location.getWorld() != null) {
+                String materialName = block.getType().name();
+                if (materialName.contains("CHEST")) {
+                    Chest chest = (Chest) block.getState();
+                    ItemStack[] itemStacks = chest.getBlockInventory().getContents();
+                    for (ItemStack itemStack : itemStacks) {
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                    }
+                    block.setType(Material.AIR);
+                } else if (materialName.contains("SHULKER_BOX")) {
+                    ShulkerBox shulkerBox = (ShulkerBox) block.getState();
+                    ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
+                    for (ItemStack itemStack : itemStacks) {
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                    }
+                    block.setType(Material.AIR);
                 }
-                block.setType(Material.AIR);
-            } else if (materialName.contains("SHULKER_BOX")) {
-                ShulkerBox shulkerBox = (ShulkerBox) block.getState();
-                ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
-                for (ItemStack itemStack : itemStacks) {
-                    itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
-                }
-                block.setType(Material.AIR);
             }
         });
+        long end = System.currentTimeMillis();
+        System.out.println("시간(ms): " + (end - start));
         deathPenaltyChestLog.reset();
     }
 

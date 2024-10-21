@@ -150,16 +150,13 @@ public class OfflinePlayerData {
         dataMap.put(key, object);
     }
 
-    public Object getData(String key) {
-        return dataMap.getOrDefault(key, null);
-    }
-
     public Object getData(String key, Object def) {
-        Object object = getData(key);
-        if (!hasData(key) || object == null) {
+        if (hasData(key)) {
+            return dataMap.get(key);
+        } else {
+            dataMap.put(key, def);
             return def;
         }
-        return object;
     }
 
     public boolean hasData(String key) {

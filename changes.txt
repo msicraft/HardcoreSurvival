@@ -1,3 +1,7 @@
+해야될것
+- DeathPenaltyChestLog 비동기로 전환 (sendChestLogToItemBox)
+- 비동기로 전환가능한것은 비동기로 전환
+
 패치노트
 - 스폰 근처에서 상점메뉴를 사용할 수 있습니다
 - 경매장 메뉴가 추가되었습니다

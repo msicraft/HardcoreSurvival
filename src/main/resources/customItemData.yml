@@ -23,6 +23,7 @@ CustomItem:
     CustomModelData: 3
     DisplayName: "&a죽음 패널티 면역 크리스탈"
     MaxStackSize: 1
+    CoolDown: 3600
     Lore:
       - "&f우 클릭: 죽음 패널티를 1회 보호"
       - ""

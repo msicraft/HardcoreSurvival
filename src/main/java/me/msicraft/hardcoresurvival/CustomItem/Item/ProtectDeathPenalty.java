@@ -9,8 +9,17 @@ import org.bukkit.inventory.ItemStack;
 
 public class ProtectDeathPenalty extends CustomItem {
 
+    private int coolDown;
+
     public ProtectDeathPenalty(String id, CustomItemDataFile customItemDataFile) {
         super(id, customItemDataFile);
+        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 3600);
+    }
+
+    @Override
+    public void update(CustomItemDataFile customItemDataFile) {
+        super.update(customItemDataFile);
+        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 3600);
     }
 
     @Override
@@ -24,10 +33,8 @@ public class ProtectDeathPenalty extends CustomItem {
             player.sendMessage(ChatColor.RED + "이미 죽음 패널티 면역이 적용중인 상태입니다");
             return false;
         }
-        if (!playerData.hasData("LastIgnoreDeathPenaltyTime")) {
-            playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
-        }
-        long checkTime = (long) playerData.getData("LastIgnoreDeathPenaltyTime") + (3600 * 1000L);
+        long t = this.coolDown * 1000L;
+        long checkTime = (long) playerData.getData("LastIgnoreDeathPenaltyTime", (System.currentTimeMillis() - t - 1000)) + (this.coolDown * 1000L);
         long time = System.currentTimeMillis();
         if (checkTime > time) {
             player.sendMessage(ChatColor.RED + "재사용 대기시간이 지나지 않았습니다");

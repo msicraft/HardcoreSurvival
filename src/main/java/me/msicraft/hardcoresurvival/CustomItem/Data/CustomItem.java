@@ -20,11 +20,13 @@ public abstract class CustomItem {
 
     public static final NamespacedKey CUSTOM_ITEM_KEY = new NamespacedKey(HardcoreSurvival.getPlugin(), "CustomItem");
 
+    private final String path;
     private final String id;
     private ItemStack itemStack;
 
     public CustomItem(String id, CustomItemDataFile customItemDataFile) {
         this.id = id;
+        this.path = "CustomItem." + id;
         update(customItemDataFile);
     }
 
@@ -76,4 +78,8 @@ public abstract class CustomItem {
         return itemStack;
     }
 
+    public String getPath() {
+        return path;
+    }
 }
+

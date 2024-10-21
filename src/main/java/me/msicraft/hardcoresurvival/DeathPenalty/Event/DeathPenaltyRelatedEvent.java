@@ -142,18 +142,15 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 e.setKeepInventory(true);
                 e.setKeepLevel(true);
 
+
                 if (plugin.useDebug()) {
                     MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
                 }
-                return;
+            } else {
+                e.getItemsToKeep().clear();
             }
-            e.getItemsToKeep().clear();
             e.getDrops().clear();
             e.setDroppedExp(0);
-
-            if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("DeathPenalty-Death", "Player: " + player.getName());
-            }
         }
     }
 
@@ -164,13 +161,19 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
-            if ((boolean) playerData.getData("IgnoreDeathPenalty", false)) {
-                playerData.setData("IgnoreDeathPenalty", true);
+            boolean ignoreDeathPenalty = (boolean) playerData.getData("IgnoreDeathPenalty", false);
+            if (ignoreDeathPenalty) {
+                playerData.setData("IgnoreDeathPenalty", false);
                 playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
 
                 player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
             } else {
                 deathPenaltyManager.applyDeathPenalty(playerData);
+            }
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("DeathPenalty-Apply Status", "Player: " + player.getName(),
+                        "Status: " + ignoreDeathPenalty);
             }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
