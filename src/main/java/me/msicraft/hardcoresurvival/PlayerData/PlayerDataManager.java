@@ -1,7 +1,10 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
+import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadEvent;
+import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import me.msicraft.hardcoresurvival.Utils.GuiUtil;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -11,12 +14,13 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
 
     private final HardcoreSurvival plugin;
 
-    private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
+    private final Map<UUID, PlayerData> playerDataMap = new ConcurrentHashMap<>();
 
     private final List<UUID> streamerList = new ArrayList<>();
     private final List<UUID> whiteList = new ArrayList<>();
@@ -76,17 +80,29 @@ public class PlayerDataManager {
         plugin.saveConfig();
     }
 
-    public void registerPlayerData(Player player) {
-        PlayerData playerData = new PlayerData(player);
+    public void registerPlayerData(Player player, PlayerData playerData) {
         playerDataMap.put(player.getUniqueId(), playerData);
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(playerData));
+        });
     }
 
     public void unregisterPlayerData(Player player) {
+        PlayerData playerData = getPlayerData(player);
         playerDataMap.remove(player.getUniqueId());
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(playerData));
+        });
     }
 
     public PlayerData getPlayerData(Player player) {
-        return playerDataMap.getOrDefault(player.getUniqueId(), new PlayerData(player));
+        return getPlayerData(player.getUniqueId());
+    }
+
+    public PlayerData getPlayerData(UUID uuid) {
+        return playerDataMap.get(uuid);
     }
 
     public Set<UUID> getUUIDSets() {
@@ -94,17 +110,18 @@ public class PlayerDataManager {
     }
 
     public List<String> getPlayerFileNames() {
-        List<String> list = new ArrayList<>();
         File file = new File(plugin.getDataFolder() + File.separator + "PlayerData");
         String[] fileNames = file.list();
         if (fileNames != null) {
+            List<String> list = new ArrayList<>(fileNames.length);
             for (String fileName : fileNames) {
                 if (fileName.endsWith(".yml")) {
                     list.add(fileName.replace(".yml", ""));
                 }
             }
+            return list;
         }
-        return list;
+        return GuiUtil.EMPTY_LORE;
     }
 
     public boolean hasWhiteList(OfflinePlayer offlinePlayer) {

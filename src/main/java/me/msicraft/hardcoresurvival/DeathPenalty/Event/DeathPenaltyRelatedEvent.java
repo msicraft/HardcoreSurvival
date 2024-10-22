@@ -172,7 +172,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
             }
 
             if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("DeathPenalty-Apply Status", "Player: " + player.getName(),
+                MessageUtil.sendDebugMessage("DeathPenalty-Ignore Status", "Player: " + player.getName(),
                         "Status: " + ignoreDeathPenalty);
             }
 

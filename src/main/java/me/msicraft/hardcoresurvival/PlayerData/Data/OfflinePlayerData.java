@@ -61,7 +61,8 @@ public class OfflinePlayerData {
         }
 
         DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        playerDataConfig.getStringList("DeathPenaltyChestLog").forEach(format -> {
+        List<String> formatList = playerDataConfig.getStringList("DeathPenaltyChestLog");
+        for (String format : formatList) {
             Location location = deathPenaltyManager.formatToLocation(format);
             if (location != null) {
                 Block block = location.getBlock();
@@ -69,12 +70,13 @@ public class OfflinePlayerData {
                     deathPenaltyChestLog.addLocation(location);
                 }
             }
-        });
+        }
 
-        playerDataConfig.getStringList("ItemBoxData").forEach(itemBoxDataFormat -> {
+        List<String> itemBoxDataFormatList = playerDataConfig.getStringList("ItemBoxData");
+        for (String itemBoxDataFormat : itemBoxDataFormatList) {
             ItemBoxStack itemBoxStack = ItemBoxStack.fromFormat(itemBoxDataFormat);
             itemBox.addItemBoxStack(itemBoxStack);
-        });
+        }
 
         PersonalOption[] personalOptions = PersonalOption.values();
         for (PersonalOption option : personalOptions) {
@@ -110,18 +112,20 @@ public class OfflinePlayerData {
         }
 
         DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        List<String> chestLogList = new ArrayList<>();
-        deathPenaltyChestLog.getChestLocationList().forEach(location -> {
+        List<Location> locationList = deathPenaltyChestLog.getChestLocationList();
+        List<String> chestLogList = new ArrayList<>(locationList.size());
+        for (Location location : locationList) {
             String format = deathPenaltyManager.locationToFormat(location);
             chestLogList.add(format);
-        });
+        }
         playerDataConfig.set("DeathPenaltyChestLog", chestLogList);
 
-        List<String> itemBoxDataList = new ArrayList<>();
-        itemBox.getList().forEach(itemBoxStack -> {
+        List<ItemBoxStack> itemBoxStackList = itemBox.getList();
+        List<String> itemBoxDataList = new ArrayList<>(itemBoxStackList.size());
+        for (ItemBoxStack itemBoxStack : itemBoxStackList) {
             String format = itemBoxStack.toFormat();
             itemBoxDataList.add(format);
-        });
+        }
         playerDataConfig.set("ItemBoxData", itemBoxDataList);
 
         PersonalOption[] personalOptions = PersonalOption.values();

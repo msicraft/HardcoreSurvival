@@ -39,7 +39,11 @@ public class DeathPenaltyManager {
             return false;
         }
         String name = material.name();
-        return name.contains("CHEST") || name.contains("SHULKER_BOX");
+        return isContainerMaterial(name);
+    }
+
+    public boolean isContainerMaterial(String materialName) {
+        return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX");
     }
 
     public void applyDeathPenalty(PlayerData playerData) {
@@ -75,7 +79,7 @@ public class DeathPenaltyManager {
     }
 
     public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
         DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationList().forEach(location -> {
@@ -99,8 +103,8 @@ public class DeathPenaltyManager {
                 }
             }
         });
-        long end = System.currentTimeMillis();
-        System.out.println("시간(ms): " + (end - start));
+        //long end = System.currentTimeMillis();
+        //System.out.println("시간(ms): " + (end - start));
         deathPenaltyChestLog.reset();
     }
 

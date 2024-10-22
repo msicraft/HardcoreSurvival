@@ -10,15 +10,15 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerDataRelatedEvent implements Listener {
 
@@ -30,7 +30,7 @@ public class PlayerDataRelatedEvent implements Listener {
         this.playerDataManager = plugin.getPlayerDataManager();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerLoginEvent e) {
         Player player = e.getPlayer();
 
@@ -65,43 +65,38 @@ public class PlayerDataRelatedEvent implements Listener {
         }
 
         if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
-            plugin.getPlayerDataManager().registerPlayerData(player);
+            CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
+                PlayerData playerData = new PlayerData(player);
+                playerData.loadData();
+                playerData.updateTask(plugin.getPlayerTaskTick());
+                playerData.setLastLogin(System.currentTimeMillis());
+                return playerData;
+            });
+            future.thenAccept(playerData -> {
+                plugin.getPlayerDataManager().registerPlayerData(player, playerData);
+            });
         }
     }
 
-    @EventHandler
-    public void playerJoin(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        PlayerData playerData = playerDataManager.getPlayerData(player);
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(playerData));
-        });
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
-        PlayerData playerData = playerDataManager.getPlayerData(player);
-        playerData.setLastLogin(System.currentTimeMillis());
-        playerData.saveData();
+        CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
+            return playerDataManager.getPlayerData(player);
+        });
+        future.thenAccept(playerData -> {
+            playerData.setLastLogin(System.currentTimeMillis());
+            playerData.saveData();
 
-        playerDataManager.unregisterPlayerData(player);
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(playerData));
+            playerDataManager.unregisterPlayerData(player);
         });
     }
 
     @EventHandler
     public void playerDataLoad(PlayerDataLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
-        playerData.loadData();
         Player player = playerData.getPlayer();
-
-        playerData.updateTask(plugin.getPlayerTaskTick());
-        playerData.setLastLogin(System.currentTimeMillis());
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
