@@ -8,7 +8,6 @@ import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +16,8 @@ import java.util.*;
 
 public class OfflinePlayerData {
 
-    private final OfflinePlayer offlinePlayer;
+    //private final OfflinePlayer offlinePlayer;
+    private final UUID uuid;
     private final PlayerDataFile playerDataFile;
 
     private final Map<String, Object> dataMap = new HashMap<>();
@@ -30,9 +30,9 @@ public class OfflinePlayerData {
     private long lastLogin;
     private UUID guildUUID;
 
-    public OfflinePlayerData(OfflinePlayer offlinePlayer) {
-        this.offlinePlayer = offlinePlayer;
-        this.playerDataFile = new PlayerDataFile(offlinePlayer);
+    public OfflinePlayerData(UUID uuid) {
+        this.uuid = uuid;
+        this.playerDataFile = new PlayerDataFile(uuid);
         this.deathPenaltyChestLog = new DeathPenaltyChestLog();
         this.itemBox = new ItemBox();
     }
@@ -43,7 +43,7 @@ public class OfflinePlayerData {
         this.lastLogin = playerDataConfig.getLong("LastLogin", System.currentTimeMillis());
         String guildUUIDS = playerDataConfig.getString("Guild.UUID", null);
         if (guildUUIDS == null) {
-            MessageUtil.sendDebugMessage("Invalid Guild UUID", "Player: " + offlinePlayer.getName());
+            MessageUtil.sendDebugMessage("Invalid Guild UUID", "Player UUID: " + uuid);
         } else {
             this.guildUUID = UUID.fromString(guildUUIDS);
         }
@@ -142,8 +142,8 @@ public class OfflinePlayerData {
         playerDataFile.saveConfig();
     }
 
-    public OfflinePlayer getOfflinePlayer() {
-        return offlinePlayer;
+    public UUID getUuid() {
+        return uuid;
     }
 
     public PlayerDataFile getPlayerDataFile() {

@@ -15,9 +15,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class PlayerDataRelatedEvent implements Listener {
@@ -33,9 +35,10 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerLoginEvent e) {
         Player player = e.getPlayer();
+        UUID uuid = player.getUniqueId();
 
         if (!player.isOp()) {
-            if (!playerDataManager.hasWhiteList(player)) {
+            if (!playerDataManager.hasWhiteList(uuid)) {
                 e.setResult(PlayerLoginEvent.Result.KICK_OTHER);
                 e.kickMessage(Component.text(plugin.getPlayerDataManager().getWhitelistMessage()));
 
@@ -44,11 +47,11 @@ public class PlayerDataRelatedEvent implements Listener {
                 }
                 return;
             }
-            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(player);
+            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
             offlinePlayerData.loadData();
             if (offlinePlayerData.getGuildUUID() == null) {
                 e.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-                e.kickMessage(Component.text("접속 권한이 없거나 {g-uuid} 가 없습니다")); //g-uuid = guild-uuid
+                e.kickMessage(Component.text("접속 권한이 없거나 {G-UUID} 가 존재하지 않습니다")); //G-uuid = guild-uuid
                 return;
             }
             Guild guild = plugin.getGuildManager().getGuild(offlinePlayerData.getGuildUUID());
@@ -66,9 +69,8 @@ public class PlayerDataRelatedEvent implements Listener {
 
         if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
             CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
-                PlayerData playerData = new PlayerData(player);
+                PlayerData playerData = new PlayerData(uuid, player);
                 playerData.loadData();
-                playerData.updateTask(plugin.getPlayerTaskTick());
                 playerData.setLastLogin(System.currentTimeMillis());
                 return playerData;
             });
@@ -76,6 +78,14 @@ public class PlayerDataRelatedEvent implements Listener {
                 plugin.getPlayerDataManager().registerPlayerData(player, playerData);
             });
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+
+        playerData.updateTask(plugin.getPlayerTaskTick());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

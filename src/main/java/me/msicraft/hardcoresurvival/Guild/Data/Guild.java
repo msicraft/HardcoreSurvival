@@ -1,22 +1,21 @@
 package me.msicraft.hardcoresurvival.Guild.Data;
 
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
 
 public class Guild {
 
-    private final OfflinePlayer leaderPlayer;
+    private final UUID leader;
     private final List<UUID> members = new ArrayList<>();
 
     private final Map<UUID, Long> tempKickMap = new HashMap<>();
 
     private int inviteCount;
 
-    public Guild(OfflinePlayerData offlinePlayerData) {
-        this.leaderPlayer = offlinePlayerData.getOfflinePlayer();
+    public Guild(UUID leader, OfflinePlayerData offlinePlayerData) {
+        this.leader = leader;
 
         FileConfiguration config = offlinePlayerData.getPlayerDataFile().getConfig();
         this.inviteCount = config.getInt("Guild.InviteCount", 0);
@@ -58,8 +57,8 @@ public class Guild {
         return tempKickMap.keySet();
     }
 
-    public OfflinePlayer getLeaderPlayer() {
-        return leaderPlayer;
+    public UUID getLeader() {
+        return leader;
     }
 
     public void addMember(UUID uuid) {

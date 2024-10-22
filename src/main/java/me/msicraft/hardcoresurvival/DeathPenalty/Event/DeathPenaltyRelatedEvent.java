@@ -67,7 +67,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
                                         }
                                     } else {
                                         CompletableFuture<OfflinePlayerData> future = CompletableFuture.supplyAsync(() -> {
-                                            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(ownerPlayer);
+                                            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                             offlinePlayerData.loadData();
                                             return offlinePlayerData;
                                         });

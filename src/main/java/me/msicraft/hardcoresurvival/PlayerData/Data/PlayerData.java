@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PlayerData extends OfflinePlayerData {
 
@@ -24,8 +25,8 @@ public class PlayerData extends OfflinePlayerData {
     private PlayerTask playerTask;
     private CombatTask combatTask;
 
-    public PlayerData(Player player) {
-        super(player);
+    public PlayerData(UUID uuid, Player player) {
+        super(uuid);
         this.player = player;
     }
 

@@ -34,8 +34,8 @@ public class GuildManager {
     public void loadGuild() {
         plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
-            Guild guild = new Guild(offlinePlayerData);
+            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
+            Guild guild = new Guild(uuid, offlinePlayerData);
             guildMap.put(uuid, guild);
         });
 
@@ -48,8 +48,8 @@ public class GuildManager {
         Set<UUID> guildIds = guildMap.keySet();
         for (UUID uuid : guildIds) {
             Guild guild = guildMap.get(uuid);
-            OfflinePlayer offlinePlayer = guild.getLeaderPlayer();
-            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(guild.getLeader());
+            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
             FileConfiguration config = offlinePlayerData.getPlayerDataFile().getConfig();
             config.set("Guild.InviteCount", guild.getInviteCount());
 
@@ -97,7 +97,7 @@ public class GuildManager {
             leader.sendMessage(ChatColor.RED + "이미 등록된 플레이어입니다");
             return false;
         }
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(viewer);
+        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(viewer.getUniqueId());
         offlinePlayerData.loadData();
         offlinePlayerData.setGuildUUID(leader.getUniqueId());
         offlinePlayerData.saveData();
@@ -122,7 +122,7 @@ public class GuildManager {
             target.getPlayer().kick(Component.text("스트리머에 의해 추방당하였습니다"));
         }
         playerDataManager.removeWhiteList(target.getUniqueId());
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(target);
+        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(target.getUniqueId());
         offlinePlayerData.loadData();
         offlinePlayerData.setGuildUUID(null);
         offlinePlayerData.saveData();

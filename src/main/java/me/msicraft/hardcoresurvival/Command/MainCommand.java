@@ -108,12 +108,12 @@ public class MainCommand implements CommandExecutor {
                                 sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머로 등록되었습니다");
                                 sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
                                 sender.sendMessage(ChatColor.GREEN + "UUID: " + uuid.toString());
-                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                 offlinePlayerData.loadData();
                                 offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
                                 offlinePlayerData.saveData();
 
-                                Guild guild = new Guild(offlinePlayerData);
+                                Guild guild = new Guild(uuid, offlinePlayerData);
                                 guild.addMember(uuid);
                                 plugin.getGuildManager().registerGuild(uuid, guild);
                                 return true;
@@ -131,7 +131,7 @@ public class MainCommand implements CommandExecutor {
                                 if (offlinePlayer.isOnline()) {
                                     offlinePlayer.getPlayer().kick(Component.text(ChatColor.RED + "접속권한이 제거되었습니다"));
                                 }
-                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                 offlinePlayerData.loadData();
                                 offlinePlayerData.setGuildUUID(null);
                                 offlinePlayerData.saveData();
@@ -141,7 +141,7 @@ public class MainCommand implements CommandExecutor {
                                     if (memberO.isOnline()) {
                                         memberO.getPlayer().kick(Component.text(ChatColor.RED + "스트리머의 접속권한이 제거되어 관련 플레이어의 접속권한도 제거되었습니다"));
                                     }
-                                    OfflinePlayerData memberData = new OfflinePlayerData(memberO);
+                                    OfflinePlayerData memberData = new OfflinePlayerData(memberUUID);
                                     memberData.loadData();
                                     memberData.setGuildUUID(null);
                                     memberData.saveData();
@@ -287,7 +287,7 @@ public class MainCommand implements CommandExecutor {
                                                PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
                                                itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
                                            } else {
-                                               OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                               OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                                offlinePlayerData.loadData();
                                                itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
                                                offlinePlayerData.saveData();
@@ -301,7 +301,7 @@ public class MainCommand implements CommandExecutor {
                                            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
                                            itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
                                        } else {
-                                           OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                           OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                            offlinePlayerData.loadData();
                                            itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
                                            offlinePlayerData.saveData();
@@ -373,7 +373,7 @@ public class MainCommand implements CommandExecutor {
                                                         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
                                                         deathPenaltyManager.sendChestLogToItemBox(playerData);
                                                     } else {
-                                                        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                                        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                                         offlinePlayerData.loadData();
                                                         deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
                                                         offlinePlayerData.saveData();
@@ -386,7 +386,7 @@ public class MainCommand implements CommandExecutor {
                                                     PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
                                                     deathPenaltyManager.sendChestLogToItemBox(playerData);
                                                 } else {
-                                                    OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                                                    OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                                     offlinePlayerData.loadData();
                                                     deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
                                                     offlinePlayerData.saveData();

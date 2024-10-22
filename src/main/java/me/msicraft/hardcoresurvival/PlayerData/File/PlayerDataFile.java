@@ -1,7 +1,6 @@
 package me.msicraft.hardcoresurvival.PlayerData.File;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -10,10 +9,10 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class PlayerDataFile {
 
-    private final OfflinePlayer player;
     private final HardcoreSurvival plugin = HardcoreSurvival.getPlugin();
 
     private final String folderName = "PlayerData";
@@ -21,43 +20,20 @@ public class PlayerDataFile {
     private File file;
     private FileConfiguration config;
 
-    public PlayerDataFile(Player player) {
-        this.player = player;
-        String fileS = player.getUniqueId() + ".yml";
+    public PlayerDataFile(UUID uuid) {
+        String fileS = uuid + ".yml";
         this.file = new File(plugin.getDataFolder() + File.separator + folderName, fileS);
         if (!file.exists()) {
-            createFile(player);
+            createFile(uuid);
         }
         this.config = YamlConfiguration.loadConfiguration(this.file);
     }
 
-    public PlayerDataFile(OfflinePlayer offlinePlayer) {
-        this.player = offlinePlayer;
-        String fileS = offlinePlayer.getUniqueId() + ".yml";
-        this.file = new File(plugin.getDataFolder() + File.separator + folderName, fileS);
-        if (!file.exists()) {
-            createFile(offlinePlayer);
-        }
-        this.config = YamlConfiguration.loadConfiguration(this.file);
-    }
-
-    private void createFile(OfflinePlayer offlinePlayer) {
+    private void createFile(UUID uuid) {
         if(!this.file.exists()) {
             try {
                 YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(this.file);
-                yamlConfiguration.set("Name", offlinePlayer.getName());
-                yamlConfiguration.save(this.file);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void createFile(Player player) {
-        if(!this.file.exists()) {
-            try {
-                YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(this.file);
-                yamlConfiguration.set("Name", player.getName());
+                yamlConfiguration.set("UUID", uuid.toString());
                 yamlConfiguration.save(this.file);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -102,10 +78,6 @@ public class PlayerDataFile {
         if(!this.file.exists()) {
             plugin.saveResource(fileS, false);
         }
-    }
-
-    public OfflinePlayer getPlayer() {
-        return player;
     }
 
     public File getFile() {

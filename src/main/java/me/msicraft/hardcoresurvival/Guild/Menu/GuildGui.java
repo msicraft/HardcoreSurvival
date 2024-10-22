@@ -59,7 +59,7 @@ public class GuildGui extends CustomGui {
         List<Component> lore = new ArrayList<>();
         for (int a = lastCount; a < maxSize; a++) {
             UUID memberUUID = members.get(a);
-            if (memberUUID.equals(guild.getLeaderPlayer().getUniqueId())) {
+            if (memberUUID.equals(guild.getLeader())) {
                 continue;
             }
             lore.clear();
@@ -77,7 +77,7 @@ public class GuildGui extends CustomGui {
             if (offlinePlayer.isOnline()) {
                 lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.GREEN + "온라인"));
             } else {
-                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
+                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer.getUniqueId());
                 offlinePlayerData.loadData();
                 lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.RED + "오프라인"));
                 lore.add(Component.text(ChatColor.GRAY + "마지막 접속시간: " + TimeUtil.getTimeToFormat(offlinePlayerData.getLastLogin())));
