@@ -13,7 +13,6 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
-import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;

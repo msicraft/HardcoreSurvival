@@ -12,11 +12,11 @@ public class DeathPenaltyChestLog {
     public DeathPenaltyChestLog() {
     }
 
-    public void addLocation(Location location) {
+    public synchronized void addLocation(Location location) {
         chestLocationList.add(location);
     }
 
-    public void removeLocation(Location location) {
+    public synchronized void removeLocation(Location location) {
         chestLocationList.remove(location);
     }
 

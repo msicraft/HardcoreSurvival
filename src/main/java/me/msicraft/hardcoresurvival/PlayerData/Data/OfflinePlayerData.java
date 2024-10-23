@@ -7,7 +7,6 @@ import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,7 +16,6 @@ import java.util.*;
 
 public class OfflinePlayerData {
 
-    //private final OfflinePlayer offlinePlayer;
     private final UUID uuid;
     private final PlayerDataFile playerDataFile;
 
@@ -39,7 +37,6 @@ public class OfflinePlayerData {
     }
 
     public void loadData() {
-        Bukkit.getConsoleSender().sendMessage("데이터 로딩중: " + uuid.toString() + " | " + Bukkit.isPrimaryThread());
         FileConfiguration playerDataConfig = playerDataFile.getConfig();
 
         this.lastLogin = playerDataConfig.getLong("LastLogin", System.currentTimeMillis());
@@ -82,26 +79,17 @@ public class OfflinePlayerData {
             }
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(HardcoreSurvival.getPlugin(), () -> {
-            Bukkit.getConsoleSender().sendMessage("Thread-t: " + Thread.currentThread().getName());
-            long start = System.currentTimeMillis();
-            DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-            List<String> formatList = playerDataConfig.getStringList("DeathPenaltyChestLog");
-            int count = 0;
-            for (String format : formatList) {
-                Location location = deathPenaltyManager.formatToLocation(format);
-                if (location != null) {
-                    Block block = location.getBlock();
-                    Bukkit.getConsoleSender().sendMessage("Count: " + count + " | " + block.getType().name());
-                    if (deathPenaltyManager.isContainerMaterial(block.getType())) {
-                        deathPenaltyChestLog.addLocation(location);
-                    }
-                    count++;
+        DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
+        List<String> formatList = playerDataConfig.getStringList("DeathPenaltyChestLog");
+        for (String format : formatList) {
+            Location location = deathPenaltyManager.formatToLocation(format);
+            if (location != null) {
+                Block block = location.getBlock();
+                if (deathPenaltyManager.isContainerMaterial(block.getType())) {
+                    deathPenaltyChestLog.addLocation(location);
                 }
             }
-            long end = System.currentTimeMillis();
-            Bukkit.getConsoleSender().sendMessage("Death Penalty Log Load Time: " + (end - start) + "ms");
-        });
+        }
     }
 
     public void saveData() {
@@ -122,15 +110,6 @@ public class OfflinePlayerData {
             playerDataConfig.set("Data." + key, value);
         }
 
-        DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        List<Location> locationList = deathPenaltyChestLog.getChestLocationList();
-        List<String> chestLogList = new ArrayList<>(locationList.size());
-        for (Location location : locationList) {
-            String format = deathPenaltyManager.locationToFormat(location);
-            chestLogList.add(format);
-        }
-        playerDataConfig.set("DeathPenaltyChestLog", chestLogList);
-
         List<ItemBoxStack> itemBoxStackList = itemBox.getList();
         List<String> itemBoxDataList = new ArrayList<>(itemBoxStackList.size());
         for (ItemBoxStack itemBoxStack : itemBoxStackList) {
@@ -149,6 +128,15 @@ public class OfflinePlayerData {
                 }
             }
         }
+
+        DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
+        List<Location> locationList = deathPenaltyChestLog.getChestLocationList();
+        List<String> chestLogList = new ArrayList<>(locationList.size());
+        for (Location location : locationList) {
+            String format = deathPenaltyManager.locationToFormat(location);
+            chestLogList.add(format);
+        }
+        playerDataConfig.set("DeathPenaltyChestLog", chestLogList);
 
         playerDataFile.saveConfig();
     }

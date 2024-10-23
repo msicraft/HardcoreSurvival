@@ -84,7 +84,7 @@ public class PlayerDataManager {
         playerDataMap.put(player.getUniqueId(), playerData);
 
         Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(playerData));
+            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(player, playerData));
         });
     }
 
@@ -93,7 +93,7 @@ public class PlayerDataManager {
         playerDataMap.remove(player.getUniqueId());
 
         Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(playerData));
+            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(player, playerData));
         });
     }
 

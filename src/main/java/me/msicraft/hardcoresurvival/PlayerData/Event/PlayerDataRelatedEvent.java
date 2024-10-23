@@ -10,14 +10,12 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -70,19 +68,27 @@ public class PlayerDataRelatedEvent implements Listener {
             }
         }
 
-        if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                PlayerData playerData = new PlayerData(uuid, player);
-                plugin.getPlayerDataManager().registerPlayerData(player, playerData);
-                playerData.loadData();
-            });
-        }
+        PlayerData playerData = new PlayerData(uuid, player);
+        plugin.getPlayerDataManager().registerPlayerData(player, playerData);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        //PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+
+        player.sendMessage(ChatColor.GREEN + "데이터 로딩중...");
+        CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
+            return playerDataManager.getPlayerData(player);
+        });
+        future.thenAcceptAsync(playerData -> {
+            playerData.loadData();
+            playerData.updateTask(plugin.getPlayerTaskTick());
+            playerData.setLastLogin(System.currentTimeMillis());
+            player.sendMessage(ChatColor.GREEN + "데이터 로딩 완료");
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -93,14 +99,10 @@ public class PlayerDataRelatedEvent implements Listener {
             return playerDataManager.getPlayerData(player);
         });
         future.thenAcceptAsync(playerData -> {
-            long start = System.currentTimeMillis();
             playerData.setLastLogin(System.currentTimeMillis());
             playerData.saveData();
 
             playerDataManager.unregisterPlayerData(player);
-            long end = System.currentTimeMillis();
-            Bukkit.getConsoleSender().sendMessage("데이터 저장 완료: " + player.getName()
-                    + " | ms: " + (end - start));
         });
     }
 
@@ -108,13 +110,6 @@ public class PlayerDataRelatedEvent implements Listener {
     public void playerDataLoad(PlayerDataLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
         Player player = playerData.getPlayer();
-
-        playerData.updateTask(plugin.getPlayerTaskTick());
-        playerData.setLastLogin(System.currentTimeMillis());
-
-        if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
-        }
     }
 
     @EventHandler
