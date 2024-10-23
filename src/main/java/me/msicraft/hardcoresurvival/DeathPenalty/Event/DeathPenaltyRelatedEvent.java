@@ -39,6 +39,11 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Block placedBlock = e.getBlockPlaced();
             if (deathPenaltyManager.isContainerMaterial(placedBlock.getType())) {
                 PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                if (playerData == null) {
+                    e.setCancelled(true);
+                    MessageUtil.sendPlayerDataLoadingMessage(player);
+                    return;
+                }
                 Location location = placedBlock.getLocation();
                 playerData.getDeathPenaltyChestLog().addLocation(location);
 
@@ -118,6 +123,11 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Block block = e.getBlock();
             if (deathPenaltyManager.isContainerMaterial(block.getType())) {
                 PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                if (playerData == null) {
+                    e.setCancelled(true);
+                    MessageUtil.sendPlayerDataLoadingMessage(player);
+                    return;
+                }
                 Location location = block.getLocation();
                 playerData.getDeathPenaltyChestLog().removeLocation(location);
 
@@ -137,20 +147,20 @@ public class DeathPenaltyRelatedEvent implements Listener {
         if (deathPenaltyManager.isEnabled()) {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+            if (playerData != null) {
+                if ((boolean) playerData.getData("IgnoreDeathPenalty", false)) {
+                    e.setKeepInventory(true);
+                    e.setKeepLevel(true);
 
-            if ((boolean) playerData.getData("IgnoreDeathPenalty", false)) {
-                e.setKeepInventory(true);
-                e.setKeepLevel(true);
-
-
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
+                    if (plugin.useDebug()) {
+                        MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
+                    }
+                } else {
+                    e.getItemsToKeep().clear();
                 }
-            } else {
-                e.getItemsToKeep().clear();
+                e.getDrops().clear();
+                e.setDroppedExp(0);
             }
-            e.getDrops().clear();
-            e.setDroppedExp(0);
         }
     }
 

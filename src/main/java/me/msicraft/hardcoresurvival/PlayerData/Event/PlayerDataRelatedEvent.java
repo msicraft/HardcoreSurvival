@@ -10,11 +10,14 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -68,14 +71,10 @@ public class PlayerDataRelatedEvent implements Listener {
         }
 
         if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
-            CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 PlayerData playerData = new PlayerData(uuid, player);
-                playerData.loadData();
-                playerData.setLastLogin(System.currentTimeMillis());
-                return playerData;
-            });
-            future.thenAccept(playerData -> {
                 plugin.getPlayerDataManager().registerPlayerData(player, playerData);
+                playerData.loadData();
             });
         }
     }
@@ -83,9 +82,7 @@ public class PlayerDataRelatedEvent implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-
-        playerData.updateTask(plugin.getPlayerTaskTick());
+        //PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -95,11 +92,15 @@ public class PlayerDataRelatedEvent implements Listener {
         CompletableFuture<PlayerData> future = CompletableFuture.supplyAsync(() -> {
             return playerDataManager.getPlayerData(player);
         });
-        future.thenAccept(playerData -> {
+        future.thenAcceptAsync(playerData -> {
+            long start = System.currentTimeMillis();
             playerData.setLastLogin(System.currentTimeMillis());
             playerData.saveData();
 
             playerDataManager.unregisterPlayerData(player);
+            long end = System.currentTimeMillis();
+            Bukkit.getConsoleSender().sendMessage("데이터 저장 완료: " + player.getName()
+                    + " | ms: " + (end - start));
         });
     }
 
@@ -107,6 +108,9 @@ public class PlayerDataRelatedEvent implements Listener {
     public void playerDataLoad(PlayerDataLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
         Player player = playerData.getPlayer();
+
+        playerData.updateTask(plugin.getPlayerTaskTick());
+        playerData.setLastLogin(System.currentTimeMillis());
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());

@@ -107,6 +107,9 @@ public final class HardcoreSurvival extends JavaPlugin {
     public void onDisable() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+            if (playerData == null) {
+                continue;
+            }
             playerData.saveData();
         }
 
@@ -156,6 +159,9 @@ public final class HardcoreSurvival extends JavaPlugin {
         this.playerTaskTick = getConfig().contains("Setting.PlayerTaskTick") ? getConfig().getInt("Setting.PlayerTaskTick") : 20;
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData playerData = playerDataManager.getPlayerData(player);
+            if (playerData == null) {
+                continue;
+            }
             playerData.updateTask(playerTaskTick);
         }
 

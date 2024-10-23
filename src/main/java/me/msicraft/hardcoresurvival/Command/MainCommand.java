@@ -13,6 +13,7 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -49,23 +50,12 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
-                        /*
                         int max = Integer.parseInt(args[1]);
-                        long start = System.currentTimeMillis();
-                        for (int i = 0; i<max; i++) {
-                            plugin.getPlayerDataManager().getPlayerFileNames().forEach(uuidS -> {
-                                UUID uuid = UUID.fromString(uuidS);
-                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer);
-                                offlinePlayerData.loadData();
-                                offlinePlayerData.saveData();
-                            });
+                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(((Player) sender).getUniqueId());
+                        for (int i = 0; i < max; i++) {
+                            Location location = new Location(Bukkit.getWorld("world"), i, 15, 0);
+                            playerData.getDeathPenaltyChestLog().addLocation(location);
                         }
-                        long end = System.currentTimeMillis();
-                        System.out.println("Max: " + max);
-                        System.out.println("Time: " + (end - start));
-
-                         */
                     }
                     case "reload" -> {
                         if (sender.isOp()) {
