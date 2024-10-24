@@ -13,6 +13,7 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -48,18 +49,18 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
-                    case "test1" -> {
-                        if (sender instanceof Player player) {
-                            System.out.println("Name: " + player.getName());
+                    case "broadcast" -> {
+                        if (!sender.isOp()) {
+                            return false;
                         }
-                    }
-                    case "test" -> {
-                        int max = Integer.parseInt(args[1]);
-                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(((Player) sender).getUniqueId());
-                        for (int i = 0; i < max; i++) {
-                            Location location = new Location(Bukkit.getWorld("world"), i, 15, 0);
-                            playerData.getDeathPenaltyChestLog().addLocation(location);
+                        int max = args.length;
+                        StringBuilder a = new StringBuilder(ChatColor.BOLD + "" + ChatColor.GOLD + "[공지] ");
+                        for (int i = 1; i < max; i++) {
+                            a.append(args[i]).append(" ");
                         }
+                        String message = a.toString();
+                        Bukkit.broadcast(Component.text(MessageUtil.translateColorCodes(message)));
+                        return true;
                     }
                     case "reload" -> {
                         if (sender.isOp()) {

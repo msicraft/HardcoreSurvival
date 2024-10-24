@@ -24,7 +24,7 @@ public class MainTabCompleter implements TabCompleter {
         if (command.getName().equals("hardcoresurvival")) {
             if (sender.isOp()) {
                 if (args.length == 1) {
-                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer", "itembox", "info");
+                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer", "itembox", "info", "broadcast");
                 }
                 if (args.length == 2) {
                     String var = args[0];
