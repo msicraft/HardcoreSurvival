@@ -21,6 +21,7 @@ import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.Event.ShopGuiEvent;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.TeamManager.TeamManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -63,6 +64,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private ShopManager shopManager;
     private CustomItemManager customItemManager;
     private GuildManager guildManager;
+    private TeamManager teamManager;
 
     @Override
     public void onEnable() {
@@ -77,6 +79,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         customItemManager = new CustomItemManager(this);
         shopManager = new ShopManager(this);
         guildManager = new GuildManager(this);
+        teamManager = new TeamManager(this);
 
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -111,11 +114,14 @@ public final class HardcoreSurvival extends JavaPlugin {
                 continue;
             }
             playerData.saveData();
+            teamManager.unRegisterTeam(player);
         }
 
         shopManager.saveShopData();
         playerDataManager.saveData();
         guildManager.saveGuild();
+
+        //teamManager.unRegisterAll();
     }
 
     public void registeredEvents() {
@@ -241,4 +247,9 @@ public final class HardcoreSurvival extends JavaPlugin {
     public GuildManager getGuildManager() {
         return guildManager;
     }
+
+    public TeamManager getTeamManager() {
+        return teamManager;
+    }
+
 }

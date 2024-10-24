@@ -60,8 +60,8 @@ public class MenuGuiEvent implements Listener {
     public void menuChatEditEvent(AsyncChatEvent e) {
         Player player = e.getPlayer();
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-        String a = (String) playerData.getTempData("Menu_auction_sell", null);
-        if (a != null) {
+        String auctionSell = (String) playerData.getTempData("Menu_auction_sell", null);
+        if (auctionSell != null) {
             e.setCancelled(true);
             String message = PlainTextComponentSerializer.plainText().serialize(e.message());
             if (message.equalsIgnoreCase("cancel")) {
@@ -77,6 +77,57 @@ public class MenuGuiEvent implements Listener {
                 Bukkit.getServer().dispatchCommand(player, "ah sell " + price);
                 openMainMenu(player);
             });
+            return;
+        }
+        String nickName_first = (String) playerData.getTempData("NickName_First", null);
+        if (nickName_first != null) {
+            e.setCancelled(true);
+            String message = PlainTextComponentSerializer.plainText().serialize(e.message());
+            if (message.equalsIgnoreCase("cancel")) {
+                playerData.removeTempData("NickName_First");
+                Bukkit.getScheduler().runTask(plugin, ()-> {
+                    openMainMenu(player);
+                });
+                return;
+            }
+            String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
+            if (nickName.length() > 6) {
+                player.sendMessage(ChatColor.RED + "6 자리를 초과하였습니다");
+            } else {
+                playerData.setData("NickName", nickName);
+                player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+            }
+            playerData.removeTempData("NickName_First");
+            Bukkit.getScheduler().runTask(plugin, ()-> {
+                plugin.getTeamManager().updateTeam(player);
+                openMainMenu(player);
+            });
+            return;
+        }
+        String nickName_Change = (String) playerData.getTempData("NickName_Change", null);
+        if (nickName_Change != null) {
+            e.setCancelled(true);
+            String message = PlainTextComponentSerializer.plainText().serialize(e.message());
+            if (message.equalsIgnoreCase("cancel")) {
+                playerData.removeTempData("NickName_Change");
+                Bukkit.getScheduler().runTask(plugin, ()-> {
+                    openMainMenu(player);
+                });
+                return;
+            }
+            String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
+            if (nickName.length() > 6) {
+                player.sendMessage(ChatColor.RED + "6 자리를 초과하였습니다");
+            } else {
+                playerData.setData("NickName", nickName);
+                player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+            }
+            playerData.removeTempData("NickName_Change");
+            Bukkit.getScheduler().runTask(plugin, ()-> {
+                plugin.getTeamManager().updateTeam(player);
+                openMainMenu(player);
+            });
+            return;
         }
     }
 
@@ -132,6 +183,30 @@ public class MenuGuiEvent implements Listener {
                                         playerData.setTempData("Menu_auction_sell", "none");
                                     }
                                 }
+                                case "NickName-First" -> {
+                                    player.sendMessage(ChatColor.GRAY + "========================================");
+                                    player.sendMessage(ChatColor.GRAY + "닉네임을 입력해주세요.");
+                                    player.sendMessage(ChatColor.GRAY + "숫자,영어,한글 만 사용가능합니다");
+                                    player.sendMessage(ChatColor.GRAY + "최대 6자리(공백 포함)");
+                                    player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
+                                    player.sendMessage(ChatColor.GRAY + "========================================");
+                                    player.closeInventory();
+                                    playerData.setTempData("NickName_First", "none");
+                                }
+                                case "NickName-Change" -> {
+                                    player.sendMessage(ChatColor.RED + "현재 이용 불가능합니다");
+                                    /*
+                                    player.sendMessage(ChatColor.GRAY + "========================================");
+                                    player.sendMessage(ChatColor.GRAY + "변경할 닉네임을 입력해주세요.");
+                                    player.sendMessage(ChatColor.GRAY + "숫자 영어 한글 만 사용가능합니다");
+                                    player.sendMessage(ChatColor.GRAY + "최대 6자리(공백 포함)");
+                                    player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
+                                    player.sendMessage(ChatColor.GRAY + "========================================");
+                                    player.closeInventory();
+                                    playerData.setTempData("NickName_Change", "none");
+
+                                     */
+                                }
                             }
                         }
                     } else if (dataContainer.has(MenuGui.PERSONAL_SETTINGS_KEY)) {
@@ -145,7 +220,7 @@ public class MenuGuiEvent implements Listener {
                                 default -> {
                                     PersonalOption personalOption = PersonalOption.valueOf(data);
                                     switch (personalOption) {
-                                        case DISPLAY_ACTIONBAR -> {
+                                        case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
                                             if (e.isLeftClick()) {
                                                 boolean b = (boolean) playerData.getPersonalOption(personalOption);
                                                 if (b) {

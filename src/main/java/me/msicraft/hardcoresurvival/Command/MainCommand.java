@@ -48,6 +48,11 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
+                    case "test1" -> {
+                        if (sender instanceof Player player) {
+                            System.out.println("Name: " + player.getName());
+                        }
+                    }
                     case "test" -> {
                         int max = Integer.parseInt(args[1]);
                         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(((Player) sender).getUniqueId());
@@ -345,7 +350,7 @@ public class MainCommand implements CommandExecutor {
                                             DeathPenaltyManager deathPenaltyManager = plugin.getDeathPenaltyManager();
                                             DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
                                             sender.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
-                                            deathPenaltyChestLog.getChestLocationList().forEach(location -> {
+                                            deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
                                                 String locationToFormat = deathPenaltyManager.locationToFormat(location);
                                                 sender.sendMessage(ChatColor.GRAY + "Location: " + locationToFormat);
                                             });

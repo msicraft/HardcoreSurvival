@@ -70,7 +70,7 @@ public class OfflinePlayerData {
             String path = "PersonalOption." + option.name();
             if (playerDataConfig.contains(path)) {
                 switch (option) {
-                    case DISPLAY_ACTIONBAR -> {
+                    case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
                         personalOptionMap.put(option, playerDataConfig.getBoolean(path, (boolean) option.getBaseValue()));
                     }
                 }
@@ -123,14 +123,14 @@ public class OfflinePlayerData {
             Object object = personalOptionMap.get(option);
             String path = "PersonalOption." + option.name();
             switch (option) {
-                case DISPLAY_ACTIONBAR -> {
+                case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
                     playerDataConfig.set(path, object);
                 }
             }
         }
 
         DeathPenaltyManager deathPenaltyManager = HardcoreSurvival.getPlugin().getDeathPenaltyManager();
-        List<Location> locationList = deathPenaltyChestLog.getChestLocationList();
+        Set<Location> locationList = deathPenaltyChestLog.getChestLocationSets();
         List<String> chestLogList = new ArrayList<>(locationList.size());
         for (Location location : locationList) {
             String format = deathPenaltyManager.locationToFormat(location);
@@ -149,7 +149,7 @@ public class OfflinePlayerData {
         return playerDataFile;
     }
 
-    public void setData(String key, Object object) {
+    public synchronized void setData(String key, Object object) {
         dataMap.put(key, object);
     }
 
@@ -157,7 +157,7 @@ public class OfflinePlayerData {
         if (hasData(key)) {
             return dataMap.get(key);
         } else {
-            dataMap.put(key, def);
+            setData(key, def);
             return def;
         }
     }

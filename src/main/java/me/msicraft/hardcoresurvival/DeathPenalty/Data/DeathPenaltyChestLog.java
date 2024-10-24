@@ -2,34 +2,34 @@ package me.msicraft.hardcoresurvival.DeathPenalty.Data;
 
 import org.bukkit.Location;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DeathPenaltyChestLog {
 
-    private final List<Location> chestLocationList = new ArrayList<>();
+    private final Set<Location> chestLocationSets = new HashSet<>();
 
     public DeathPenaltyChestLog() {
     }
 
     public synchronized void addLocation(Location location) {
-        chestLocationList.add(location);
+        chestLocationSets.add(location);
     }
 
     public synchronized void removeLocation(Location location) {
-        chestLocationList.remove(location);
+        chestLocationSets.remove(location);
     }
 
     public boolean hasLocation(Location location) {
-        return chestLocationList.contains(location);
+        return chestLocationSets.contains(location);
     }
 
-    public List<Location> getChestLocationList() {
-        return chestLocationList;
+    public Set<Location> getChestLocationSets() {
+        return chestLocationSets;
     }
 
     public void reset() {
-        chestLocationList.clear();
+        chestLocationSets.clear();
     }
 
 }

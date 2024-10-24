@@ -34,7 +34,7 @@ public class PlayerData extends OfflinePlayerData {
         if (playerTask != null) {
             playerTask.cancel();
         }
-        playerTask = new PlayerTask(player);
+        playerTask = new PlayerTask(this);
         playerTask.runTaskTimer(HardcoreSurvival.getPlugin(), 0, ticks);
     }
 

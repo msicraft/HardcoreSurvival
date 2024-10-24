@@ -33,7 +33,7 @@ public class MenuGui extends CustomGui {
         itemStack = GuiUtil.createItemStack(Material.JUKEBOX, "개인 설정", GuiUtil.EMPTY_LORE, -1,
                 MENU_KEY, "personal-settings");
         gui.setItem(10, itemStack);
-        itemStack = GuiUtil.createItemStack(Material.CHEST, "아이템 우편함", GuiUtil.EMPTY_LORE, -1,
+        itemStack = GuiUtil.createItemStack(Material.HOPPER, "아이템 우편함", GuiUtil.EMPTY_LORE, -1,
                 MENU_KEY, "item-box");
         gui.setItem(11, itemStack);
         itemStack = GuiUtil.createItemStack(Material.ENDER_CHEST, "경매장",
@@ -51,16 +51,18 @@ public class MenuGui extends CustomGui {
                     MENU_KEY, "Guild");
             gui.setItem(1, itemStack);
         }
-        /*
         String nickName = (String) playerData.getData("NickName", null);
         if (nickName == null) {
             itemStack = GuiUtil.createItemStack(Material.NAME_TAG, "닉네임 변경",
-                    List.of(ChatColor.WHITE + "최초 1회 변경 가능합니다"), -1,
-                    MENU_KEY, "NickName");
+                    List.of(ChatColor.WHITE + "최초 1회 무료 변경 가능합니다"), -1,
+                    MENU_KEY, "NickName-First");
+            gui.setItem(2, itemStack);
+        } else {
+            itemStack = GuiUtil.createItemStack(Material.NAME_TAG, "닉네임 변경",
+                    List.of(ChatColor.WHITE + "현재 이용 불가능합니다"), -1,
+                    MENU_KEY, "NickName-Change");
             gui.setItem(2, itemStack);
         }
-
-         */
     }
 
     private static final int[] optionSlots = new int[]{
@@ -82,7 +84,7 @@ public class MenuGui extends CustomGui {
             lore.add("");
             Object object = playerData.getPersonalOption(option);
             switch (option) {
-                case DISPLAY_ACTIONBAR -> {
+                case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
                     lore.add(ChatColor.GRAY + "현재 값: " + object);
                     itemStack = GuiUtil.createItemStack(Material.PAPER, option.getDisplayName(), lore, -1,
                             PERSONAL_SETTINGS_KEY, option.name());

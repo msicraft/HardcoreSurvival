@@ -62,7 +62,7 @@ public class DeathPenaltyManager {
         plugin.getEconomy().depositPlayer(player, i);
 
         DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
-        deathPenaltyChestLog.getChestLocationList().forEach(location -> {
+        deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
             Block block = location.getBlock();
             String materialName = block.getType().name();
             if (materialName.contains("CHEST")) {
@@ -79,10 +79,9 @@ public class DeathPenaltyManager {
     }
 
     public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
-        //long start = System.currentTimeMillis();
         ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
         DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
-        deathPenaltyChestLog.getChestLocationList().forEach(location -> {
+        deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
             Block block = location.getBlock();
             if (location.getWorld() != null) {
                 String materialName = block.getType().name();
@@ -103,8 +102,6 @@ public class DeathPenaltyManager {
                 }
             }
         });
-        //long end = System.currentTimeMillis();
-        //System.out.println("시간(ms): " + (end - start));
         deathPenaltyChestLog.reset();
     }
 

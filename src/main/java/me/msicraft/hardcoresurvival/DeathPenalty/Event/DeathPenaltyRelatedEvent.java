@@ -123,11 +123,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Block block = e.getBlock();
             if (deathPenaltyManager.isContainerMaterial(block.getType())) {
                 PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-                if (playerData == null) {
-                    e.setCancelled(true);
-                    MessageUtil.sendPlayerDataLoadingMessage(player);
-                    return;
-                }
+
                 Location location = block.getLocation();
                 playerData.getDeathPenaltyChestLog().removeLocation(location);
 

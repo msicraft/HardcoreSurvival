@@ -33,7 +33,7 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
-              <outputDirectory>B:\Bukkit\1.21.1 paper test\plugins</outputDirectory>
+              <outputDirectory>C:\Users\user\Desktop\bukkit\1.21.1 paper test\plugins</outputDirectory>
           </configuration>
       </plugin>
       <plugin>
