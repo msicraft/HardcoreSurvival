@@ -13,13 +13,13 @@ public class ProtectDeathPenalty extends CustomItem {
 
     public ProtectDeathPenalty(String id, CustomItemDataFile customItemDataFile) {
         super(id, customItemDataFile);
-        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 3600);
+        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 7200);
     }
 
     @Override
     public void update(CustomItemDataFile customItemDataFile) {
         super.update(customItemDataFile);
-        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 3600);
+        this.coolDown = customItemDataFile.getConfig().getInt(getPath() + ".CoolDown", 7200);
     }
 
     @Override

@@ -2,7 +2,7 @@ name: HardcoreSurvival
 version: "1.0" #'${project.version}'
 main: me.msicraft.hardcoresurvival.HardcoreSurvival
 api-version: '1.21'
-depend: [Vault, MythicMobs]
+depend: [Vault, MythicMobs, Oraxen]
 commands:
   hardcoresurvival:
     description: 'Main commands'

@@ -148,6 +148,7 @@ public class GuildGuiEvent implements Listener {
                                     player.sendMessage(ChatColor.GRAY + "========================================");
                                     player.sendMessage(ChatColor.GRAY + "임시 추방 시간을 입력해주세요 (초). 숫자만 입력");
                                     player.sendMessage(ChatColor.GRAY + "이미 임시 추방 상태인경우 시간을 연장합니다");
+                                    player.sendMessage(ChatColor.GRAY + "-1 입력시 추방 취소");
                                     player.sendMessage(ChatColor.GRAY + "예시: 60, 180, 10");
                                     player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
                                     player.sendMessage(ChatColor.GRAY + "========================================");

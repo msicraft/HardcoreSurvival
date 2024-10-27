@@ -24,20 +24,23 @@ public class MainTabCompleter implements TabCompleter {
         if (command.getName().equals("hardcoresurvival")) {
             if (sender.isOp()) {
                 if (args.length == 1) {
-                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer", "itembox", "info", "broadcast");
+                    return List.of("reload", "deathpenalty", "shop", "customitem", "streamer",
+                            "itembox", "info", "broadcast", "save-date", "maintenance", "set-maintenance");
                 }
                 if (args.length == 2) {
                     String var = args[0];
                     if (var.equalsIgnoreCase("deathpenalty")) {
                         return List.of("setspawn", "chestlog");
                     } else if (var.equalsIgnoreCase("shop")) {
-                        return List.of("register", "unregister", "setcenter");
+                        return List.of("register", "unregister", "setcenter", "edit", "price-update");
                     } else if (var.equalsIgnoreCase("customitem")) {
                         return List.copyOf(plugin.getCustomItemManager().getInternalNames());
                     } else if (var.equalsIgnoreCase("streamer")) {
                         return List.of("add", "remove", "list");
                     } else if (var.equalsIgnoreCase("itembox")) {
                         return List.of("give");
+                    } else if (var.equalsIgnoreCase("save-date")) {
+                        return List.of("shop");
                     }
                 }
                 if (args.length == 3) {
@@ -48,7 +51,8 @@ public class MainTabCompleter implements TabCompleter {
                             return List.of("get", "log-to-ItemBox");
                         }
                     } else if (var.equalsIgnoreCase("shop")) {
-                        if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
+                        if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")
+                                || var2.equalsIgnoreCase("edit")) {
                             return plugin.getShopManager().getInternalNameList();
                         }
                     } else if (var.equalsIgnoreCase("streamer")) {
@@ -86,6 +90,8 @@ public class MainTabCompleter implements TabCompleter {
                                 list.add(itemType.name());
                             }
                             return list;
+                        } else if (var2.equalsIgnoreCase("edit")) {
+                            return List.of("UseStaticPrice", "UnlimitStock", "BasePrice", "Price", "Stock", "DisableSell");
                         }
                     }
                 }

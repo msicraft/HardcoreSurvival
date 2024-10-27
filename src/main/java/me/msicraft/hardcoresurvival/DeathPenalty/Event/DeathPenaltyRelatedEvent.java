@@ -47,52 +47,55 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 Location location = placedBlock.getLocation();
                 playerData.getDeathPenaltyChestLog().addLocation(location);
 
-                Chest chest = (Chest) placedBlock.getState();
-                if (chest.getBlockData() instanceof org.bukkit.block.data.type.Chest chestType) {
-                    if (chestType.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
-                        Location otherChestLocation = deathPenaltyManager.getOtherChestLocation(placedBlock, chestType);
-                        if (otherChestLocation != null) {
-                            playerData.getDeathPenaltyChestLog().addLocation(otherChestLocation);
-                            if (plugin.useDebug()) {
-                                MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace",
-                                        "Place Player: " + player.getName());
-                            }
-                            if (otherChestLocation.getBlock().getState() instanceof TileState tileState) {
-                                String owner = tileState.getPersistentDataContainer().get(BLOCK_OWNER_KEY, PersistentDataType.STRING);
-                                if (owner != null) {
-                                    UUID uuid = UUID.fromString(owner);
-                                    OfflinePlayer ownerPlayer = Bukkit.getOfflinePlayer(uuid);
-                                    if (ownerPlayer.isOnline()) {
-                                        PlayerData ownerPlayerData = plugin.getPlayerDataManager().getPlayerData((Player) ownerPlayer);
-                                        ownerPlayerData.getDeathPenaltyChestLog().addLocation(location);
-                                        if (plugin.useDebug()) {
-                                            MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OtherChest",
-                                                    "Place Player: " + player.getName(),
-                                                    "Original Chest Owner: " + ownerPlayer.getName() + " | Status: online");
-                                        }
-                                    } else {
-                                        CompletableFuture<OfflinePlayerData> future = CompletableFuture.supplyAsync(() -> {
-                                            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                            offlinePlayerData.loadData();
-                                            return offlinePlayerData;
-                                        });
-                                        future.thenAccept(offlinePlayerData -> {
-                                            offlinePlayerData.getDeathPenaltyChestLog().addLocation(location);
-                                            offlinePlayerData.saveData();
 
+                if (placedBlock.getType() != Material.BARREL) {
+                    Chest chest = (Chest) placedBlock.getState();
+                    if (chest.getBlockData() instanceof org.bukkit.block.data.type.Chest chestType) {
+                        if (chestType.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
+                            Location otherChestLocation = deathPenaltyManager.getOtherChestLocation(placedBlock, chestType);
+                            if (otherChestLocation != null) {
+                                playerData.getDeathPenaltyChestLog().addLocation(otherChestLocation);
+                                if (plugin.useDebug()) {
+                                    MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace",
+                                            "Place Player: " + player.getName());
+                                }
+                                if (otherChestLocation.getBlock().getState() instanceof TileState tileState) {
+                                    String owner = tileState.getPersistentDataContainer().get(BLOCK_OWNER_KEY, PersistentDataType.STRING);
+                                    if (owner != null) {
+                                        UUID uuid = UUID.fromString(owner);
+                                        OfflinePlayer ownerPlayer = Bukkit.getOfflinePlayer(uuid);
+                                        if (ownerPlayer.isOnline()) {
+                                            PlayerData ownerPlayerData = plugin.getPlayerDataManager().getPlayerData((Player) ownerPlayer);
+                                            ownerPlayerData.getDeathPenaltyChestLog().addLocation(location);
                                             if (plugin.useDebug()) {
                                                 MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OtherChest",
                                                         "Place Player: " + player.getName(),
-                                                        "Original Chest Owner: " + ownerPlayer.getName() + " | Status: offline");
+                                                        "Original Chest Owner: " + ownerPlayer.getName() + " | Status: online");
                                             }
-                                        });
-                                    }
-                                } else {
-                                    if (plugin.useDebug()) {
-                                        MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace",
-                                                "Unknown Owner: " + location.getWorld().getName() +
-                                                        " | X: " + location.getBlockX() +
-                                                        " | Y: " + location.getBlockY() + " | Z: " + location.getBlockZ());
+                                        } else {
+                                            CompletableFuture<OfflinePlayerData> future = CompletableFuture.supplyAsync(() -> {
+                                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
+                                                offlinePlayerData.loadData();
+                                                return offlinePlayerData;
+                                            });
+                                            future.thenAccept(offlinePlayerData -> {
+                                                offlinePlayerData.getDeathPenaltyChestLog().addLocation(location);
+                                                offlinePlayerData.saveData();
+
+                                                if (plugin.useDebug()) {
+                                                    MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OtherChest",
+                                                            "Place Player: " + player.getName(),
+                                                            "Original Chest Owner: " + ownerPlayer.getName() + " | Status: offline");
+                                                }
+                                            });
+                                        }
+                                    } else {
+                                        if (plugin.useDebug()) {
+                                            MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace",
+                                                    "Unknown Owner: " + location.getWorld().getName() +
+                                                            " | X: " + location.getBlockX() +
+                                                            " | Y: " + location.getBlockY() + " | Z: " + location.getBlockZ());
+                                        }
                                     }
                                 }
                             }

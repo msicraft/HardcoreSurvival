@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.Command;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
+import io.th0rgal.oraxen.api.OraxenItems;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
@@ -62,6 +63,39 @@ public class MainCommand implements CommandExecutor {
                         Bukkit.broadcast(Component.text(MessageUtil.translateColorCodes(message)));
                         return true;
                     }
+                    case "set-maintenance" -> {
+                        if (!sender.isOp()) {
+                            return false;
+                        }
+                        if (plugin.isMaintenance()) {
+                            plugin.setMaintenance(false);
+                            sender.sendMessage(ChatColor.RED + "Maintenance: false");
+                            return true;
+                        } else {
+                            plugin.setMaintenance(true);
+                            sender.sendMessage(ChatColor.RED + "Maintenance: true");
+                            return true;
+                        }
+                    }
+                    case "maintenance" -> { //hs maintenance <message>
+                        if (!sender.isOp()) {
+                            return false;
+                        }
+                        int max = args.length;
+                        StringBuilder a = new StringBuilder(ChatColor.BOLD + "" + ChatColor.RED + "[점검] ");
+                        for (int i = 1; i < max; i++) {
+                            a.append(args[i]).append(" ");
+                        }
+                        String message = a.toString();
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            if (player.isOp()) {
+                                continue;
+                            }
+                            player.kick(Component.text(message));
+                        }
+                        plugin.setMaintenance(true);
+                        return true;
+                    }
                     case "reload" -> {
                         if (sender.isOp()) {
                             plugin.reloadVariables();
@@ -70,6 +104,16 @@ public class MainCommand implements CommandExecutor {
                         } else {
                             sendPermissionMessage(sender);
                             return false;
+                        }
+                    }
+                    case "save-date" -> { //hs save-data [shop]
+                        if (!sender.isOp()) {
+                            return false;
+                        }
+                        switch (args[1]) {
+                            case "shop" -> {
+                                plugin.getShopManager().saveShopData();
+                            }
                         }
                     }
                     case "info" -> {
@@ -189,12 +233,55 @@ public class MainCommand implements CommandExecutor {
                         try {
                             ShopManager shopManager = plugin.getShopManager();
                             switch (var2) {
+                                case "price-update" -> { //hs shop price-update
+                                    List<String> internalNameList = shopManager.getInternalNameList();
+                                    for (String internalName : internalNameList) {
+                                        ShopItem shopItem = shopManager.getShopItem(internalName);
+                                        if (shopItem != null) {
+                                            shopItem.updatePrice(shopManager);
+                                        }
+                                    }
+                                }
+                                case "edit" -> { //hs shop edit <internal> <edit_var> <value>
+                                    String internalName = args[2];
+                                    if (!shopManager.hasInternalName(internalName)) {
+                                        sender.sendMessage(ChatColor.RED + "존재하지 않는 내부이름입니다.");
+                                        return false;
+                                    }
+                                    String editVar = args[3];
+                                    ShopItem shopItem = shopManager.getShopItem(internalName);
+                                    if (shopItem == null) {
+                                        sender.sendMessage(ChatColor.RED + "잘못된 Shopitem 입니다");
+                                        return false;
+                                    }
+                                    String valueS = args[4];
+                                    switch (editVar) {
+                                        case "UseStaticPrice" -> {
+                                            shopItem.setUseStaticPrice(Boolean.parseBoolean(valueS));
+                                        }
+                                        case "UnlimitStock" -> {
+                                            shopItem.setUnlimitStock(Boolean.parseBoolean(valueS));
+                                        }
+                                        case "BasePrice" -> {
+                                            shopItem.setBasePrice(Integer.parseInt(valueS));
+                                        }
+                                        case "Price" -> {
+                                            shopItem.setPrice(Integer.parseInt(valueS));
+                                        }
+                                        case "Stock" -> {
+                                            shopItem.setStock(Integer.parseInt(valueS));
+                                        }
+                                        case "DisableSell" -> {
+                                            shopItem.setDisableSell(Boolean.parseBoolean(valueS));
+                                        }
+                                    }
+                                    sender.sendMessage(ChatColor.GREEN + "변경되었습니다 값: " + valueS);
+                                    return true;
+                                }
                                 case "setcenter" -> {
                                     if (sender instanceof Player player) {
                                         Location location = player.getLocation();
-                                        shopManager.getShopRegion().update(location, shopManager.getShopRegionRadius());
-                                        shopManager.getShopDataFile().getConfig().set("Setting.CenterLocation", location);
-                                        shopManager.getShopDataFile().saveConfig();
+                                        shopManager.updateShopRegion(location);
                                     }
                                 }
                                 case "register" -> {
@@ -212,7 +299,7 @@ public class MainCommand implements CommandExecutor {
                                         ShopItem.ItemType itemType = ShopItem.ItemType.valueOf(args[3].toUpperCase());
                                         int basePrice = Integer.parseInt(args[4]);
                                         ShopItem shopItem = new ShopItem(itemType, false, false, itemStack, internalName,
-                                                0, basePrice, basePrice);
+                                                0, basePrice, basePrice, false);
                                         shopManager.registerShopItem(shopItem);
                                         String path = "Items." + internalName;
                                         FileConfiguration config = shopManager.getShopDataFile().getConfig();
@@ -222,6 +309,7 @@ public class MainCommand implements CommandExecutor {
                                         config.set(path + ".BasePrice", shopItem.getBasePrice());
                                         config.set(path + ".Price", shopItem.getPrice(false));
                                         config.set(path + ".Stock", shopItem.getStock());
+                                        config.set(path + ".DisableSell", shopItem.isDisableSell());
                                         switch (shopItem.getItemType()) {
                                             case VANILLA -> {
                                                 config.set(path + ".ItemStack", itemStack);
@@ -232,6 +320,10 @@ public class MainCommand implements CommandExecutor {
                                             }
                                             case CUSTOM_ITEM -> {
                                                 String sa = plugin.getCustomItemManager().getCustomItemInternalName(itemStack);
+                                                config.set(path + ".InternalName", sa);
+                                            }
+                                            case ORAXEN -> {
+                                                String sa = OraxenItems.getIdByItem(itemStack);
                                                 config.set(path + ".InternalName", sa);
                                             }
                                         }

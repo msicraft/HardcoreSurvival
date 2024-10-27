@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.Shop;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
+import io.th0rgal.oraxen.api.OraxenItems;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGuiManager;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
@@ -10,6 +11,7 @@ import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopRegion;
 import me.msicraft.hardcoresurvival.Shop.File.ShopDataFile;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
+import me.msicraft.hardcoresurvival.Shop.Task.ShopLocationTask;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopTask;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Bukkit;
@@ -21,6 +23,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,16 +41,17 @@ public class ShopManager extends CustomGuiManager {
     private double maxPricePercent = 0.0;
     private double minPricePercent = 0.0;
     private double perValueChangeMaxPercent = 0.0;
+    private ShopRegion shopRegion = null;
     private int radius = 10;
-    private final ShopRegion shopRegion;
 
     private boolean isShopMaintenance = false;
     private ShopTask shopTask = null;
 
+    private BukkitRunnable shopCheckRunnable = null;
+
     public ShopManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
         this.shopDataFile = new ShopDataFile(plugin);
-        this.shopRegion = new ShopRegion(null, 0);
     }
 
     public void sendMaintenanceMessage(Player player) {
@@ -97,17 +101,28 @@ public class ShopManager extends CustomGuiManager {
         this.maxPricePercent = config.getDouble("Setting.MaxPricePercent", 0.0);
         this.minPricePercent = config.getDouble("Setting.MinPricePercent", 0.0);
         this.perValueChangeMaxPercent = config.getDouble("Setting.PerValueChangeMaxPercent", 0.0);
-        this.radius = config.getInt("Setting.Radius", 10);
-        Location centerLocation = config.getLocation("Setting.CenterLocation", null);
-        if (centerLocation != null) {
-            shopRegion.update(centerLocation, radius);
 
-            if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("Shop CenterLocation update", "Shop region: " + shopRegion.toString());
-            }
+        String centerWorldName = config.getString("Setting.CenterLocation.WorldName", null);
+        int centerX = config.getInt("Setting.CenterLocation.X", 0);
+        int centerY = config.getInt("Setting.CenterLocation.Y", 64);
+        int centerZ = config.getInt("Setting.CenterLocation.Z", 0);
+        this.radius = config.getInt("Setting.CenterLocation.Radius", 10);
+        if (shopRegion == null) {
+            shopRegion = new ShopRegion(centerWorldName, centerX, centerY, centerZ, radius);
+        } else {
+            shopRegion.setCenterWorldName(centerWorldName);
+            shopRegion.setCenterX(centerX);
+            shopRegion.setCenterY(centerY);
+            shopRegion.setCenterZ(centerZ);
+            shopRegion.setRadius(radius);
         }
-
         loadShopData();
+
+        if (shopCheckRunnable != null) {
+            shopCheckRunnable.cancel();
+            shopCheckRunnable = null;
+        }
+        shopCheckRunnable = new ShopLocationTask(plugin, this);
 
         if (shopTask != null) {
             shopTask.cancel();
@@ -115,6 +130,33 @@ public class ShopManager extends CustomGuiManager {
         }
         shopTask = new ShopTask(plugin, this, updateSeconds);
         setShopMaintenance(false);
+    }
+
+    public void updateShopRegion(Location location) {
+        String centerWorldName = location.getWorld().getName();
+        int centerX = location.getBlockX();
+        int centerY = location.getBlockY();
+        int centerZ = location.getBlockZ();
+        shopDataFile.getConfig().set("Setting.CenterLocation.WorldName", centerWorldName);
+        shopDataFile.getConfig().set("Setting.CenterLocation.X", centerX);
+        shopDataFile.getConfig().set("Setting.CenterLocation.Y", centerY);
+        shopDataFile.getConfig().set("Setting.CenterLocation.Z", centerZ);
+        shopDataFile.getConfig().set("Setting.CenterLocation.Radius", radius);
+        shopDataFile.saveConfig();
+        if (shopRegion == null) {
+            shopRegion = new ShopRegion(centerWorldName, centerX, centerY, centerZ, radius);
+        } else {
+            shopRegion.setCenterWorldName(centerWorldName);
+            shopRegion.setCenterX(centerX);
+            shopRegion.setCenterY(centerY);
+            shopRegion.setCenterZ(centerZ);
+            shopRegion.setRadius(radius);
+        }
+        if (shopCheckRunnable != null) {
+            shopCheckRunnable.cancel();
+            shopCheckRunnable = null;
+        }
+        shopCheckRunnable = new ShopLocationTask(plugin, this);
     }
 
     public void registerShopItem(ShopItem shopItem) {
@@ -141,6 +183,7 @@ public class ShopManager extends CustomGuiManager {
                 int basePrice = config.getInt(path + ".BasePrice", -1);
                 int price = config.getInt(path + ".Price", -1);
                 int stock = config.getInt(path + ".Stock", 0);
+                boolean disableSell = config.getBoolean(path + ".DisableSell", false);
                 ItemStack itemStack = null;
                 ShopItem shopItem;
                 switch (itemType) {
@@ -152,6 +195,10 @@ public class ShopManager extends CustomGuiManager {
                     case CUSTOM_ITEM -> {
                         String internalName = config.getString(path + ".InternalName", null);
                         itemStack = plugin.getCustomItemManager().getCustomItem(internalName).getItemStack();
+                    }
+                    case ORAXEN -> {
+                        String internalName = config.getString(path + ".InternalName", null);
+                        itemStack = OraxenItems.getItemById(internalName).build();
                     }
                 }
                 if (itemStack == null || itemStack.getType() == Material.AIR) {
@@ -169,8 +216,9 @@ public class ShopManager extends CustomGuiManager {
                     shopItem.setBasePrice(basePrice);
                     shopItem.setPrice(price);
                     shopItem.setStock(stock);
+                    shopItem.setDisableSell(disableSell);
                 } else {
-                    shopItem = new ShopItem(itemType, useStaticPrice, unlimitStock, itemStack, key, stock, basePrice, price);
+                    shopItem = new ShopItem(itemType, useStaticPrice, unlimitStock, itemStack, key, stock, basePrice, price, disableSell);
                 }
                 shopItemMap.put(key, shopItem);
                 internalNameList.add(key);
@@ -197,6 +245,7 @@ public class ShopManager extends CustomGuiManager {
             config.set(path + ".BasePrice", shopItem.getBasePrice());
             config.set(path + ".Price", shopItem.getPrice(false));
             config.set(path + ".Stock", shopItem.getStock());
+            config.set(path + ".DisableSell", shopItem.isDisableSell());
             ItemStack itemStack = shopItem.getItemStack();
             switch (shopItem.getItemType()) {
                 case VANILLA -> {
@@ -208,6 +257,10 @@ public class ShopManager extends CustomGuiManager {
                 }
                 case CUSTOM_ITEM -> {
                     String internalName = plugin.getCustomItemManager().getCustomItemInternalName(itemStack);
+                    config.set(path + ".InternalName", internalName);
+                }
+                case ORAXEN -> {
+                    String internalName = OraxenItems.getIdByItem(itemStack);
                     config.set(path + ".InternalName", internalName);
                 }
             }
@@ -242,6 +295,11 @@ public class ShopManager extends CustomGuiManager {
                 player.getInventory().addItem(itemStack);
             }
             player.sendMessage(ChatColor.GREEN + "아이템을 구매하였습니다");
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("ShopItem-Buy", "Player: " + player.getName(),
+                        " ItemType: " + shopItem.getItemType().name() + " | Id: " + shopItem.getId()+ " | Amount: " + amount);
+            }
         } else {
             player.sendMessage(ChatColor.RED + "해당 아이템이 존재하지 않습니다");
         }
@@ -268,6 +326,11 @@ public class ShopManager extends CustomGuiManager {
 
             player.sendMessage(ChatColor.GREEN + "모든 아이템이 판매되었습니다.");
             openShopInventory(player, ShopGui.Type.SELL);
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("ShopItem-Sell", "Player: " + player.getName(),
+                        "TotalPrice: " + totalPrice);
+            }
         } else {
             player.sendMessage(ChatColor.RED + "판매할 아이템이 없습니다.");
         }
@@ -336,7 +399,4 @@ public class ShopManager extends CustomGuiManager {
         return shopRegion;
     }
 
-    public int getShopRegionRadius() {
-        return radius;
-    }
 }

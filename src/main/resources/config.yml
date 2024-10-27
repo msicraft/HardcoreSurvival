@@ -12,7 +12,7 @@ Setting:
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10
-  BreedChance: 0.1
+  BreedChance: 0.15
   WorldName:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"
@@ -47,10 +47,10 @@ Setting:
         Chance: 0.05
       COPPER_ORE:
         InternalName: "Disguise_CopperOre"
-        Chance: 0.05
+        Chance: 0.03
       DEEPSLATE_COPPER_ORE:
         InternalName: "Disguise_DeepslateCopperOre"
-        Chance: 0.05
+        Chance: 0.03
       GOLD_ORE:
         InternalName: "Disguise_GoldOre"
         Chance: 0.1
@@ -65,25 +65,25 @@ Setting:
         Chance: 0.075
       EMERALD_ORE:
         InternalName: "Disguise_EmeraldOre"
-        Chance: 0.2
+        Chance: 0.175
       DEEPSLATE_EMERALD_ORE:
         InternalName: "Disguise_DeepslateEmeraldOre"
-        Chance: 0.2
+        Chance: 0.175
       LAPIS_ORE:
         InternalName: "Disguise_LapisOre"
-        Chance: 0.1
+        Chance: 0.15
       DEEPSLATE_LAPIS_ORE:
         InternalName: "Disguise_DeepslateLapisOre"
-        Chance: 0.1
+        Chance: 0.15
       DIAMOND_ORE:
         InternalName: "Disguise_DiamondOre"
-        Chance: 0.25
+        Chance: 0.2
       DEEPSLATE_DIAMOND_ORE:
         InternalName: "Disguise_DeepslateDiamondOre"
-        Chance: 0.25
+        Chance: 0.2
       NETHER_GOLD_ORE:
         InternalName: "Disguise_NetherGoldOre"
-        Chance: 0.15
+        Chance: 0.2
 Streamer:
   MaxInviteCount: 5
   List:

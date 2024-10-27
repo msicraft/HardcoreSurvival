@@ -74,11 +74,14 @@ public class GuildGui extends CustomGui {
             lore.add(Component.text(ChatColor.YELLOW + "좌 클릭: 추방"));
             lore.add(Component.text(ChatColor.YELLOW + "우 클릭: 임시 추방 (임시 추방 취소)")); //-1 사용시 취소
             lore.add(Component.text(""));
+            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer.getUniqueId());
+            offlinePlayerData.loadData();
+            lore.add(Component.text(ChatColor.GRAY + "닉네임: " + offlinePlayerData.getData("NickName", null)));
+            lore.add(Component.text(ChatColor.GRAY + "소지금: " + plugin.getEconomy().getBalance(offlinePlayer)));
+            lore.add(Component.text(""));
             if (offlinePlayer.isOnline()) {
                 lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.GREEN + "온라인"));
             } else {
-                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(offlinePlayer.getUniqueId());
-                offlinePlayerData.loadData();
                 lore.add(Component.text(ChatColor.GRAY + "현재 상태: " + ChatColor.RED + "오프라인"));
                 lore.add(Component.text(ChatColor.GRAY + "마지막 접속시간: " + TimeUtil.getTimeToFormat(offlinePlayerData.getLastLogin())));
                 if (guild.isTempKickMember(memberUUID)) {

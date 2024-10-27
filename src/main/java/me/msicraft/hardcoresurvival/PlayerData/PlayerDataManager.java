@@ -6,7 +6,6 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.GuiUtil;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -30,33 +29,24 @@ public class PlayerDataManager {
 
     public PlayerDataManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
-    }
 
-    public void reloadVariables() {
-        streamerList.clear();
         plugin.getConfig().getStringList("Streamer.List").forEach(s -> {
             UUID uuid = UUID.fromString(s);
             streamerList.add(uuid);
         });
 
-        this.useWhiteList = plugin.getConfig().contains("Whitelist.Enabled") && plugin.getConfig().getBoolean("Whitelist.Enabled");
-        String wMessage = plugin.getConfig().getString("Whitelist.Message", null);
-        if (wMessage != null) {
-            this.whitelistMessage = MessageUtil.translateColorCodes(wMessage);
-        }
-
-        whiteList.clear();
         List<String> uuidList = plugin.getConfig().getStringList("Whitelist.List");
         for (String uuidString : uuidList) {
             UUID uuid = UUID.fromString(uuidString);
             whiteList.add(uuid);
         }
+    }
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (hasWhiteList(player) || player.isOp()) {
-                continue;
-            }
-            player.kick(Component.text(whitelistMessage));
+    public void reloadVariables() {
+        this.useWhiteList = plugin.getConfig().contains("Whitelist.Enabled") && plugin.getConfig().getBoolean("Whitelist.Enabled");
+        String wMessage = plugin.getConfig().getString("Whitelist.Message", null);
+        if (wMessage != null) {
+            this.whitelistMessage = MessageUtil.translateColorCodes(wMessage);
         }
 
         if (plugin.useDebug()) {
@@ -126,6 +116,10 @@ public class PlayerDataManager {
 
     public boolean hasWhiteList(OfflinePlayer offlinePlayer) {
         return hasWhiteList(offlinePlayer.getUniqueId());
+    }
+
+    public boolean hasWhiteList(Player player) {
+        return hasWhiteList(player.getUniqueId());
     }
 
     public boolean hasWhiteList(UUID uuid) {

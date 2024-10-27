@@ -39,6 +39,14 @@ public class PlayerDataRelatedEvent implements Listener {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
 
+        if (plugin.isMaintenance()) {
+            if (!player.isOp()) {
+                e.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+                e.kickMessage(Component.text("점검 중 입니다"));
+                return;
+            }
+        }
+
         if (!player.isOp()) {
             if (!playerDataManager.hasWhiteList(uuid)) {
                 e.setResult(PlayerLoginEvent.Result.KICK_OTHER);

@@ -71,11 +71,14 @@ public class MenuGuiEvent implements Listener {
                 });
                 return;
             }
-            int price = Integer.parseInt(message.replaceAll("[^0-9]", ""));
+            String ms = message.replaceAll("[^0-9]", "");
+            if (ms.isEmpty()) {
+                ms = "0";
+            }
+            int price = Integer.parseInt(ms);
             playerData.removeTempData("Menu_auction_sell");
             Bukkit.getScheduler().runTask(plugin, ()-> {
                 Bukkit.getServer().dispatchCommand(player, "ah sell " + price);
-                openMainMenu(player);
             });
             return;
         }
@@ -91,8 +94,8 @@ public class MenuGuiEvent implements Listener {
                 return;
             }
             String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.length() > 6) {
-                player.sendMessage(ChatColor.RED + "6 자리를 초과하였습니다");
+            if (nickName.length() > 8) {
+                player.sendMessage(ChatColor.RED + "8 자리를 초과하였습니다");
             } else {
                 playerData.setData("NickName", nickName);
                 player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
@@ -116,8 +119,8 @@ public class MenuGuiEvent implements Listener {
                 return;
             }
             String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.length() > 6) {
-                player.sendMessage(ChatColor.RED + "6 자리를 초과하였습니다");
+            if (nickName.length() > 8) {
+                player.sendMessage(ChatColor.RED + "8 자리를 초과하였습니다");
             } else {
                 playerData.setData("NickName", nickName);
                 player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
@@ -165,6 +168,10 @@ public class MenuGuiEvent implements Listener {
                                 case "shop" -> {
                                     plugin.getShopManager().openShopInventory(player, ShopGui.Type.BUY);
                                 }
+                                case "fish-shop" -> {
+                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),
+                                            "cfishing open market " + player.getName() + " --silent");
+                                }
                                 case "Guild" -> {
                                     GuildGui guildGui = (GuildGui) playerData.getCustomGui(GuiType.GUILD);
                                     player.openInventory(guildGui.getInventory());
@@ -187,7 +194,7 @@ public class MenuGuiEvent implements Listener {
                                     player.sendMessage(ChatColor.GRAY + "========================================");
                                     player.sendMessage(ChatColor.GRAY + "닉네임을 입력해주세요.");
                                     player.sendMessage(ChatColor.GRAY + "숫자,영어,한글 만 사용가능합니다");
-                                    player.sendMessage(ChatColor.GRAY + "최대 6자리(공백 포함)");
+                                    player.sendMessage(ChatColor.GRAY + "최대 8자리(공백 포함)");
                                     player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
                                     player.sendMessage(ChatColor.GRAY + "========================================");
                                     player.closeInventory();

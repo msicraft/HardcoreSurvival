@@ -18,12 +18,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -193,8 +195,14 @@ public class PlayerRelatedEvent implements Listener {
             Block chestBlock = e.getClickedBlock();
             if (chestBlock != null) {
                 if (chestBlock.getState() instanceof TileState tileState) {
-                    String owner = tileState.getPersistentDataContainer().get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
-                    if (owner != null) {
+                    PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
+                    String owner = dataContainer.get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
+                    if (owner == null) {
+                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                        playerData.getDeathPenaltyChestLog().addLocation(chestBlock.getLocation());
+                        dataContainer.set(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
+                        tileState.update();
+                    } else {
                         UUID ownerUUID = UUID.fromString(owner);
                         if (ownerUUID.equals(player.getUniqueId())) {
                             return;
@@ -237,8 +245,10 @@ public class PlayerRelatedEvent implements Listener {
             if (!dropList.isEmpty()) {
                 ItemStack handStack = player.getInventory().getItemInMainHand();
                 ItemMeta itemMeta = handStack.getItemMeta();
+                if (itemMeta == null) {
+                    return;
+                }
                 int fortuneLevel = itemMeta.hasEnchant(Enchantment.FORTUNE) ? itemMeta.getEnchantLevel(Enchantment.FORTUNE) : 0;
-                double extraChance = 0.05 * fortuneLevel;
                 for (Item item : dropList) {
                     ItemStack itemStack = item.getItemStack();
                     if (fortuneLevel == 0) {
@@ -246,7 +256,7 @@ public class PlayerRelatedEvent implements Listener {
                     } else {
                         int amount = 1;
                         for (int i = 0; i < fortuneLevel; i++) {
-                            if (Math.random() < extraChance) {
+                            if (Math.random() < 0.05) {
                                 amount++;
                             }
                         }
@@ -255,6 +265,11 @@ public class PlayerRelatedEvent implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void disableCauldron(CauldronLevelChangeEvent e) {
+        e.setCancelled(true);
     }
 
 }

@@ -9,10 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.ShulkerBox;
+import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -43,7 +40,7 @@ public class DeathPenaltyManager {
     }
 
     public boolean isContainerMaterial(String materialName) {
-        return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX");
+        return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX") || materialName.contains("BARREL");
     }
 
     public void applyDeathPenalty(PlayerData playerData) {
@@ -73,6 +70,10 @@ public class DeathPenaltyManager {
                 ShulkerBox shulkerBox = (ShulkerBox) block.getState();
                 shulkerBox.getInventory().clear();
                 block.setType(Material.AIR);
+            } else if (materialName.contains("BARREL")) {
+                Barrel barrel = (Barrel) block.getState();
+                barrel.getInventory().clear();
+                block.setType(Material.AIR);
             }
         });
         deathPenaltyChestLog.reset();
@@ -95,6 +96,13 @@ public class DeathPenaltyManager {
                 } else if (materialName.contains("SHULKER_BOX")) {
                     ShulkerBox shulkerBox = (ShulkerBox) block.getState();
                     ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
+                    for (ItemStack itemStack : itemStacks) {
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                    }
+                    block.setType(Material.AIR);
+                } else if (materialName.contains("BARREL")) {
+                    Barrel barrel = (Barrel) block.getState();
+                    ItemStack[] itemStacks = barrel.getInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
                         itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
                     }

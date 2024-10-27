@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 public class ShopItem {
 
     public enum ItemType {
-        VANILLA, MYTHICMOBS, CUSTOM_ITEM
+        VANILLA, MYTHICMOBS, CUSTOM_ITEM, ORAXEN
     }
 
     private final String id;
@@ -21,7 +21,10 @@ public class ShopItem {
     private int basePrice = -1;
     private int price = -1;
 
-    public ShopItem(ItemType itemType, boolean useStaticPrice, boolean unlimitStock, ItemStack itemStack, String id, int stock, int basePrice, int price) {
+    private boolean disableSell = false;
+
+    public ShopItem(ItemType itemType, boolean useStaticPrice, boolean unlimitStock,
+                    ItemStack itemStack, String id, int stock, int basePrice, int price, boolean disableSell) {
         this.itemType = itemType;
         this.useStaticPrice = useStaticPrice;
         this.unlimitStock = unlimitStock;
@@ -30,11 +33,11 @@ public class ShopItem {
         this.stock = stock;
         this.basePrice = basePrice;
         this.price = price;
+        this.disableSell = disableSell;
     }
 
     public void updatePrice(ShopManager shopManager) {
         if (useStaticPrice) {
-            price = basePrice;
             return;
         }
         if (basePrice < 0) {
@@ -149,6 +152,14 @@ public class ShopItem {
 
     public void setUnlimitStock(boolean unlimitStock) {
         this.unlimitStock = unlimitStock;
+    }
+
+    public boolean isDisableSell() {
+        return disableSell;
+    }
+
+    public void setDisableSell(boolean disableSell) {
+        this.disableSell = disableSell;
     }
 
     public String asString() {

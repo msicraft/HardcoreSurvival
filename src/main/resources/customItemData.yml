@@ -17,19 +17,20 @@ CustomItem:
     Lore:
       - "&f우 클릭: 플레이어를 초대할 수 있습니다"
       - ""
+      - "&c스트리머 전용 아이템"
       - "&c정확한 플레이어 이름을 입력해주세요"
   ProtectDeathPenalty:
     Material: Paper
     CustomModelData: 3
     DisplayName: "&a죽음 패널티 면역 크리스탈"
     MaxStackSize: 1
-    CoolDown: 3600
+    CoolDown: 7200
     Lore:
       - "&f우 클릭: 죽음 패널티를 1회 보호"
       - ""
       - "&c전투중 사용 불가"
       - ""
-      - "&c쿨타임: 60분"
+      - "&c쿨타임: 120분"
       - "&c쿨타임은 패널티가 발동 후 부터 적용됩니다"
   RollBackScroll:
     Material: BOOK

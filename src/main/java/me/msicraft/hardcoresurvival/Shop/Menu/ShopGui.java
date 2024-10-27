@@ -82,12 +82,15 @@ public class ShopGui extends CustomGui {
             String internalName = internalNames.get(a);
             ShopItem shopItem = shopManager.getShopItem(internalName);
             if (shopItem != null) {
-                if (shopItem.getBasePrice() <= 0) {
+                if (shopItem.getPrice(false) <= 0) {
                     continue;
                 }
                 int selectCount = (int) playerData.getTempData("ShopGui_" + internalName + "_SelectCount", 1);
                 ItemStack cloneStack = new ItemStack(shopItem.getItemStack());
                 ItemMeta itemMeta = cloneStack.getItemMeta();
+                if (itemMeta == null) {
+                    continue;
+                }
                 PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
                 List<Component> lore = new ArrayList<>();
                 lore.add(Component.text(ChatColor.WHITE + "현재 가격: " + shopItem.getPrice(false)

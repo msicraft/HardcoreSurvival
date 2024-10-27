@@ -48,7 +48,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
-    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault");
+    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen");
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;
@@ -65,6 +65,8 @@ public final class HardcoreSurvival extends JavaPlugin {
     private CustomItemManager customItemManager;
     private GuildManager guildManager;
     private TeamManager teamManager;
+
+    private boolean maintenance = true;
 
     @Override
     public void onEnable() {
@@ -198,6 +200,14 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
         economy = rsp.getProvider();
         return economy != null;
+    }
+
+    public boolean isMaintenance() {
+        return maintenance;
+    }
+
+    public void setMaintenance(boolean maintenance) {
+        this.maintenance = maintenance;
     }
 
     public boolean useDebug() {

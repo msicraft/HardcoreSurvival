@@ -203,10 +203,14 @@ public class ShopGuiEvent implements Listener {
                             if (emptySlot != -1) {
                                 ShopItem shopItem = shopManager.searchShopItem(selectItemStack);
                                 if (shopItem != null) {
-                                    SellItem sellItemSlot = new SellItem(shopItem.getId(), selectItemStack, (shopItem.getPrice(true) * selectItemStack.getAmount()));
-                                    sellItems[emptySlot] = sellItemSlot;
+                                    if (shopItem.isDisableSell()) {
+                                        player.sendMessage(ChatColor.RED + "해당 아이템을 판매할 수 없습니다");
+                                    } else {
+                                        SellItem sellItemSlot = new SellItem(shopItem.getId(), selectItemStack, (shopItem.getPrice(true) * selectItemStack.getAmount()));
+                                        sellItems[emptySlot] = sellItemSlot;
 
-                                    player.getInventory().setItem(clickSlot, GuiUtil.AIR_STACK);
+                                        player.getInventory().setItem(clickSlot, GuiUtil.AIR_STACK);
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + "해당 아이템을 판매할 수 없습니다");
                                 }

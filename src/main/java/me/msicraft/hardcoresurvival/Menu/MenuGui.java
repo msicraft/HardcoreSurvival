@@ -45,6 +45,10 @@ public class MenuGui extends CustomGui {
             itemStack = GuiUtil.createItemStack(Material.CHEST, "상점", GuiUtil.EMPTY_LORE, -1,
                     MENU_KEY, "shop");
             gui.setItem(19, itemStack);
+
+            itemStack = GuiUtil.createItemStack(Material.BARREL, "물고기 판매 상점", GuiUtil.EMPTY_LORE, -1,
+                    MENU_KEY, "fish-shop");
+            gui.setItem(20, itemStack);
         }
         if (HardcoreSurvival.getPlugin().getPlayerDataManager().isStreamer(playerData.getPlayer().getUniqueId())) {
             itemStack = GuiUtil.createItemStack(Material.PAPER, "시청자 관리", GuiUtil.EMPTY_LORE, -1,
