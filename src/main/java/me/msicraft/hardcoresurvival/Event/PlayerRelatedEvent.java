@@ -197,8 +197,11 @@ public class PlayerRelatedEvent implements Listener {
         Action action = e.getAction();
         if (action == Action.RIGHT_CLICK_BLOCK) {
             Player player = e.getPlayer();
+            if (player.isOp()) {
+                return;
+            }
             Block chestBlock = e.getClickedBlock();
-            if (chestBlock != null) {
+            if (chestBlock != null && plugin.getDeathPenaltyManager().isContainerMaterial(chestBlock.getType())) {
                 if (chestBlock.getState() instanceof TileState tileState) {
                     PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
                     String owner = dataContainer.get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
