@@ -51,7 +51,7 @@ public class MenuGui extends CustomGui {
             gui.setItem(20, itemStack);
         }
         if (HardcoreSurvival.getPlugin().getPlayerDataManager().isStreamer(playerData.getPlayer().getUniqueId())) {
-            itemStack = GuiUtil.createItemStack(Material.PAPER, "시청자 관리", GuiUtil.EMPTY_LORE, -1,
+            itemStack = GuiUtil.createItemStack(Material.PLAYER_HEAD, "시청자 관리", GuiUtil.EMPTY_LORE, -1,
                     MENU_KEY, "Guild");
             gui.setItem(1, itemStack);
         }

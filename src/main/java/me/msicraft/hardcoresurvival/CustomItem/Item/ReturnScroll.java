@@ -22,9 +22,9 @@ public class ReturnScroll extends CustomItem {
             player.sendMessage(ChatColor.RED + "전투중에는 사용 불가능합니다");
             return false;
         }
-        Location spawnLocation = HardcoreSurvival.getPlugin().getDeathPenaltyManager().getSpawnLocation();
+        Location spawnLocation = HardcoreSurvival.getPlugin().getShopManager().getShopRegion().getCenterLocation();
         if (spawnLocation == null) {
-            player.sendMessage(ChatColor.RED + "스폰위치가 존재하지 않습니다");
+            player.sendMessage(ChatColor.RED + "스폰위치가 존재하지 않습니다. 관리자에게 문의해주시기 바랍니다");
             return false;
         }
         if (!spawnLocation.getWorld().getName().equals(player.getWorld().getName())) {

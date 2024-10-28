@@ -33,7 +33,7 @@ public class GuildManager {
 
     public void loadGuild() {
         plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            //OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
             Guild guild = new Guild(uuid, offlinePlayerData);
             guildMap.put(uuid, guild);

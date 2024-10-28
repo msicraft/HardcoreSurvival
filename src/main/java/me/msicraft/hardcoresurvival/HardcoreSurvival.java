@@ -22,6 +22,7 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.Event.ShopGuiEvent;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.TeamManager.TeamManager;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -55,6 +56,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private int combatSeconds = 10;
 
     private Economy economy;
+    private Chat chat;
 
     private PlayerDataManager playerDataManager;
     private DeathPenaltyManager deathPenaltyManager;
@@ -84,6 +86,11 @@ public final class HardcoreSurvival extends JavaPlugin {
         teamManager = new TeamManager(this);
 
         if (!setupEconomy()) {
+            getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        if (!setupChat()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -200,6 +207,12 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
         economy = rsp.getProvider();
         return economy != null;
+    }
+
+    private boolean setupChat() {
+        RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
+        chat = rsp.getProvider();
+        return chat != null;
     }
 
     public boolean isMaintenance() {

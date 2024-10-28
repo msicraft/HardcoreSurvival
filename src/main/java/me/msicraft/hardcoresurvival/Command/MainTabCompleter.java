@@ -30,7 +30,7 @@ public class MainTabCompleter implements TabCompleter {
                 if (args.length == 2) {
                     String var = args[0];
                     if (var.equalsIgnoreCase("deathpenalty")) {
-                        return List.of("setspawn", "chestlog");
+                        return List.of("chestlog");
                     } else if (var.equalsIgnoreCase("shop")) {
                         return List.of("register", "unregister", "setcenter", "edit", "price-update");
                     } else if (var.equalsIgnoreCase("customitem")) {

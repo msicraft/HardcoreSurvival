@@ -69,11 +69,11 @@ public class MainCommand implements CommandExecutor {
                         }
                         if (plugin.isMaintenance()) {
                             plugin.setMaintenance(false);
-                            sender.sendMessage(ChatColor.RED + "Maintenance: false");
+                            sender.sendMessage(ChatColor.RED + "Disable Maintenance");
                             return true;
                         } else {
                             plugin.setMaintenance(true);
-                            sender.sendMessage(ChatColor.RED + "Maintenance: true");
+                            sender.sendMessage(ChatColor.RED + "Enable Maintenance");
                             return true;
                         }
                     }
@@ -409,23 +409,6 @@ public class MainCommand implements CommandExecutor {
                         String var2 = args[1];
                         try {
                             switch (var2) {
-                                case "setspawn" -> { //hs deathpenalty setspawn
-                                    if (sender.isOp()) {
-                                        if (sender instanceof Player player) {
-                                            Location location = player.getLocation();
-                                            String format = plugin.getDeathPenaltyManager().locationToFormat(location);
-                                            plugin.getConfig().set("Setting.DeathPenalty.SpawnLocation", location);
-                                            plugin.saveConfig();
-                                            player.sendMessage(ChatColor.GREEN + "DeathPenalty 스폰위치가 저장되었습니다");
-                                            player.sendMessage(ChatColor.GREEN + "위치: " + format);
-                                            plugin.getDeathPenaltyManager().setSpawnLocation(location);
-                                            return true;
-                                        }
-                                    } else {
-                                        sendPermissionMessage(sender);
-                                        return false;
-                                    }
-                                }
                                 case "chestlog" -> { //hs deathpenalty chestlog [get, log-to-ItemBox] <player>
                                     String var3 = args[2];
                                     switch (var3) {

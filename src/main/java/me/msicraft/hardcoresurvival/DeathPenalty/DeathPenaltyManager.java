@@ -18,7 +18,6 @@ public class DeathPenaltyManager {
 
     private final HardcoreSurvival plugin;
     private boolean isEnabled = false;
-    private Location spawnLocation = null;
     private double balancePercent = 0;
 
     public DeathPenaltyManager(HardcoreSurvival plugin) {
@@ -27,7 +26,6 @@ public class DeathPenaltyManager {
 
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
-        this.spawnLocation = plugin.getConfig().contains("Setting.DeathPenalty.SpawnLocation") ? plugin.getConfig().getLocation("Setting.DeathPenalty.SpawnLocation") : null;
         this.balancePercent = plugin.getConfig().contains("Setting.DeathPenalty.BalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.BalancePercent") : 0;
     }
 
@@ -161,14 +159,6 @@ public class DeathPenaltyManager {
 
     public boolean isEnabled() {
         return isEnabled;
-    }
-
-    public Location getSpawnLocation() {
-        return spawnLocation;
-    }
-
-    public void setSpawnLocation(Location spawnLocation) {
-        this.spawnLocation = spawnLocation;
     }
 
     public String locationToFormat(Location location) {

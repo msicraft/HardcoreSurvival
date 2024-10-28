@@ -7,12 +7,12 @@ Setting:
   DisableTrade: true
   DeathPenalty:
     Enabled: true
-    SpawnLocation: ''
     BalancePercent: 0.25
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10
   BreedChance: 0.15
+  ReduceArrowDamage: 0.5
   WorldName:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"
@@ -35,10 +35,10 @@ Setting:
     List:
       COAL_ORE:
         InternalName: "Disguise_CoalOre"
-        Chance: 0.01
+        Chance: 0.05
       DEEPSLATE_COAL_ORE:
         InternalName: "Disguise_DeepslateCoalOre"
-        Chance: 0.01
+        Chance: 0.05
       IRON_ORE:
         InternalName: "Disguise_IronOre"
         Chance: 0.05
@@ -47,43 +47,43 @@ Setting:
         Chance: 0.05
       COPPER_ORE:
         InternalName: "Disguise_CopperOre"
-        Chance: 0.03
+        Chance: 0.05
       DEEPSLATE_COPPER_ORE:
         InternalName: "Disguise_DeepslateCopperOre"
-        Chance: 0.03
+        Chance: 0.05
       GOLD_ORE:
         InternalName: "Disguise_GoldOre"
-        Chance: 0.1
+        Chance: 0.05
       DEEPSLATE_GOLD_ORE:
         InternalName: "Disguise_DeepslateGoldOre"
-        Chance: 0.1
+        Chance: 0.05
       REDSTONE_ORE:
         InternalName: "Disguise_RedStoneOre"
-        Chance: 0.075
+        Chance: 0.05
       DEEPSLATE_REDSTONE_ORE:
         InternalName: "Disguise_DeepslateRedStoneOre"
-        Chance: 0.075
+        Chance: 0.05
       EMERALD_ORE:
         InternalName: "Disguise_EmeraldOre"
-        Chance: 0.175
+        Chance: 0.05
       DEEPSLATE_EMERALD_ORE:
         InternalName: "Disguise_DeepslateEmeraldOre"
-        Chance: 0.175
+        Chance: 0.05
       LAPIS_ORE:
         InternalName: "Disguise_LapisOre"
-        Chance: 0.15
+        Chance: 0.05
       DEEPSLATE_LAPIS_ORE:
         InternalName: "Disguise_DeepslateLapisOre"
-        Chance: 0.15
+        Chance: 0.05
       DIAMOND_ORE:
         InternalName: "Disguise_DiamondOre"
-        Chance: 0.2
+        Chance: 0.05
       DEEPSLATE_DIAMOND_ORE:
         InternalName: "Disguise_DeepslateDiamondOre"
-        Chance: 0.2
+        Chance: 0.05
       NETHER_GOLD_ORE:
         InternalName: "Disguise_NetherGoldOre"
-        Chance: 0.2
+        Chance: 0.05
 Streamer:
   MaxInviteCount: 5
   List:

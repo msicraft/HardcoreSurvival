@@ -44,17 +44,20 @@ public class OreDisguiseRelatedEvent implements Listener {
                 Player player = e.getPlayer();
                 Location spawnLocation = block.getLocation();
                 double randomChance = Math.random();
-                if (randomChance <= chance) {
+                String lS = "World: " + spawnLocation.getWorld().getName()
+                        + " X: " + spawnLocation.getBlockX() + " Y: " + spawnLocation.getBlockY() + " Z: " + spawnLocation.getBlockZ();
+                if (randomChance < chance) {
                     ActiveMob activeMob = mythicMob.spawn(BukkitAdapter.adapt(spawnLocation), 1);
                     if (plugin.useDebug()) {
                         MessageUtil.sendDebugMessage("PlayerBlockBreak-Summon Success",
-                                "InternalName: " + internalName,
-                                "Player: " + player.getName());
+                                "InternalName: " + internalName +" | Player: " + player.getName(),
+                                "Location: " + lS);
                     }
                 } else {
                     if (plugin.useDebug()) {
                         MessageUtil.sendDebugMessage("PlayerBlockBreak-Summon Fail RandomChance",
-                                "InternalName: " + internalName, "Player: " + player.getName());
+                                "InternalName: " + internalName +" | Player: " + player.getName(),
+                                "Location: " + lS);
                     }
                 }
             }

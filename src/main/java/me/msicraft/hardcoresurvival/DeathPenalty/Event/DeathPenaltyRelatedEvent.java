@@ -14,9 +14,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
@@ -29,6 +32,34 @@ public class DeathPenaltyRelatedEvent implements Listener {
 
     public DeathPenaltyRelatedEvent(HardcoreSurvival plugin) {
         this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void chestOwnerEvent(PlayerInteractEvent e) {
+        Action action = e.getAction();
+        if (action == Action.RIGHT_CLICK_BLOCK) {
+            Player player = e.getPlayer();
+            Block chestBlock = e.getClickedBlock();
+            if (chestBlock != null) {
+                if (chestBlock.getState() instanceof TileState tileState) {
+                    PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
+                    String owner = dataContainer.get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
+                    if (owner == null) {
+                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                        playerData.getDeathPenaltyChestLog().addLocation(chestBlock.getLocation());
+                        dataContainer.set(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
+                        tileState.update();
+
+                        if (plugin.useDebug()) {
+                            Location location = chestBlock.getLocation();
+                            MessageUtil.sendDebugMessage("SpawnChestInteraction", "Player: " + player.getName(),
+                                    "Location: " + player.getWorld().getName() + " X: " + location.getBlockX() +
+                                    " Y: " + location.getBlockY() + " Z: " + location.getBlockZ());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -182,11 +213,11 @@ public class DeathPenaltyRelatedEvent implements Listener {
 
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("DeathPenalty-Ignore Status", "Player: " + player.getName(),
-                        "Status: " + ignoreDeathPenalty);
+                        "Apply Status: " + ignoreDeathPenalty);
             }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                Location spawnLocation = deathPenaltyManager.getSpawnLocation();
+                Location spawnLocation = plugin.getShopManager().getShopRegion().getCenterLocation();
                 if (spawnLocation != null) {
                     player.teleport(spawnLocation);
                 }

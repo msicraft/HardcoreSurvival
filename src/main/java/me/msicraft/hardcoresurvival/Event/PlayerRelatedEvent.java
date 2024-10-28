@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,6 +22,8 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -55,6 +58,7 @@ public class PlayerRelatedEvent implements Listener {
     private boolean disableUse;
     private final List<Material> disableUseMaterials = new ArrayList<>();
     private int shieldCooldownTick = -1;
+    private double reduceArrowDamage = 1;
 
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
@@ -72,6 +76,7 @@ public class PlayerRelatedEvent implements Listener {
                 MessageUtil.sendDebugMessage("DisableUse-Can't Load Material", "Material: " + materialName);
             }
         });
+        this.reduceArrowDamage = config.contains("Setting.ReduceArrowDamage") ? config.getDouble("Setting.ReduceArrowDamage") : 1;
     }
 
     @EventHandler
@@ -102,7 +107,7 @@ public class PlayerRelatedEvent implements Listener {
                 if (!itemMeta.hasEnchant(Enchantment.MENDING)) {
                     double random = Math.random();
                     boolean success = false;
-                    if (random <= mendingEnchantChance) {
+                    if (random < mendingEnchantChance) {
                         success = true;
                         itemMeta.addEnchant(Enchantment.MENDING, 1, true);
                         itemStack.setItemMeta(itemMeta);
@@ -198,10 +203,6 @@ public class PlayerRelatedEvent implements Listener {
                     PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
                     String owner = dataContainer.get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
                     if (owner == null) {
-                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-                        playerData.getDeathPenaltyChestLog().addLocation(chestBlock.getLocation());
-                        dataContainer.set(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
-                        tileState.update();
                     } else {
                         UUID ownerUUID = UUID.fromString(owner);
                         if (ownerUUID.equals(player.getUniqueId())) {
@@ -270,6 +271,32 @@ public class PlayerRelatedEvent implements Listener {
     @EventHandler
     public void disableCauldron(CauldronLevelChangeEvent e) {
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void reduceArrowDamage(EntityDamageByEntityEvent e) {
+        if (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
+            if (e.getDamager() instanceof AbstractArrow abstractArrow) {
+                if (abstractArrow.getShooter() instanceof Player) {
+                    double reduceDamage = e.getDamage() * reduceArrowDamage;
+                    e.setDamage(reduceDamage);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void ignoreInfinityEnchant(EntityShootBowEvent e) {
+        if (e.getEntity() instanceof Player) {
+            ItemStack itemStack = e.getBow();
+            if (itemStack != null) {
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null) {
+                    if (itemMeta.hasEnchant(Enchantment.INFINITY)) {
+                    }
+                }
+            }
+        }
     }
 
 }
