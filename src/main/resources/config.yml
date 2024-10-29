@@ -8,6 +8,18 @@ Setting:
   DeathPenalty:
     Enabled: true
     BalancePercent: 0.25
+    WorldList:
+      world:
+        - DISABLED
+      world_nether:
+        - INVENTORY
+        - BALANCE
+      world_the_end:
+        - DISABLED
+      iris_world:
+        - CHEST
+        - INVENTORY
+        - BALANCE
   PlayerTaskTick: 20
   ShieldCooldownTick: 30
   CombatSeconds: 10

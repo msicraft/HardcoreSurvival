@@ -148,13 +148,15 @@ public class GuildManager {
             leader.sendMessage(ChatColor.RED + "잘못된 {g-uuid} 입니다");
             return;
         }
-        if (guild.isTempKickMember(targetUUID)) {
-            if (seconds == -1) {
+        if (seconds == -1) {
+            if (guild.isTempKickMember(targetUUID)) {
                 guild.removeTempKickMember(targetUUID);
                 leader.sendMessage(ChatColor.GREEN + "해당 플레이어의 임시 추방이 취소되었습니다");
                 leader.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
-                return;
+            } else {
+                leader.sendMessage(ChatColor.RED + "해당 플레이어는 임시 추방 상태가 아닙니다");
             }
+            return;
         }
         guild.applyTempKick(targetUUID, seconds);
         String leftTime = TimeUtil.getTimeToFormat(guild.getTempKickTime(targetUUID));

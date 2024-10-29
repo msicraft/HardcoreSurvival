@@ -33,7 +33,7 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
-              <outputDirectory>B:\Bukkit\1.21.1 하드코어 야생\plugins</outputDirectory>
+              <outputDirectory>B:\Bukkit\1.21.1 paper test\plugins</outputDirectory>
           </configuration>
       </plugin>
       <plugin>
@@ -113,6 +113,19 @@
                   <artifactId>*</artifactId>
               </exclusion>
           </exclusions>
+      </dependency>
+      <dependency>
+          <groupId>net.Indyuce</groupId>
+          <artifactId>MMOItems-API</artifactId>
+          <version>6.10-SNAPSHOT</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>io.lumine</groupId>
+          <artifactId>MythicLib-dist</artifactId>
+          <version>1.6.2-SNAPSHOT</version>
+          <scope>provided</scope>
+          <optional>true</optional>
       </dependency>
   </dependencies>
 </project>

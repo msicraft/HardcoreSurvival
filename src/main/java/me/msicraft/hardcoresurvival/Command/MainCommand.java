@@ -15,6 +15,7 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import net.Indyuce.mmoitems.MMOItems;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -50,6 +51,9 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
+                    case "test" -> {
+                        plugin.getDeathPenaltyManager().t();
+                    }
                     case "broadcast" -> {
                         if (!sender.isOp()) {
                             return false;
@@ -184,6 +188,7 @@ public class MainCommand implements CommandExecutor {
                                     memberData.loadData();
                                     memberData.setGuildUUID(null);
                                     memberData.saveData();
+                                    playerDataManager.removeWhiteList(memberUUID);
                                 });
                                 plugin.getGuildManager().removeGuild(uuid);
                                 return true;
@@ -324,6 +329,12 @@ public class MainCommand implements CommandExecutor {
                                             }
                                             case ORAXEN -> {
                                                 String sa = OraxenItems.getIdByItem(itemStack);
+                                                config.set(path + ".InternalName", sa);
+                                            }
+                                            case MMOITEMS -> {
+                                                String typeString = MMOItems.getType(itemStack).getName();
+                                                String id = MMOItems.getID(itemStack);
+                                                String sa = typeString + ":" + id;
                                                 config.set(path + ".InternalName", sa);
                                             }
                                         }

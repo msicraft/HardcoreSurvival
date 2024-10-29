@@ -63,7 +63,7 @@ public class CustomItemRelatedEvent implements Listener {
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("Use GuildInviteScroll", "Player: " + player, "Target: " + offlinePlayer.getName());
+                        MessageUtil.sendDebugMessage("Use GuildInviteScroll", "Player: " + player.getName(), "Target: " + offlinePlayer.getName());
                     }
                 });
             } else {

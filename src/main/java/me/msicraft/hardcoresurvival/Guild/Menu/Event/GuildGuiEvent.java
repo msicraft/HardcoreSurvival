@@ -54,14 +54,15 @@ public class GuildGuiEvent implements Listener {
                 });
                 return;
             }
-            String ms = message.replaceAll("[^0-9]", "");
-            if (ms.isEmpty()) {
-                ms = "-1";
+            int seconds = Integer.parseInt(message);
+            if (seconds < -1) {
+                seconds = -1;
             }
-            int seconds = Integer.parseInt(ms);
+            int a = seconds;
             playerData.removeTempData("Guild_TempKick_Second_Edit");
-            Bukkit.getScheduler().runTask(plugin, ()-> {
-                guildManager.tempKickGuild(player, Bukkit.getOfflinePlayer(UUID.fromString(targetUUIDS)), seconds);
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                guildManager.tempKickGuild(player, Bukkit.getOfflinePlayer(UUID.fromString(targetUUIDS)), a);
+
                 GuildGui guildGui = (GuildGui) playerData.getCustomGui(GuiType.GUILD);
                 player.openInventory(guildGui.getInventory());
                 guildGui.setMain();
@@ -143,20 +144,15 @@ public class GuildGuiEvent implements Listener {
                                 player.openInventory(guildGui.getInventory());
                                 guildGui.setMain();
                             } else if (e.isRightClick()) {
-                                if (guild.isTempKickMember(targetUUID)) {
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    player.sendMessage(ChatColor.GRAY + "임시 추방 시간을 입력해주세요 (초). 숫자만 입력");
-                                    player.sendMessage(ChatColor.GRAY + "이미 임시 추방 상태인경우 시간을 연장합니다");
-                                    player.sendMessage(ChatColor.GRAY + "-1 입력시 추방 취소");
-                                    player.sendMessage(ChatColor.GRAY + "예시: 60, 180, 10");
-                                    player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    playerData.setTempData("Guild_TempKick_Second_Edit", data);
-                                    player.closeInventory();
-                                } else {
-                                    player.sendMessage(ChatColor.RED + "임시 추방상태가 아닙니다.");
-                                    return;
-                                }
+                                player.sendMessage(ChatColor.GRAY + "========================================");
+                                player.sendMessage(ChatColor.GRAY + "임시 추방 시간을 입력해주세요 (초). 숫자만 입력");
+                                player.sendMessage(ChatColor.GRAY + "이미 임시 추방 상태인경우 시간을 연장합니다");
+                                player.sendMessage(ChatColor.GRAY + "-1 입력시 추방 취소");
+                                player.sendMessage(ChatColor.GRAY + "예시: 60, 180, 10");
+                                player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
+                                player.sendMessage(ChatColor.GRAY + "========================================");
+                                playerData.setTempData("Guild_TempKick_Second_Edit", data);
+                                player.closeInventory();
                             }
                         }
                     }

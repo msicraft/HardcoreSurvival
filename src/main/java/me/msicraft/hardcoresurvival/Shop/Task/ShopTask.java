@@ -3,8 +3,11 @@ package me.msicraft.hardcoresurvival.Shop.Task;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.Utils.MathUtil;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -18,13 +21,21 @@ public class ShopTask extends BukkitRunnable {
     private boolean isMaintenance = false;
     private boolean isUpdate = false;
 
+    private final double updatePercent = 0.25;
+    private final int minUpdateSeconds;
+    private final int maxUpdateSeconds;
+
     private int seconds;
 
     public ShopTask(HardcoreSurvival plugin, ShopManager shopManager, int updateSeconds) {
         this.plugin = plugin;
         this.shopManager = shopManager;
         this.updateSeconds = updateSeconds;
-        this.seconds = updateSeconds;
+
+        this.minUpdateSeconds = (int) (updateSeconds * (1 - updatePercent));
+        this.maxUpdateSeconds = (int) (updateSeconds * (1 + updatePercent));
+
+        this.seconds = MathUtil.getRangeRandomInt(minUpdateSeconds, maxUpdateSeconds);
 
         this.maintenanceSeconds = 10;
         if (maintenanceSeconds > seconds) {
@@ -33,7 +44,7 @@ public class ShopTask extends BukkitRunnable {
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("ShopTask-Init",
-                    "Seconds: " + seconds, "UpdateSeconds: " + updateSeconds, "MaintenanceSeconds: " + maintenanceSeconds);
+                    "Random Seconds: " + seconds, "UpdateSeconds: " + updateSeconds, "MaintenanceSeconds: " + maintenanceSeconds);
         }
 
         this.runTaskTimerAsynchronously(plugin, 0, 20);
@@ -80,6 +91,8 @@ public class ShopTask extends BukkitRunnable {
             shopManager.setShopMaintenance(false);
             seconds = updateSeconds;
             isMaintenance = false;
+
+            Bukkit.getServer().broadcast(Component.text(ChatColor.BOLD + "" + ChatColor.GOLD + "상점가격이 조정되었습니다"));
 
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("ShopTask", "End-Maintenance");

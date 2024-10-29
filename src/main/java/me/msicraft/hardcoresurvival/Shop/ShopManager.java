@@ -14,6 +14,7 @@ import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopLocationTask;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopTask;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import net.Indyuce.mmoitems.MMOItems;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -199,6 +200,13 @@ public class ShopManager extends CustomGuiManager {
                     case ORAXEN -> {
                         String internalName = config.getString(path + ".InternalName", null);
                         itemStack = OraxenItems.getItemById(internalName).build();
+                    }
+                    case MMOITEMS -> {
+                        String internalName = config.getString(path + ".InternalName", null);
+                        String[] b = internalName.split(":");
+                        String type = b[0].toUpperCase();
+                        String itemId = b[1].toUpperCase();
+                        itemStack = MMOItems.plugin.getItem(type, itemId);
                     }
                 }
                 if (itemStack == null || itemStack.getType() == Material.AIR) {

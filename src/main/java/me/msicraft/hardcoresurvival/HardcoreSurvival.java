@@ -49,7 +49,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
-    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen");
+    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen", "MMOItems");
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;

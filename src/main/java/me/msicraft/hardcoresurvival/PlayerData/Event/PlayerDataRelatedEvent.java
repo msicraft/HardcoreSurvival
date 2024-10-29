@@ -12,6 +12,7 @@ import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -74,6 +75,8 @@ public class PlayerDataRelatedEvent implements Listener {
                     MessageUtil.sendDebugMessage("TempKick-Disable Join", "Player: " + player.getName());
                 }
                 return;
+            } else {
+                guild.removeTempKickMember(player.getUniqueId());
             }
         }
 
@@ -102,6 +105,13 @@ public class PlayerDataRelatedEvent implements Listener {
                 MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
             }
         });
+
+        if (!player.isOp()) {
+            World world = player.getWorld();
+            if (world.getName().equalsIgnoreCase("world")) {
+                player.teleport(world.getSpawnLocation());
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

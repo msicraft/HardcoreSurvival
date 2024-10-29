@@ -1,6 +1,5 @@
 package me.msicraft.hardcoresurvival.Event;
 
-import me.msicraft.hardcoresurvival.DeathPenalty.Event.DeathPenaltyRelatedEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
@@ -24,15 +23,18 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlayerRelatedEvent implements Listener {
@@ -56,7 +58,7 @@ public class PlayerRelatedEvent implements Listener {
     private double mendingEnchantChance = 0.0;
     private boolean disableBedExplode = false;
     private boolean disableUse;
-    private final List<Material> disableUseMaterials = new ArrayList<>();
+    private final Set<Material> disableUseMaterials = new HashSet<>();
     private int shieldCooldownTick = -1;
     private double reduceArrowDamage = 1;
 
@@ -153,12 +155,16 @@ public class PlayerRelatedEvent implements Listener {
     @EventHandler
     public void disableUse(PlayerInteractEvent e) {
         if (disableUse) {
+            Player player = e.getPlayer();
+            if (player.isOp()) {
+                return;
+            }
             Action action = e.getAction();
             if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
                 ItemStack itemStack = e.getItem();
                 if (itemStack != null) {
                     if (disableUseMaterials.contains(itemStack.getType())) {
-                        Player player = e.getPlayer();
+
                         e.setCancelled(true);
                         player.sendMessage(ChatColor.RED + "해당 아이템은 사용할 수 없습니다");
 
@@ -184,16 +190,27 @@ public class PlayerRelatedEvent implements Listener {
     public void applyShieldCooldown(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player player) {
             if (shieldCooldownTick != -1) {
-                if (player.getActiveItem().getType() == Material.SHIELD) {
+                ItemStack itemStack = player.getActiveItem();
+                if (itemStack.getType() == Material.SHIELD) {
                     player.setCooldown(Material.SHIELD, shieldCooldownTick);
                     player.clearActiveItem();
+
+                    ItemMeta itemMeta = itemStack.getItemMeta();
+                    if (itemMeta instanceof Damageable damageable) {
+                        if (damageable.hasDamage()) {
+                            damageable.setDamage(damageable.getDamage() + 1);
+                        } else {
+                            damageable.setDamage(1);
+                        }
+                        itemStack.setItemMeta(itemMeta);
+                    }
                 }
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void privateChest(PlayerInteractEvent e) {
+    public void privateChestOpen(PlayerInteractEvent e) {
         Action action = e.getAction();
         if (action == Action.RIGHT_CLICK_BLOCK) {
             Player player = e.getPlayer();
@@ -204,9 +221,8 @@ public class PlayerRelatedEvent implements Listener {
             if (chestBlock != null && plugin.getDeathPenaltyManager().isContainerMaterial(chestBlock.getType())) {
                 if (chestBlock.getState() instanceof TileState tileState) {
                     PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
-                    String owner = dataContainer.get(DeathPenaltyRelatedEvent.BLOCK_OWNER_KEY, PersistentDataType.STRING);
-                    if (owner == null) {
-                    } else {
+                    String owner = dataContainer.get(plugin.getDeathPenaltyManager().getBlockOwnerKey(), PersistentDataType.STRING);
+                    if (owner != null) {
                         UUID ownerUUID = UUID.fromString(owner);
                         if (ownerUUID.equals(player.getUniqueId())) {
                             return;
@@ -265,6 +281,14 @@ public class PlayerRelatedEvent implements Listener {
                             }
                         }
                         itemStack.setAmount(amount);
+                        if (itemMeta instanceof Damageable damageable) {
+                            int v = amount * 5;
+                            if (damageable.hasDamage()) {
+                                damageable.setDamage(damageable.getDamage() + v);
+                            } else {
+                                damageable.setDamage(v);
+                            }
+                        }
                     }
                 }
             }
@@ -296,10 +320,17 @@ public class PlayerRelatedEvent implements Listener {
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 if (itemMeta != null) {
                     if (itemMeta.hasEnchant(Enchantment.INFINITY)) {
+                        if (itemMeta instanceof Damageable damageable) {
+                        }
                     }
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void disableTame(EntityTameEvent e) {
+        e.setCancelled(true);
     }
 
 }

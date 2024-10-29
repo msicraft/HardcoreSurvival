@@ -5,28 +5,72 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import org.bukkit.*;
 import org.bukkit.block.*;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
+import java.util.*;
+
 public class DeathPenaltyManager {
+
+    public enum ActionType {
+        DISABLED, CHEST, INVENTORY, BALANCE
+    }
 
     private final HardcoreSurvival plugin;
     private boolean isEnabled = false;
     private double balancePercent = 0;
 
+    private final Map<String, Set<ActionType>> worldActionMap = new HashMap<>();
+
     public DeathPenaltyManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
+
+        this.blockOwnerKey = new NamespacedKey(HardcoreSurvival.getPlugin(), "Block_Owner");
+    }
+
+    public void t() {
+        worldActionMap.forEach((s, actionTypes) -> {
+            System.out.println("World: " + s);
+            System.out.println("Sets: " + actionTypes);
+        });
     }
 
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
         this.balancePercent = plugin.getConfig().contains("Setting.DeathPenalty.BalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.BalancePercent") : 0;
+
+        ConfigurationSection worldActionSection = plugin.getConfig().getConfigurationSection("Setting.DeathPenalty.WorldList");
+        if (worldActionSection != null) {
+            Set<String> worlds = worldActionSection.getKeys(false);
+            for (String worldName : worlds) {
+                List<String> actionList = plugin.getConfig().getStringList("Setting.DeathPenalty.WorldList." + worldName);
+                Set<ActionType> sets;
+                if (worldActionMap.containsKey(worldName)) {
+                    sets = worldActionMap.get(worldName);
+                } else {
+                    sets = new HashSet<>();
+                }
+                for (String actionS : actionList) {
+                    ActionType actionType;
+                    try {
+                        actionType = ActionType.valueOf(actionS.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        actionType = ActionType.DISABLED;
+                    }
+                    sets.add(actionType);
+                }
+                worldActionMap.put(worldName, sets);
+            }
+        } else {
+            worldActionMap.clear();
+        }
     }
 
     public boolean isContainerMaterial(Material material) {
@@ -43,11 +87,36 @@ public class DeathPenaltyManager {
 
     public void applyDeathPenalty(PlayerData playerData) {
         Player player = playerData.getPlayer();
+        Set<ActionType> sets = getWorldActionTypes(player.getWorld().getName());
+        for (ActionType actionType : sets) {
+            switch (actionType) {
+                case DISABLED -> {
+                }
+                case INVENTORY -> {
+                    removeInventory(player);
+                }
+                case BALANCE -> {
+                    removeBalance(player);
+                }
+                case CHEST -> {
+                    removeDeathPenaltyChestLog(playerData);
+                }
+            }
+        }
+
+        if (plugin.useDebug()) {
+            MessageUtil.sendDebugMessage("Apply DeathPenalty", "Player: " + player.getName(), "ActionTypes: " + sets);
+        }
+    }
+
+    private void removeInventory(Player player) {
         player.setLevel(0);
         player.setExp(0);
         player.getInventory().clear();
         player.getEnderChest().clear();
+    }
 
+    private void removeBalance(Player player) {
         double balance = plugin.getEconomy().getBalance(player);
         plugin.getEconomy().withdrawPlayer(player, balance);
         int i = (int) (balance * balancePercent);
@@ -55,7 +124,9 @@ public class DeathPenaltyManager {
             i = 0;
         }
         plugin.getEconomy().depositPlayer(player, i);
+    }
 
+    private void removeDeathPenaltyChestLog(PlayerData playerData) {
         DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
             Block block = location.getBlock();
@@ -176,6 +247,28 @@ public class DeathPenaltyManager {
         double y = Double.parseDouble(split[2]);
         double z = Double.parseDouble(split[3]);
         return new Location(world, x, y, z);
+    }
+
+    private final NamespacedKey blockOwnerKey;
+
+    public NamespacedKey getBlockOwnerKey() {
+        return blockOwnerKey;
+    }
+
+    public String getChestOwner(Block block) {
+        if (block != null && isContainerMaterial(block.getType())) {
+            if (block.getState() instanceof TileState tileState) {
+                PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
+                if (dataContainer.has(blockOwnerKey, PersistentDataType.STRING)) {
+                    return dataContainer.get(blockOwnerKey, PersistentDataType.STRING);
+                }
+            }
+        }
+        return null;
+    }
+
+    public Set<ActionType> getWorldActionTypes(String worldName) {
+        return worldActionMap.getOrDefault(worldName, new HashSet<>(0));
     }
 
 }
