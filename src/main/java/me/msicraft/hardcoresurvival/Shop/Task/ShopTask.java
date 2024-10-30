@@ -88,14 +88,16 @@ public class ShopTask extends BukkitRunnable {
         }
 
         if (seconds <= 0) {
+            seconds = MathUtil.getRangeRandomInt(minUpdateSeconds, maxUpdateSeconds);
+
             shopManager.setShopMaintenance(false);
-            seconds = updateSeconds;
             isMaintenance = false;
 
             Bukkit.getServer().broadcast(Component.text(ChatColor.BOLD + "" + ChatColor.GOLD + "상점가격이 조정되었습니다"));
 
             if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("ShopTask", "End-Maintenance");
+                MessageUtil.sendDebugMessage("ShopTask-End-Maintenance",
+                        "Random Seconds: " + seconds, "UpdateSeconds: " + updateSeconds, "MaintenanceSeconds: " + maintenanceSeconds);
             }
         }
     }

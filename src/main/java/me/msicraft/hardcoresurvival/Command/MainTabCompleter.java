@@ -25,7 +25,7 @@ public class MainTabCompleter implements TabCompleter {
             if (sender.isOp()) {
                 if (args.length == 1) {
                     return List.of("reload", "deathpenalty", "shop", "customitem", "streamer",
-                            "itembox", "info", "broadcast", "save-date", "maintenance", "set-maintenance");
+                            "itembox", "info", "broadcast", "save-data", "maintenance", "set-maintenance");
                 }
                 if (args.length == 2) {
                     String var = args[0];
@@ -39,7 +39,7 @@ public class MainTabCompleter implements TabCompleter {
                         return List.of("add", "remove", "list");
                     } else if (var.equalsIgnoreCase("itembox")) {
                         return List.of("give");
-                    } else if (var.equalsIgnoreCase("save-date")) {
+                    } else if (var.equalsIgnoreCase("save-data")) {
                         return List.of("shop");
                     }
                 }

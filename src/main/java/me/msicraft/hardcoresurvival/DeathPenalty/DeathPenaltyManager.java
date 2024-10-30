@@ -35,13 +35,6 @@ public class DeathPenaltyManager {
         this.blockOwnerKey = new NamespacedKey(HardcoreSurvival.getPlugin(), "Block_Owner");
     }
 
-    public void t() {
-        worldActionMap.forEach((s, actionTypes) -> {
-            System.out.println("World: " + s);
-            System.out.println("Sets: " + actionTypes);
-        });
-    }
-
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
         this.balancePercent = plugin.getConfig().contains("Setting.DeathPenalty.BalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.BalancePercent") : 0;
@@ -54,6 +47,7 @@ public class DeathPenaltyManager {
                 Set<ActionType> sets;
                 if (worldActionMap.containsKey(worldName)) {
                     sets = worldActionMap.get(worldName);
+                    sets.clear();
                 } else {
                     sets = new HashSet<>();
                 }
@@ -67,6 +61,10 @@ public class DeathPenaltyManager {
                     sets.add(actionType);
                 }
                 worldActionMap.put(worldName, sets);
+
+                if (plugin.useDebug()) {
+                    MessageUtil.sendDebugMessage("DeathPenalty-WorldActionTypes", "WorldName: " + worldName, "ActionTypes: " + sets);
+                }
             }
         } else {
             worldActionMap.clear();
@@ -85,9 +83,9 @@ public class DeathPenaltyManager {
         return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX") || materialName.contains("BARREL");
     }
 
-    public void applyDeathPenalty(PlayerData playerData) {
+    public void applyDeathPenalty(PlayerData playerData, String deathWorldName) {
         Player player = playerData.getPlayer();
-        Set<ActionType> sets = getWorldActionTypes(player.getWorld().getName());
+        Set<ActionType> sets = getWorldActionTypes(deathWorldName);
         for (ActionType actionType : sets) {
             switch (actionType) {
                 case DISABLED -> {
@@ -105,7 +103,8 @@ public class DeathPenaltyManager {
         }
 
         if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("Apply DeathPenalty", "Player: " + player.getName(), "ActionTypes: " + sets);
+            MessageUtil.sendDebugMessage("Apply DeathPenalty",
+                    "WorldName: " + deathWorldName + " | Player: " + player.getName(), "ActionTypes: " + sets);
         }
     }
 

@@ -306,7 +306,8 @@ public class ShopManager extends CustomGuiManager {
 
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("ShopItem-Buy", "Player: " + player.getName(),
-                        " ItemType: " + shopItem.getItemType().name() + " | Id: " + shopItem.getId()+ " | Amount: " + amount);
+                        " ItemType: " + shopItem.getItemType().name() + " | Id: " + shopItem.getId()
+                                + " | Amount: " + amount + " | TotalPrice: " + totalPrice);
             }
         } else {
             player.sendMessage(ChatColor.RED + "해당 아이템이 존재하지 않습니다");

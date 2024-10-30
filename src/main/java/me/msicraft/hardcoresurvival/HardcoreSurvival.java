@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival;
 
 import me.msicraft.hardcoresurvival.API.MythicMobs.MythicMobsRegisterEvent;
+import me.msicraft.hardcoresurvival.API.PAPIExpansion;
 import me.msicraft.hardcoresurvival.Command.MainCommand;
 import me.msicraft.hardcoresurvival.Command.MainTabCompleter;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
@@ -21,7 +22,6 @@ import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.Event.ShopGuiEvent;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
-import me.msicraft.hardcoresurvival.TeamManager.TeamManager;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -49,7 +49,7 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
-    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen", "MMOItems");
+    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen", "MMOItems", "PlaceholderAPI");
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;
@@ -66,7 +66,6 @@ public final class HardcoreSurvival extends JavaPlugin {
     private ShopManager shopManager;
     private CustomItemManager customItemManager;
     private GuildManager guildManager;
-    private TeamManager teamManager;
 
     private boolean maintenance = true;
 
@@ -83,7 +82,6 @@ public final class HardcoreSurvival extends JavaPlugin {
         customItemManager = new CustomItemManager(this);
         shopManager = new ShopManager(this);
         guildManager = new GuildManager(this);
-        teamManager = new TeamManager(this);
 
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -105,6 +103,8 @@ public final class HardcoreSurvival extends JavaPlugin {
             }
         }
 
+        new PAPIExpansion(this).register();
+
         registeredEvents();
         registeredCommands();
 
@@ -123,14 +123,11 @@ public final class HardcoreSurvival extends JavaPlugin {
                 continue;
             }
             playerData.saveData();
-            teamManager.unRegisterTeam(player);
         }
 
         shopManager.saveShopData();
         playerDataManager.saveData();
         guildManager.saveGuild();
-
-        //teamManager.unRegisterAll();
     }
 
     public void registeredEvents() {
@@ -144,7 +141,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new ItemBoxGuiEvent(this), this);
         pluginManager.registerEvents(new ShopGuiEvent(this), this);
         pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
-        pluginManager.registerEvents(new GuildGuiEvent(this),this);
+        pluginManager.registerEvents(new GuildGuiEvent(this), this);
         pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
     }
 
@@ -231,6 +228,10 @@ public final class HardcoreSurvival extends JavaPlugin {
         return economy;
     }
 
+    public Chat getChat() {
+        return chat;
+    }
+
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
     }
@@ -269,10 +270,6 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public GuildManager getGuildManager() {
         return guildManager;
-    }
-
-    public TeamManager getTeamManager() {
-        return teamManager;
     }
 
 }

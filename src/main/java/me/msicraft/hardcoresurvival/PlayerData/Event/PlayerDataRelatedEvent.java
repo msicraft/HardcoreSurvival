@@ -10,7 +10,6 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -98,9 +97,6 @@ public class PlayerDataRelatedEvent implements Listener {
             playerData.setLastLogin(System.currentTimeMillis());
             player.sendMessage(ChatColor.GREEN + "데이터 로딩 완료");
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                plugin.getTeamManager().updateTeam(player);
-            });
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("PlayerData Loaded", "Player: " + player.getName());
             }
@@ -127,16 +123,12 @@ public class PlayerDataRelatedEvent implements Listener {
 
             playerDataManager.unregisterPlayerData(player);
         });
-
-        plugin.getTeamManager().unRegisterTeam(player);
     }
 
     @EventHandler
     public void playerDataLoad(PlayerDataLoadEvent e) {
         PlayerData playerData = e.getPlayerData();
         Player player = playerData.getPlayer();
-
-        plugin.getTeamManager().registerTeam(player);
     }
 
     @EventHandler

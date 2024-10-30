@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.Command;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.lib.api.item.NBTItem;
 import io.th0rgal.oraxen.api.OraxenItems;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
@@ -15,7 +16,6 @@ import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import net.Indyuce.mmoitems.MMOItems;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -52,7 +52,16 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
-                        plugin.getDeathPenaltyManager().t();
+                        if (sender instanceof Player player) {
+                            ItemStack itemStack = player.getInventory().getItemInMainHand();
+                            NBTItem nbtItem = NBTItem.get(itemStack);
+                            if (nbtItem.hasType()) {
+                                String typeString = nbtItem.getType().toUpperCase();
+                                String id = nbtItem.getString("MMOITEMS_ITEM_ID");
+                                String sa = typeString + ":" + id;
+                                System.out.println(sa);
+                            }
+                        }
                     }
                     case "broadcast" -> {
                         if (!sender.isOp()) {
@@ -110,7 +119,7 @@ public class MainCommand implements CommandExecutor {
                             return false;
                         }
                     }
-                    case "save-date" -> { //hs save-data [shop]
+                    case "save-data" -> { //hs save-data [shop]
                         if (!sender.isOp()) {
                             return false;
                         }
@@ -332,10 +341,13 @@ public class MainCommand implements CommandExecutor {
                                                 config.set(path + ".InternalName", sa);
                                             }
                                             case MMOITEMS -> {
-                                                String typeString = MMOItems.getType(itemStack).getName();
-                                                String id = MMOItems.getID(itemStack);
-                                                String sa = typeString + ":" + id;
-                                                config.set(path + ".InternalName", sa);
+                                                NBTItem nbtItem = NBTItem.get(itemStack);
+                                                if (nbtItem.hasType()) {
+                                                    String typeString = nbtItem.getType().toUpperCase();
+                                                    String id = nbtItem.getString("MMOITEMS_ITEM_ID");
+                                                    String sa = typeString + ":" + id;
+                                                    config.set(path + ".InternalName", sa);
+                                                }
                                             }
                                         }
                                         shopManager.getShopDataFile().saveConfig();

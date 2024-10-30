@@ -33,7 +33,7 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
-              <outputDirectory>B:\Bukkit\1.21.1 paper test\plugins</outputDirectory>
+              <outputDirectory>B:\Bukkit\1.21.1 하드코어 야생\plugins</outputDirectory>
           </configuration>
       </plugin>
       <plugin>
@@ -81,6 +81,10 @@
           <name>Oraxen Repository</name>
           <url>https://repo.oraxen.com/releases/</url>
       </repository>
+      <repository>
+          <id>placeholderapi</id>
+          <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -126,6 +130,12 @@
           <version>1.6.2-SNAPSHOT</version>
           <scope>provided</scope>
           <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>me.clip</groupId>
+          <artifactId>placeholderapi</artifactId>
+          <version>2.11.6</version>
+          <scope>provided</scope>
       </dependency>
   </dependencies>
 </project>

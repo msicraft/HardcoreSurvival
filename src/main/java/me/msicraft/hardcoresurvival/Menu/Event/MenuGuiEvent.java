@@ -102,7 +102,6 @@ public class MenuGuiEvent implements Listener {
             }
             playerData.removeTempData("NickName_First");
             Bukkit.getScheduler().runTask(plugin, ()-> {
-                plugin.getTeamManager().updateTeam(player);
                 openMainMenu(player);
             });
             return;
@@ -127,7 +126,6 @@ public class MenuGuiEvent implements Listener {
             }
             playerData.removeTempData("NickName_Change");
             Bukkit.getScheduler().runTask(plugin, ()-> {
-                plugin.getTeamManager().updateTeam(player);
                 openMainMenu(player);
             });
             return;

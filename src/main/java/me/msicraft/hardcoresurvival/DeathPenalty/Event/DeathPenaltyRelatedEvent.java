@@ -218,29 +218,13 @@ public class DeathPenaltyRelatedEvent implements Listener {
         if (deathPenaltyManager.isEnabled()) {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-            boolean ignoreDeathPenalty = (boolean) playerData.getData("IgnoreDeathPenalty", false);
-            if (ignoreDeathPenalty) {
-                e.setKeepInventory(true);
-                e.setKeepLevel(true);
 
-                playerData.setData("IgnoreDeathPenalty", false);
-                playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
+            playerData.setTempData("DeathWorldName", player.getWorld().getName());
 
-                player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
-
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
-                }
-            } else {
-                e.getItemsToKeep().clear();
-            }
+            e.setKeepInventory(true);
+            e.setKeepLevel(true);
             e.getDrops().clear();
             e.setDroppedExp(0);
-
-            if (plugin.useDebug()) {
-                MessageUtil.sendDebugMessage("DeathPenalty-Ignore Status", "Player: " + player.getName(),
-                        "Apply Status: " + ignoreDeathPenalty);
-            }
         }
     }
 
@@ -251,8 +235,26 @@ public class DeathPenaltyRelatedEvent implements Listener {
 
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
             boolean ignoreDeathPenalty = (boolean) playerData.getData("IgnoreDeathPenalty", false);
-            if (!ignoreDeathPenalty) {
-                deathPenaltyManager.applyDeathPenalty(playerData);
+            if (ignoreDeathPenalty) {
+                playerData.setData("IgnoreDeathPenalty", false);
+                playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
+
+                player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
+
+                if (plugin.useDebug()) {
+                    MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
+                }
+            } else {
+                String deathWorldName = (String) playerData.getTempData("DeathWorldName");
+                if (deathWorldName == null) {
+                    MessageUtil.sendDebugMessage("Unknown DeathWorld", "Player: " + player.getName());
+                }
+                deathPenaltyManager.applyDeathPenalty(playerData, deathWorldName);
+            }
+
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("DeathPenalty-Ignore Status", "Player: " + player.getName(),
+                        "Apply Status: " + ignoreDeathPenalty);
             }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
