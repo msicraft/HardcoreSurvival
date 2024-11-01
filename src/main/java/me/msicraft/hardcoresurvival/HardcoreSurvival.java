@@ -1,7 +1,9 @@
 package me.msicraft.hardcoresurvival;
 
+import fr.maxlego08.zauctionhouse.api.AuctionManager;
 import me.msicraft.hardcoresurvival.API.MythicMobs.MythicMobsRegisterEvent;
 import me.msicraft.hardcoresurvival.API.PAPIExpansion;
+import me.msicraft.hardcoresurvival.API.zAuctionV3.AuctionRelatedEvent;
 import me.msicraft.hardcoresurvival.Command.MainCommand;
 import me.msicraft.hardcoresurvival.Command.MainTabCompleter;
 import me.msicraft.hardcoresurvival.CustomItem.CustomItemManager;
@@ -12,8 +14,8 @@ import me.msicraft.hardcoresurvival.Event.EntityRelatedEvent;
 import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
 import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.Guild.Menu.Event.GuildGuiEvent;
-import me.msicraft.hardcoresurvival.ItemBox.Event.ItemBoxGuiEvent;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
+import me.msicraft.hardcoresurvival.ItemBox.Menu.Event.ItemBoxGuiEvent;
 import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.Event.OreDisguiseRelatedEvent;
 import me.msicraft.hardcoresurvival.OreDisguise.OreDisguiseManager;
@@ -49,7 +51,8 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     public static final String PREFIX = ChatColor.GREEN + "[HardcoreSurvival] ";
 
-    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen", "MMOItems", "PlaceholderAPI");
+    private final List<String> checkPluginNameList = List.of("MythicMobs", "Vault", "Oraxen",
+            "MMOItems", "PlaceholderAPI", "zAuctionHouseV3");
 
     private boolean useDebug = false;
     private int playerTaskTick = 20;
@@ -57,6 +60,8 @@ public final class HardcoreSurvival extends JavaPlugin {
 
     private Economy economy;
     private Chat chat;
+
+    private AuctionManager auctionManager;
 
     private PlayerDataManager playerDataManager;
     private DeathPenaltyManager deathPenaltyManager;
@@ -143,6 +148,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildGuiEvent(this), this);
         pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
+        pluginManager.registerEvents(new AuctionRelatedEvent(this), this);
     }
 
     public void registeredCommands() {
@@ -210,6 +216,20 @@ public final class HardcoreSurvival extends JavaPlugin {
         RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
         chat = rsp.getProvider();
         return chat != null;
+    }
+
+    private  <T> T getProvider(Class<T> classz) {
+        RegisteredServiceProvider<T> provider = Bukkit.getServer().getServicesManager().getRegistration(classz);
+        if (provider == null)
+            return null;
+        return provider.getProvider() != null ? (T) provider.getProvider() : null;
+    }
+
+    public AuctionManager getAuctionManager() {
+        if (auctionManager == null) {
+            auctionManager = getProvider(AuctionManager.class);
+        }
+        return auctionManager;
     }
 
     public boolean isMaintenance() {

@@ -11,6 +11,21 @@ public class ShopItem {
         VANILLA, MYTHICMOBS, CUSTOM_ITEM, ORAXEN, MMOITEMS
     }
 
+    public enum Category {
+        FARM("농사"), CONSUMABLE("소모품"), ECONOMY("화폐"),
+        EQUIPMENT("장비"), NONE("기타");
+
+        private final String displayName;
+
+        Category(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
     private final String id;
     private ItemStack itemStack;
 
@@ -52,17 +67,12 @@ public class ShopItem {
 
         double changeV = shopManager.getPerValueChangeMaxPercent();
         double randomChangeValue = MathUtil.getRangeRandomDouble(changeV, -changeV);
-        if (randomChangeValue < 0) {
-            randomChangeValue = Math.abs(randomChangeValue);
-            price = (int) (price - (price * randomChangeValue));
-            if (price < minPrice) {
-                price = minPrice;
-            }
-        } else {
-            price = (int) (price + (price * randomChangeValue));
-            if (price > maxPrice) {
-                price = maxPrice;
-            }
+        price = (int) (price + (price * randomChangeValue));
+        if (price < minPrice) {
+            price = minPrice;
+        }
+        if (price > maxPrice) {
+            price = maxPrice;
         }
     }
 
@@ -171,6 +181,7 @@ public class ShopItem {
                 ", stock=" + stock +
                 ", basePrice=" + basePrice +
                 ", price=" + price +
+                ", DisableSell=" + disableSell +
                 '}';
     }
 

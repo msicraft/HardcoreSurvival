@@ -26,7 +26,7 @@ CustomItem:
     MaxStackSize: 1
     CoolDown: 7200
     Lore:
-      - "&f우 클릭: 죽음 패널티를 1회 보호"
+      - "&f우 클릭: 죽음 패널티 면역 활성화"
       - ""
       - "&c전투중 사용 불가"
       - ""

@@ -1,7 +1,11 @@
 package me.msicraft.hardcoresurvival.DeathPenalty;
 
+import fr.maxlego08.zauctionhouse.api.AuctionItem;
+import fr.maxlego08.zauctionhouse.api.AuctionManager;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -20,7 +24,7 @@ import java.util.*;
 public class DeathPenaltyManager {
 
     public enum ActionType {
-        DISABLED, CHEST, INVENTORY, BALANCE
+        DISABLED, CHEST, INVENTORY, BALANCE, ITEMBOX, AUCTION
     }
 
     private final HardcoreSurvival plugin;
@@ -83,7 +87,8 @@ public class DeathPenaltyManager {
         return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX") || materialName.contains("BARREL");
     }
 
-    public void applyDeathPenalty(PlayerData playerData, String deathWorldName) {
+    public void applyDeathPenalty(PlayerData playerData) {
+        String deathWorldName = (String) playerData.getData("DeathWorldName", "world");
         Player player = playerData.getPlayer();
         Set<ActionType> sets = getWorldActionTypes(deathWorldName);
         for (ActionType actionType : sets) {
@@ -91,60 +96,68 @@ public class DeathPenaltyManager {
                 case DISABLED -> {
                 }
                 case INVENTORY -> {
-                    removeInventory(player);
+                    player.setLevel(0);
+                    player.setExp(0);
+                    player.getInventory().clear();
+                    player.getEnderChest().clear();
                 }
                 case BALANCE -> {
-                    removeBalance(player);
+                    double balance = plugin.getEconomy().getBalance(player);
+                    plugin.getEconomy().withdrawPlayer(player, balance);
+                    int i = (int) (balance * balancePercent);
+                    if (i < 0) {
+                        i = 0;
+                    }
+                    plugin.getEconomy().depositPlayer(player, i);
                 }
                 case CHEST -> {
-                    removeDeathPenaltyChestLog(playerData);
+                    DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
+                    deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
+                        Block block = location.getBlock();
+                        String materialName = block.getType().name();
+                        if (materialName.contains("CHEST")) {
+                            Chest chest = (Chest) block.getState();
+                            chest.getBlockInventory().clear();
+                            block.setType(Material.AIR);
+                        } else if (materialName.contains("SHULKER_BOX")) {
+                            ShulkerBox shulkerBox = (ShulkerBox) block.getState();
+                            shulkerBox.getInventory().clear();
+                            block.setType(Material.AIR);
+                        } else if (materialName.contains("BARREL")) {
+                            Barrel barrel = (Barrel) block.getState();
+                            barrel.getInventory().clear();
+                            block.setType(Material.AIR);
+                        }
+                    });
+                    deathPenaltyChestLog.reset();
+                }
+                case ITEMBOX -> {
+                    ItemBox itemBox = playerData.getItemBox();
+                    Iterator<ItemBoxStack> it = itemBox.getList().iterator();
+                    while (it.hasNext()) {
+                        ItemBoxStack itemBoxStack = it.next();
+                        if (itemBoxStack.isUnlimitedExpiredTime()) {
+                            continue;
+                        }
+                        it.remove();
+                    }
+                }
+                case AUCTION -> {
+                    AuctionManager auctionManager = plugin.getAuctionManager();
+                    List<AuctionItem> list = auctionManager.getItems(player);
+                    for (AuctionItem auctionItem : list) {
+                        ItemStack itemStack = auctionItem.getItemStack();
+                        itemStack.setAmount(0);
+                    }
                 }
             }
         }
+        playerData.setData("DeathWorldName", null);
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("Apply DeathPenalty",
                     "WorldName: " + deathWorldName + " | Player: " + player.getName(), "ActionTypes: " + sets);
         }
-    }
-
-    private void removeInventory(Player player) {
-        player.setLevel(0);
-        player.setExp(0);
-        player.getInventory().clear();
-        player.getEnderChest().clear();
-    }
-
-    private void removeBalance(Player player) {
-        double balance = plugin.getEconomy().getBalance(player);
-        plugin.getEconomy().withdrawPlayer(player, balance);
-        int i = (int) (balance * balancePercent);
-        if (i < 0) {
-            i = 0;
-        }
-        plugin.getEconomy().depositPlayer(player, i);
-    }
-
-    private void removeDeathPenaltyChestLog(PlayerData playerData) {
-        DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
-        deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
-            Block block = location.getBlock();
-            String materialName = block.getType().name();
-            if (materialName.contains("CHEST")) {
-                Chest chest = (Chest) block.getState();
-                chest.getBlockInventory().clear();
-                block.setType(Material.AIR);
-            } else if (materialName.contains("SHULKER_BOX")) {
-                ShulkerBox shulkerBox = (ShulkerBox) block.getState();
-                shulkerBox.getInventory().clear();
-                block.setType(Material.AIR);
-            } else if (materialName.contains("BARREL")) {
-                Barrel barrel = (Barrel) block.getState();
-                barrel.getInventory().clear();
-                block.setType(Material.AIR);
-            }
-        });
-        deathPenaltyChestLog.reset();
     }
 
     public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
@@ -158,21 +171,21 @@ public class DeathPenaltyManager {
                     Chest chest = (Chest) block.getState();
                     ItemStack[] itemStacks = chest.getBlockInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 } else if (materialName.contains("SHULKER_BOX")) {
                     ShulkerBox shulkerBox = (ShulkerBox) block.getState();
                     ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 } else if (materialName.contains("BARREL")) {
                     Barrel barrel = (Barrel) block.getState();
                     ItemStack[] itemStacks = barrel.getInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 }

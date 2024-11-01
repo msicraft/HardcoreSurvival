@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.Event;
 
+import io.lumine.mythic.bukkit.MythicBukkit;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
@@ -24,8 +25,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.DecoratedPotInventory;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -331,6 +336,31 @@ public class PlayerRelatedEvent implements Listener {
     @EventHandler
     public void disableTame(EntityTameEvent e) {
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void playerDisableContainerToBlock(InventoryCloseEvent e) {
+        Player player = (Player) e.getPlayer();
+        Inventory inventory = e.getInventory();
+        if (inventory instanceof FurnaceInventory furnaceInventory) {
+            ItemStack itemStack = furnaceInventory.getSmelting();
+            if (MythicBukkit.inst().getItemManager().isMythicItem(itemStack)) {
+                player.getInventory().addItem(itemStack);
+                furnaceInventory.setSmelting(null);
+            } else if (plugin.getCustomItemManager().getCustomItemInternalName(itemStack) != null) {
+                player.getInventory().addItem(itemStack);
+                furnaceInventory.setSmelting(null);
+            }
+        } else if (inventory instanceof DecoratedPotInventory decoratedPotInventory) {
+            ItemStack itemStack = decoratedPotInventory.getItem();
+            if (MythicBukkit.inst().getItemManager().isMythicItem(itemStack)) {
+                player.getInventory().addItem(itemStack);
+                decoratedPotInventory.setItem(null);
+            } else if (plugin.getCustomItemManager().getCustomItemInternalName(itemStack) != null) {
+                player.getInventory().addItem(itemStack);
+                decoratedPotInventory.setItem(null);
+            }
+        }
     }
 
 }

@@ -219,7 +219,11 @@ public class DeathPenaltyRelatedEvent implements Listener {
             Player player = e.getPlayer();
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
-            playerData.setTempData("DeathWorldName", player.getWorld().getName());
+            boolean ignoreDeathPenalty = (boolean) playerData.getData("IgnoreDeathPenalty", false);
+            if (ignoreDeathPenalty) {
+            } else {
+                playerData.setData("DeathWorldName", player.getWorld().getName());
+            }
 
             e.setKeepInventory(true);
             e.setKeepLevel(true);
@@ -245,11 +249,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
                     MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
                 }
             } else {
-                String deathWorldName = (String) playerData.getTempData("DeathWorldName");
-                if (deathWorldName == null) {
-                    MessageUtil.sendDebugMessage("Unknown DeathWorld", "Player: " + player.getName());
-                }
-                deathPenaltyManager.applyDeathPenalty(playerData, deathWorldName);
+                deathPenaltyManager.applyDeathPenalty(playerData);
             }
 
             if (plugin.useDebug()) {

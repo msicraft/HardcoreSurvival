@@ -1,6 +1,7 @@
-package me.msicraft.hardcoresurvival.ItemBox.Data;
+package me.msicraft.hardcoresurvival.ItemBox.Menu;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.GuiUtil;
@@ -63,7 +64,7 @@ public class ItemBoxGui extends CustomGui {
 
         for (int a = lastCount; a <maxSize; a++) {
             ItemBoxStack itemBoxStack = itemBoxList.get(a);
-            ItemStack guiStack = itemBoxStack.getGuiStack();
+            ItemStack guiStack = itemBoxStack.createGuiStack();
             ItemMeta itemMeta = guiStack.getItemMeta();
             PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
             dataContainer.set(SELECT_KEY, PersistentDataType.STRING, String.valueOf(a));

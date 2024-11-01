@@ -25,22 +25,31 @@ public class MainTabCompleter implements TabCompleter {
             if (sender.isOp()) {
                 if (args.length == 1) {
                     return List.of("reload", "deathpenalty", "shop", "customitem", "streamer",
-                            "itembox", "info", "broadcast", "save-data", "maintenance", "set-maintenance");
+                            "itembox", "info", "broadcast", "save-data", "maintenance", "set-maintenance", "debug");
                 }
                 if (args.length == 2) {
-                    String var = args[0];
-                    if (var.equalsIgnoreCase("deathpenalty")) {
-                        return List.of("chestlog");
-                    } else if (var.equalsIgnoreCase("shop")) {
-                        return List.of("register", "unregister", "setcenter", "edit", "price-update");
-                    } else if (var.equalsIgnoreCase("customitem")) {
-                        return List.copyOf(plugin.getCustomItemManager().getInternalNames());
-                    } else if (var.equalsIgnoreCase("streamer")) {
-                        return List.of("add", "remove", "list");
-                    } else if (var.equalsIgnoreCase("itembox")) {
-                        return List.of("give");
-                    } else if (var.equalsIgnoreCase("save-data")) {
-                        return List.of("shop");
+                    switch (args[0]) {
+                        case "deathpenalty" -> {
+                            return List.of("chestlog");
+                        }
+                        case "shop" -> {
+                            return List.of("register", "unregister", "setcenter", "edit", "price-update");
+                        }
+                        case "customitem" -> {
+                            return List.copyOf(plugin.getCustomItemManager().getInternalNames());
+                        }
+                        case "streamer" -> {
+                            return List.of("add", "remove", "list");
+                        }
+                        case "itembox" -> {
+                            return List.of("give");
+                        }
+                        case "save-data" -> {
+                            return List.of("shop");
+                        }
+                        case "debug" -> {
+                            return List.of("change-nickname");
+                        }
                     }
                 }
                 if (args.length == 3) {
@@ -93,6 +102,8 @@ public class MainTabCompleter implements TabCompleter {
                         } else if (var2.equalsIgnoreCase("edit")) {
                             return List.of("UseStaticPrice", "UnlimitStock", "BasePrice", "Price", "Stock", "DisableSell");
                         }
+                    } else if (var.equalsIgnoreCase("itembox")) {
+                        return List.of("<expiredSeconds>");
                     }
                 }
                 if (args.length == 5) {

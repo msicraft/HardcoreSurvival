@@ -35,6 +35,9 @@ public class ItemBox {
     public boolean receiveItemBoxStack(int index, Player player) {
         if (index >= 0 && index < list.size()) {
             ItemBoxStack itemBoxStack = list.get(index);
+            if (itemBoxStack.isExpired()) {
+                return false;
+            }
             int slot = player.getInventory().firstEmpty();
             if (slot != -1) {
                 player.getInventory().addItem(itemBoxStack.getItemStack());

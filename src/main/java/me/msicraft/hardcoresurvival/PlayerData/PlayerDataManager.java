@@ -1,6 +1,5 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
-import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadEvent;
 import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -72,10 +71,6 @@ public class PlayerDataManager {
 
     public void registerPlayerData(Player player, PlayerData playerData) {
         playerDataMap.put(player.getUniqueId(), playerData);
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataLoadEvent(player, playerData));
-        });
     }
 
     public void unregisterPlayerData(Player player) {

@@ -166,10 +166,6 @@ public class OfflinePlayerData {
         return dataMap.containsKey(key);
     }
 
-    public void removeData(String key) {
-        dataMap.remove(key);
-    }
-
     public void setPersonalOption(PersonalOption personalOption, Object value) {
         personalOptionMap.put(personalOption, value);
     }

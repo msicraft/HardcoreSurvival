@@ -94,17 +94,22 @@ public class MenuGuiEvent implements Listener {
                 return;
             }
             String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.length() > 8) {
-                player.sendMessage(ChatColor.RED + "8 자리를 초과하였습니다");
+            if (nickName.equalsIgnoreCase("Unknown")) {
+                player.sendMessage(ChatColor.RED + "사용할 수 없는 닉네임 입니다");
             } else {
-                playerData.setData("NickName", nickName);
-                player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+                if (nickName.length() > 10) {
+                    player.sendMessage(ChatColor.RED + "10 자리를 초과하였습니다");
+                } else {
+                    playerData.setData("NickName", nickName);
+                    player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+                }
             }
             playerData.removeTempData("NickName_First");
             Bukkit.getScheduler().runTask(plugin, ()-> {
                 openMainMenu(player);
             });
             return;
+
         }
         String nickName_Change = (String) playerData.getTempData("NickName_Change", null);
         if (nickName_Change != null) {
@@ -118,11 +123,15 @@ public class MenuGuiEvent implements Listener {
                 return;
             }
             String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.length() > 8) {
-                player.sendMessage(ChatColor.RED + "8 자리를 초과하였습니다");
+            if (nickName.equalsIgnoreCase("Unknown")) {
+                player.sendMessage(ChatColor.RED + "사용할 수 없는 닉네임 입니다");
             } else {
-                playerData.setData("NickName", nickName);
-                player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+                if (nickName.length() > 10) {
+                    player.sendMessage(ChatColor.RED + "10 자리를 초과하였습니다");
+                } else {
+                    playerData.setData("NickName", nickName);
+                    player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
+                }
             }
             playerData.removeTempData("NickName_Change");
             Bukkit.getScheduler().runTask(plugin, ()-> {
@@ -192,7 +201,7 @@ public class MenuGuiEvent implements Listener {
                                     player.sendMessage(ChatColor.GRAY + "========================================");
                                     player.sendMessage(ChatColor.GRAY + "닉네임을 입력해주세요.");
                                     player.sendMessage(ChatColor.GRAY + "숫자,영어,한글 만 사용가능합니다");
-                                    player.sendMessage(ChatColor.GRAY + "최대 8자리(공백 포함)");
+                                    player.sendMessage(ChatColor.GRAY + "최대 10자리(공백 포함)");
                                     player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
                                     player.sendMessage(ChatColor.GRAY + "========================================");
                                     player.closeInventory();

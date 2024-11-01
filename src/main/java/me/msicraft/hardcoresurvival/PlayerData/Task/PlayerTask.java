@@ -44,15 +44,6 @@ public class PlayerTask extends BukkitRunnable {
         String worldName = location.getWorld().getName();
         String currentWorldName = worldManager.getCurrentWorldName(worldName);
 
-        String tabListString;
-        String nickName = (String) playerData.getData("NickName", null);
-        if (nickName != null) {
-            tabListString = "[" + nickName + "] " + player.getName() + " " + currentWorldName;
-        } else {
-            tabListString = player.getName() + " " + currentWorldName;
-        }
-        player.setPlayerListName(tabListString);
-
         boolean displayActionBar = (boolean) plugin.getPlayerDataManager().getPlayerData(player).getPersonalOption(PersonalOption.DISPLAY_ACTIONBAR, true);
         if (displayActionBar) {
             String sb = currentWorldName + ChatColor.WHITE + " | " + ChatColor.GREEN +"XYZ: " + location.getBlockX()

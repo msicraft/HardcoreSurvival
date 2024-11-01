@@ -17,6 +17,8 @@ import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -51,15 +53,17 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
-                    case "test" -> {
-                        if (sender instanceof Player player) {
-                            ItemStack itemStack = player.getInventory().getItemInMainHand();
-                            NBTItem nbtItem = NBTItem.get(itemStack);
-                            if (nbtItem.hasType()) {
-                                String typeString = nbtItem.getType().toUpperCase();
-                                String id = nbtItem.getString("MMOITEMS_ITEM_ID");
-                                String sa = typeString + ":" + id;
-                                System.out.println(sa);
+                    case "debug" -> { //hs debug []
+                        if (!sender.isOp()) {
+                            return false;
+                        }
+                        switch (args[1]) {
+                            case "change-nickname" -> {
+                                Player player = Bukkit.getPlayer(args[2]);
+                                if (player != null) {
+                                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                                    playerData.setData("NickName", args[3]);
+                                }
                             }
                         }
                     }
@@ -138,9 +142,17 @@ public class MainCommand implements CommandExecutor {
                             sender.sendMessage(ChatColor.RED + "플레이어를 찾을 수 없습니다");
                             return false;
                         }
+                        UUID uuid = player.getUniqueId();
                         sender.sendMessage("Player: " + player.getName());
-                        sender.sendMessage("UUID: " + player.getUniqueId());
+                        TextComponent textComponent = Component.text("UUID: " + uuid).
+                                clickEvent(ClickEvent.suggestCommand(uuid.toString()));
+                        sender.sendMessage(textComponent);
                         return true;
+                    }
+                    case "playerdata" -> { //hs playerdata <online_player> [get, edit] [variable]
+                        if (!sender.isOp()) {
+                            return false;
+                        }
                     }
                     case "streamer" -> { //hs streamer [add, remove, list] <target> //스트리머 용
                         if (!sender.isOp()) {
@@ -375,7 +387,7 @@ public class MainCommand implements CommandExecutor {
                             return false;
                         }
                     }
-                    case "itembox" -> { //hs itembox give <target>
+                    case "itembox" -> { //hs itembox give <target> <expiredSeconds>
                        if (!sender.isOp()) {
                            return false;
                        }
@@ -388,6 +400,7 @@ public class MainCommand implements CommandExecutor {
                            switch (args[1]) {
                                case "give" -> {
                                    String target = args[2];
+                                   long expiredTime = System.currentTimeMillis() + (Long.parseLong(args[3]) * 1000L);
                                    if (target.equalsIgnoreCase("all-players")) {
                                        List<String> list = plugin.getPlayerDataManager().getPlayerFileNames();
                                        for (String uuidS : list) {
@@ -395,11 +408,11 @@ public class MainCommand implements CommandExecutor {
                                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                                            if (offlinePlayer.isOnline()) {
                                                PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                               itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
+                                               itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
                                            } else {
                                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                                offlinePlayerData.loadData();
-                                               itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                                               itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", expiredTime);
                                                offlinePlayerData.saveData();
                                            }
                                        }
@@ -409,11 +422,11 @@ public class MainCommand implements CommandExecutor {
                                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                                        if (offlinePlayer.isOnline()) {
                                            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                           itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]");
+                                           itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
                                        } else {
                                            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
                                            offlinePlayerData.loadData();
-                                           itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]");
+                                           itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", expiredTime);
                                            offlinePlayerData.saveData();
                                        }
                                        sender.sendMessage(ChatColor.GREEN + "해당 플레이어에게 아이템을 보냈습니다");

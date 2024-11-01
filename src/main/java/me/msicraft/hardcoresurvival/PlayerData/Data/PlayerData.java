@@ -2,7 +2,7 @@ package me.msicraft.hardcoresurvival.PlayerData.Data;
 
 import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
+import me.msicraft.hardcoresurvival.ItemBox.Menu.ItemBoxGui;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;

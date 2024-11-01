@@ -1,9 +1,9 @@
-package me.msicraft.hardcoresurvival.ItemBox.Event;
+package me.msicraft.hardcoresurvival.ItemBox.Menu.Event;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxGui;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
+import me.msicraft.hardcoresurvival.ItemBox.Menu.ItemBoxGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.Menu.MenuGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -90,6 +90,10 @@ public class ItemBoxGuiEvent implements Listener {
                                     break;
                                 }
                                 ItemBoxStack itemBoxStack = iterator.next();
+                                if (itemBoxStack.isExpired()) {
+                                    iterator.remove();
+                                    continue;
+                                }
                                 player.getInventory().setItem(emptySlot, itemBoxStack.getItemStack());
                                 iterator.remove();
                             }
@@ -103,7 +107,7 @@ public class ItemBoxGuiEvent implements Listener {
                                 if (itemBox.receiveItemBoxStack(index, player)) {
                                     player.sendMessage(ChatColor.GREEN + "우편함으로부터 해당 아이템을 받았습니다");
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "인벤토리에 빈 공간이 없거나 잘못된 값이 입력되었습니다");
+                                    player.sendMessage(ChatColor.RED + "인벤토리에 빈 공간이 없거나, 만료된 아이템입니다");
                                 }
                                 itemBoxGui.open(playerData);
                             } else if (e.isRightClick()) {
