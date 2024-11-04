@@ -62,7 +62,14 @@ public class MainCommand implements CommandExecutor {
                                 Player player = Bukkit.getPlayer(args[2]);
                                 if (player != null) {
                                     PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-                                    playerData.setData("NickName", args[3]);
+
+                                    int max = args.length;
+                                    StringBuilder nickName = new StringBuilder();
+                                    for (int i = 3; i < max; i++) {
+                                        nickName.append(args[i]).append(" ");
+                                    }
+                                    playerData.setData("NickName", nickName.toString());
+                                    sender.sendMessage(ChatColor.GREEN + "변경된 닉네임: " + nickName.toString());
                                 }
                             }
                         }
@@ -259,6 +266,15 @@ public class MainCommand implements CommandExecutor {
                         try {
                             ShopManager shopManager = plugin.getShopManager();
                             switch (var2) {
+                                case "reset-price" -> { //hs shop reset-price
+                                    List<String> internalNameList = shopManager.getInternalNameList();
+                                    for (String internalName : internalNameList) {
+                                        ShopItem shopItem = shopManager.getShopItem(internalName);
+                                        if (shopItem != null) {
+                                            shopItem.resetPrice();
+                                        }
+                                    }
+                                }
                                 case "price-update" -> { //hs shop price-update
                                     List<String> internalNameList = shopManager.getInternalNameList();
                                     for (String internalName : internalNameList) {

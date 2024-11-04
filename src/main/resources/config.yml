@@ -29,6 +29,9 @@ Setting:
     world: "#00f1ff[메인월드]"
     world_nether: "#d32a00[지옥]"
     world_the_end: "#ff1af9[엔더]"
+  ExtraEnchantItemDamage:
+    Mending: 1
+    Infinity: 1
   DisableUse:
     Enabled: true
     List:

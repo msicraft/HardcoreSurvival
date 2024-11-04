@@ -97,7 +97,7 @@ public class ShopManager extends CustomGuiManager {
 
         FileConfiguration config = shopDataFile.getConfig();
 
-        this.isEnabled = config.getBoolean("Setting.Enable", false);
+        this.isEnabled = config.getBoolean("Setting.Enabled", false);
         this.updateSeconds = config.getInt("Setting.UpdateSeconds", 3600);
         this.maxPricePercent = config.getDouble("Setting.MaxPricePercent", 0.0);
         this.minPricePercent = config.getDouble("Setting.MinPricePercent", 0.0);

@@ -10,6 +10,7 @@ import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
+import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -173,7 +174,15 @@ public class MenuGuiEvent implements Listener {
                                     plugin.getItemBoxManager().openItemBox(playerData);
                                 }
                                 case "shop" -> {
-                                    plugin.getShopManager().openShopInventory(player, ShopGui.Type.BUY);
+                                    ShopManager shopManager = plugin.getShopManager();
+                                    if (shopManager.isEnabled()) {
+                                        shopManager.openShopInventory(player, ShopGui.Type.BUY);
+                                    } else {
+                                        player.sendMessage(ChatColor.RED + "상점을 사용할 수 없는 상태입니다");
+                                        if (player.isOp()) {
+                                            shopManager.openShopInventory(player, ShopGui.Type.BUY);
+                                        }
+                                    }
                                 }
                                 case "fish-shop" -> {
                                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),

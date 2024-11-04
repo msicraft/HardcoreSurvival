@@ -9,6 +9,7 @@ import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
@@ -23,11 +24,11 @@ import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.DecoratedPotInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
@@ -37,10 +38,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerRelatedEvent implements Listener {
 
@@ -67,6 +65,8 @@ public class PlayerRelatedEvent implements Listener {
     private int shieldCooldownTick = -1;
     private double reduceArrowDamage = 1;
 
+    private final Map<Enchantment, Double> extraEnchantItemDamageMap = new HashMap<>();
+
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
 
@@ -84,6 +84,28 @@ public class PlayerRelatedEvent implements Listener {
             }
         });
         this.reduceArrowDamage = config.contains("Setting.ReduceArrowDamage") ? config.getDouble("Setting.ReduceArrowDamage") : 1;
+
+        ConfigurationSection extraEnchantSection = config.getConfigurationSection("Setting.ExtraEnchantItemDamage");
+        if (extraEnchantSection == null) {
+            extraEnchantItemDamageMap.clear();
+        } else {
+            Set<String> enchantKey = extraEnchantSection.getKeys(false);
+            for (String key : enchantKey) {
+                String path = "Setting.ExtraEnchantItemDamage." + key;
+                Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key.toLowerCase()));
+                if (enchantment == null) {
+                    if (plugin.useDebug()) {
+                        MessageUtil.sendDebugMessage("ExtraEnchantItemDamage-UnknownEnchantment", "Key: " + key);
+                    }
+                    continue;
+                }
+                double multiplier = config.getDouble(path, 1.0);
+                extraEnchantItemDamageMap.put(enchantment, multiplier);
+            }
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("ExtraEnchantItemDamage-Register", "Size: " + extraEnchantItemDamageMap.size());
+            }
+        }
     }
 
     @EventHandler
@@ -317,19 +339,21 @@ public class PlayerRelatedEvent implements Listener {
         }
     }
 
+
     @EventHandler
-    public void ignoreInfinityEnchant(EntityShootBowEvent e) {
-        if (e.getEntity() instanceof Player) {
-            ItemStack itemStack = e.getBow();
-            if (itemStack != null) {
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (itemMeta != null) {
-                    if (itemMeta.hasEnchant(Enchantment.INFINITY)) {
-                        if (itemMeta instanceof Damageable damageable) {
-                        }
-                    }
+    public void extraEnchantItemDamage(PlayerItemDamageEvent e) {
+        ItemStack itemStack = e.getItem();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta != null) {
+            int damage = e.getDamage();
+            Set<Enchantment> sets = extraEnchantItemDamageMap.keySet();
+            for (Enchantment enchantment : sets) {
+                if (itemMeta.hasEnchant(enchantment)) {
+                    double extraD = extraEnchantItemDamageMap.get(enchantment);
+                    damage = (int) (damage * extraD);
                 }
             }
+            e.setDamage(damage);
         }
     }
 

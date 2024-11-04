@@ -76,6 +76,17 @@ public class ShopItem {
         }
     }
 
+    public void resetPrice() {
+        if (useStaticPrice) {
+            return;
+        }
+        if (basePrice < 0) {
+            return;
+        }
+
+        price= basePrice;
+    }
+
     public String getChangePercentString() {
         String changePercent;
         if (price < basePrice) {

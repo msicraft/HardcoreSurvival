@@ -33,7 +33,7 @@ public class MainTabCompleter implements TabCompleter {
                             return List.of("chestlog");
                         }
                         case "shop" -> {
-                            return List.of("register", "unregister", "setcenter", "edit", "price-update");
+                            return List.of("register", "unregister", "setcenter", "edit", "price-update", "reset-price");
                         }
                         case "customitem" -> {
                             return List.copyOf(plugin.getCustomItemManager().getInternalNames());

@@ -21,7 +21,6 @@ public class ShopTask extends BukkitRunnable {
     private boolean isMaintenance = false;
     private boolean isUpdate = false;
 
-    private final double updatePercent = 0.25;
     private final int minUpdateSeconds;
     private final int maxUpdateSeconds;
 
@@ -32,6 +31,7 @@ public class ShopTask extends BukkitRunnable {
         this.shopManager = shopManager;
         this.updateSeconds = updateSeconds;
 
+        double updatePercent = 0.25;
         this.minUpdateSeconds = (int) (updateSeconds * (1 - updatePercent));
         this.maxUpdateSeconds = (int) (updateSeconds * (1 + updatePercent));
 
