@@ -20,7 +20,7 @@ public class OfflinePlayerData {
     private final PlayerDataFile playerDataFile;
 
     private final Map<String, Object> dataMap = new HashMap<>();
-    private final List<String> tagList = new ArrayList<>();
+    private final Set<String> tags = new HashSet<>();
     private final Map<PersonalOption, Object> personalOptionMap = new HashMap<>();
 
     private final DeathPenaltyChestLog deathPenaltyChestLog;
@@ -48,7 +48,7 @@ public class OfflinePlayerData {
         }
 
         List<String> tags = playerDataConfig.getStringList("Tags");
-        tagList.addAll(tags);
+        this.tags.addAll(tags);
 
         ConfigurationSection dataSection = playerDataConfig.getConfigurationSection("Data");
         if (dataSection != null) {
@@ -102,7 +102,7 @@ public class OfflinePlayerData {
             playerDataConfig.set("Guild.UUID", guildUUID.toString());
         }
 
-        playerDataConfig.set("Tags", tagList);
+        playerDataConfig.set("Tags", List.of(tags));
 
         Set<String> dataKeys = dataMap.keySet();
         for (String key : dataKeys) {
@@ -183,19 +183,19 @@ public class OfflinePlayerData {
     }
 
     public boolean hasTag(String key) {
-        return tagList.contains(key);
+        return tags.contains(key);
     }
 
     public void addTag(String key) {
-        tagList.add(key);
+        tags.add(key);
     }
 
     public void removeTag(String key) {
-        tagList.remove(key);
+        tags.remove(key);
     }
 
-    public List<String> getTagList() {
-        return tagList;
+    public Set<String> getTags() {
+        return tags;
     }
 
     public UUID getGuildUUID() {
