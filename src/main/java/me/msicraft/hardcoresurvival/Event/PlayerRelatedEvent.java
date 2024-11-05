@@ -26,6 +26,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -66,6 +67,7 @@ public class PlayerRelatedEvent implements Listener {
     private double reduceArrowDamage = 1;
 
     private final Map<Enchantment, Double> extraEnchantItemDamageMap = new HashMap<>();
+    private final Map<String, String> changeWorldMessageMap = new HashMap<>();
 
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
@@ -104,6 +106,21 @@ public class PlayerRelatedEvent implements Listener {
             }
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("ExtraEnchantItemDamage-Register", "Size: " + extraEnchantItemDamageMap.size());
+            }
+        }
+
+        ConfigurationSection changeWorldMessageSection = config.getConfigurationSection("Setting.ChangeWorldMessage");
+        if (changeWorldMessageSection == null) {
+            changeWorldMessageMap.clear();
+        } else {
+            Set<String> keySet = changeWorldMessageSection.getKeys(false);
+            for (String key : keySet) {
+                String path = "Setting.ChangeWorldMessage." + key;
+                String message = config.getString(path, null);
+                changeWorldMessageMap.put(key, message);
+            }
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("ChangeWorldMessage-Register", "Size: " + changeWorldMessageMap.size());
             }
         }
     }
@@ -383,6 +400,18 @@ public class PlayerRelatedEvent implements Listener {
             } else if (plugin.getCustomItemManager().getCustomItemInternalName(itemStack) != null) {
                 player.getInventory().addItem(itemStack);
                 decoratedPotInventory.setItem(null);
+            }
+        }
+    }
+
+    @EventHandler
+    public void playerChangeWorldMessage(PlayerChangedWorldEvent e) {
+        Player player = e.getPlayer();
+        String worldName = player.getWorld().getName();
+        if (changeWorldMessageMap.containsKey(worldName)) {
+            String message = changeWorldMessageMap.get(worldName);
+            if (message != null) {
+                player.sendMessage(MessageUtil.translateColorCodes(message));
             }
         }
     }

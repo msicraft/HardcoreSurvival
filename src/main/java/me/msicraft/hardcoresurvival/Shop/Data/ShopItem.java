@@ -84,7 +84,7 @@ public class ShopItem {
             return;
         }
 
-        price= basePrice;
+        price = basePrice;
     }
 
     public String getChangePercentString() {

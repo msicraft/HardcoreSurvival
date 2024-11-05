@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 
@@ -81,6 +82,14 @@ public class EntityRelatedEvent implements Listener {
         if (random <= breedChance) {
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void disableEntityPortal(EntityPortalEnterEvent e) {
+        if (e.getEntityType() == EntityType.PLAYER) {
+            return;
+        }
+        e.setCancelled(true);
     }
 
 }

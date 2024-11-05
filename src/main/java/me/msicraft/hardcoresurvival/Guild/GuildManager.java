@@ -21,6 +21,7 @@ public class GuildManager {
     private final Map<UUID, Guild> guildMap = new HashMap<>(); //leader-uuid, guild
 
     private int maxInviteCount = -1;
+    private int regionProtectRadius = 150;
 
     public GuildManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -29,6 +30,7 @@ public class GuildManager {
     public void reloadVariables() {
         FileConfiguration mainConfig = plugin.getConfig();
         this.maxInviteCount = mainConfig.getInt("Streamer.MaxInviteCount", -1);
+        this.regionProtectRadius = mainConfig.getInt("Streamer.RegionProtectRadius", 150);
     }
 
     public void loadGuild() {
@@ -167,6 +169,10 @@ public class GuildManager {
         leader.sendMessage(ChatColor.GREEN + "해당 플레이어가 임시추방 되었습니다");
         leader.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
         leader.sendMessage(ChatColor.GREEN + "만료 기간: " + leftTime);
+    }
+
+    public int getRegionProtectRadius() {
+        return regionProtectRadius;
     }
 
 }

@@ -12,8 +12,6 @@ public class Guild {
 
     private final Map<UUID, Long> tempKickMap = new HashMap<>();
 
-    //private final GuildRegion guildRegion;
-
     private int inviteCount;
 
     public Guild(UUID leader, OfflinePlayerData offlinePlayerData) {
@@ -33,8 +31,6 @@ public class Guild {
             long time = Long.parseLong(split[1]);
             tempKickMap.put(target, time);
         });
-
-        //this.guildRegion = new GuildRegion();
     }
 
     public void applyTempKick(UUID target, int seconds) {

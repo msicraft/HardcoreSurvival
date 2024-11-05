@@ -34,7 +34,7 @@ public class ShopLocationTask extends BukkitRunnable {
             return;
         }
         count++;
-        if (count > 60) {
+        if (count > 300) {
             cancel();
         }
     }

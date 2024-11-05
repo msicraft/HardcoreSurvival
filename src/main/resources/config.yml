@@ -32,6 +32,8 @@ Setting:
   ExtraEnchantItemDamage:
     Mending: 1
     Infinity: 1
+  ChangeWorldMessage:
+    world_nether: "&c네더는 매우 위험한 장소입니다. 충분한 준비를 한 후 도전해주세요"
   DisableUse:
     Enabled: true
     List:
@@ -100,6 +102,7 @@ Setting:
         InternalName: "Disguise_NetherGoldOre"
         Chance: 0.05
 Streamer:
+  RegionProtectRadius: 150
   MaxInviteCount: 5
   List:
 Whitelist:

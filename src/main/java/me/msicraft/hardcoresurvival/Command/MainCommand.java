@@ -53,6 +53,19 @@ public class MainCommand implements CommandExecutor {
             String var = args[0];
             try {
                 switch (var) {
+                    case "test" -> {
+                        if (sender instanceof Player player) {
+                            Chunk chunk = player.getChunk();
+                            player.sendMessage("Chunk X: " + chunk.getX() + " Z: " + chunk.getZ());
+                            int blockX = player.getLocation().getBlockX();
+                            int blockZ = player.getLocation().getBlockZ();
+                            player.sendMessage("Loc X: " + blockX + " Z: " + blockZ);
+                            int chunkX = blockX >> 4;
+                            int chunkZ = blockZ >> 4;
+                            player.sendMessage("LToC X: " + chunkX + " Z: " + chunkZ);
+                            player.sendMessage("Chunk: " + chunk);
+                        }
+                    }
                     case "debug" -> { //hs debug []
                         if (!sender.isOp()) {
                             return false;
