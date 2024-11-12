@@ -1,14 +1,15 @@
-package me.msicraft.hardcoresurvival.PlayerData.Data;
+package me.msicraft.hardcoresurvival.Guild.Data;
 
-public enum PersonalOption {
+public enum RegionOptions {
 
-    DISPLAY_ACTIONBAR("액션바 표시", true);
-    //PRIVATE_CHEST("비공개 상자", false);
+    PRIVATE_CHEST("상자 잠금", false),
+    BLOCK_PLACE("외부인 블록 설치 금지", false),
+    BLOCK_BREAK("외부인 블록 파괴 금지", false);
 
     private final String displayName;
     private final Object baseValue;
 
-    PersonalOption(String displayName, Object baseValue) {
+    RegionOptions(String displayName, Object baseValue) {
         this.displayName = displayName;
         this.baseValue = baseValue;
     }

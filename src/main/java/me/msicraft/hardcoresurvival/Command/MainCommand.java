@@ -8,6 +8,9 @@ import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
+import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
@@ -26,6 +29,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,16 +59,16 @@ public class MainCommand implements CommandExecutor {
             try {
                 switch (var) {
                     case "test" -> {
+                        if (!sender.isOp()) {
+                            return false;
+                        }
                         if (sender instanceof Player player) {
-                            Chunk chunk = player.getChunk();
-                            player.sendMessage("Chunk X: " + chunk.getX() + " Z: " + chunk.getZ());
-                            int blockX = player.getLocation().getBlockX();
-                            int blockZ = player.getLocation().getBlockZ();
-                            player.sendMessage("Loc X: " + blockX + " Z: " + blockZ);
-                            int chunkX = blockX >> 4;
-                            int chunkZ = blockZ >> 4;
-                            player.sendMessage("LToC X: " + chunkX + " Z: " + chunkZ);
-                            player.sendMessage("Chunk: " + chunk);
+                            Location location = player.getLocation();
+                            Chunk chunk = location.getChunk();
+                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                                dataContainer.remove(GuildRegion.GUILD_REGION_KEY);
+                            }
                         }
                     }
                     case "debug" -> { //hs debug []
@@ -83,6 +88,62 @@ public class MainCommand implements CommandExecutor {
                                     }
                                     playerData.setData("NickName", nickName.toString());
                                     sender.sendMessage(ChatColor.GREEN + "변경된 닉네임: " + nickName.toString());
+                                }
+                            }
+                            case "set-guild-spawnlocation" -> {
+                                if (sender instanceof Player player) {
+                                    UUID uuid = UUID.fromString(args[2]);
+                                    GuildManager guildManager = plugin.getGuildManager();
+                                    Guild guild = guildManager.getGuild(uuid);
+                                    if (guild == null) {
+                                        sender.sendMessage(ChatColor.RED + "존재하지 않는 길드입니다");
+                                        return false;
+                                    }
+                                    GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
+                                    guildSpawnLocation.setGuildSpawnLocation(player.getLocation());
+                                }
+                            }
+                            case "region" -> {
+                                switch (args[2]) {
+                                    case "info" -> {
+                                        if (sender instanceof Player player) {
+                                            Location location = player.getLocation();
+                                            Chunk chunk = location.getChunk();
+                                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                                                String guildUUID = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+                                                if (guildUUID == null) {
+                                                    player.sendMessage(ChatColor.RED + "GuildUUID null");
+                                                    return false;
+                                                }
+                                                Guild guild = plugin.getGuildManager().getGuild(UUID.fromString(guildUUID));
+                                                player.sendMessage(ChatColor.GREEN + "Guild UUID - " + guildUUID);
+                                                player.sendMessage(ChatColor.GREEN + "Guild Region Count: " + guild.getGuildRegion().getBuyRegionCount());
+                                            } else {
+                                                player.sendMessage(ChatColor.GREEN + "Unknown Guild UUID");
+                                            }
+                                        }
+                                        return true;
+                                    }
+                                    case "remove" -> {
+                                        if (sender instanceof Player player) {
+                                            Location location = player.getLocation();
+                                            Chunk chunk = location.getChunk();
+                                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                                                String guildUUID = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+                                                if (guildUUID == null) {
+                                                    player.sendMessage(ChatColor.RED + "GuildUUID null");
+                                                    return false;
+                                                }
+                                                Guild guild = plugin.getGuildManager().getGuild(UUID.fromString(guildUUID));
+                                                plugin.getGuildManager().removeRegion(guild, location);
+
+                                                player.sendMessage(ChatColor.GREEN + "해당 지역을 길드로부터 제거하였습니다");
+                                            }
+                                        }
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -197,7 +258,7 @@ public class MainCommand implements CommandExecutor {
                                 offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
                                 offlinePlayerData.saveData();
 
-                                Guild guild = new Guild(uuid, offlinePlayerData);
+                                Guild guild = new Guild(uuid, offlinePlayerData.getPlayerDataFile());
                                 guild.addMember(uuid);
                                 plugin.getGuildManager().registerGuild(uuid, guild);
                                 return true;
@@ -230,6 +291,15 @@ public class MainCommand implements CommandExecutor {
                                     memberData.setGuildUUID(null);
                                     memberData.saveData();
                                     playerDataManager.removeWhiteList(memberUUID);
+                                });
+                                guild.getGuildRegion().getGuildChunks().forEach(guildChunk -> {
+                                    Location location = plugin.getWorldManager().getCenterChunkLocation(guildChunk.getWorldName(),
+                                            guildChunk.getChunkPair().getV1(), guildChunk.getChunkPair().getV2());
+                                    Chunk chunk = location.getChunk();
+                                    PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                                    if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                                        dataContainer.remove(GuildRegion.GUILD_REGION_KEY);
+                                    }
                                 });
                                 plugin.getGuildManager().removeGuild(uuid);
                                 return true;

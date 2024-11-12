@@ -1,0 +1,28 @@
+Name: #
+UUID: #
+Tags: []
+DeathPenaltyChestLog: []
+Streamer: false
+ItemBoxData: []
+LastLogin: 1730970691674
+PersonalOption:
+  DISPLAY_ACTIONBAR: true
+  PRIVATE_CHEST: false
+Guild:
+  UUID: #guild uuid
+  InviteCount: 0
+  MemberList: []
+  TempKickList: []
+  Region:
+    LastRegionPayTime: -1
+    SpawnLocation:
+      WorldName: world
+      X: 0
+      Y: 64
+      Z: 0
+    BuyRegion: []
+    RegionOptions: []
+Data:
+  NickName: 테스트
+  IgnoreDeathPenalty: false
+  LastIgnoreDeathPenaltyTime: 1730722332733

@@ -2,6 +2,9 @@ package me.msicraft.hardcoresurvival.DeathPenalty.Event;
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
+import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
@@ -258,7 +261,28 @@ public class DeathPenaltyRelatedEvent implements Listener {
             }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                Location spawnLocation = plugin.getShopManager().getShopRegion().getCenterLocation();
+                Location spawnLocation = null;
+                UUID guildUUID = playerData.getGuildUUID();
+                if (guildUUID != null) {
+                    Guild guild = plugin.getGuildManager().getGuild(playerData.getGuildUUID());
+                    if (guild != null) {
+                        GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
+                        Location guildSpawnLoc = guildSpawnLocation.getSpawnLocation();
+                        if (guildSpawnLoc != null) {
+                            Chunk chunk = guildSpawnLoc.getChunk();
+                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                                String guildRegionKey = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+                                if (guildRegionKey != null && guildRegionKey.equals(guildUUID.toString())) {
+                                    spawnLocation = guildSpawnLoc;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (spawnLocation == null) {
+                    spawnLocation = plugin.getShopManager().getShopRegion().getCenterLocation();
+                }
                 if (spawnLocation != null) {
                     player.teleport(spawnLocation);
                 }

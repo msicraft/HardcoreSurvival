@@ -4,6 +4,8 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +45,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
                     case "nickname" -> {
                         UUID uuid = onlineP.getUniqueId();
                         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
-                        String s = (String) plugin.getPlayerDataManager().getPlayerData(onlineP.getUniqueId()).getData("NickName", null);
+                        String s = (String) playerData.getData("NickName", null);
                         if (s == null) {
                             return "Unknown";
                         }
@@ -54,6 +56,11 @@ public class PAPIExpansion extends PlaceholderExpansion {
                     }
                     case "worldname" -> {
                         return plugin.getWorldManager().getCurrentWorldName(onlineP.getWorld().getName());
+                    }
+                    case "chunkinfo" -> {
+                        Location location = onlineP.getLocation();
+                        Chunk chunk = location.getChunk();
+                        return chunk.getX() + " " + chunk.getZ();
                     }
                 }
             }

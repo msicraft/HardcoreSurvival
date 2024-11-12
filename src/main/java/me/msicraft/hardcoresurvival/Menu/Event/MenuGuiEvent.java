@@ -2,6 +2,7 @@ package me.msicraft.hardcoresurvival.Menu.Event;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
+import me.msicraft.hardcoresurvival.Guild.Menu.GuildRegionGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
@@ -230,6 +231,11 @@ public class MenuGuiEvent implements Listener {
 
                                      */
                                 }
+                                case "GuildRegion" -> {
+                                    GuildRegionGui guildRegionGui = (GuildRegionGui) playerData.getCustomGui(GuiType.GUILD_REGION);
+                                    player.openInventory(guildRegionGui.getInventory());
+                                    guildRegionGui.setMain();
+                                }
                             }
                         }
                     } else if (dataContainer.has(MenuGui.PERSONAL_SETTINGS_KEY)) {
@@ -243,7 +249,7 @@ public class MenuGuiEvent implements Listener {
                                 default -> {
                                     PersonalOption personalOption = PersonalOption.valueOf(data);
                                     switch (personalOption) {
-                                        case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
+                                        case DISPLAY_ACTIONBAR -> {
                                             if (e.isLeftClick()) {
                                                 boolean b = (boolean) playerData.getPersonalOption(personalOption);
                                                 if (b) {

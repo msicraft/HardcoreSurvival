@@ -1,34 +1,40 @@
 package me.msicraft.hardcoresurvival.Guild.Data;
 
-import me.msicraft.hardcoresurvival.Guild.Task.GuildSpawnTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 public class GuildSpawnLocation {
 
-    private Location location = null;
-    private String spawnWorldName;
+    private Location spawnLocation = null;
+    private String spawnWorldName = null;
     private int spawnX;
     private int spawnY;
     private int spawnZ;
 
-    private GuildSpawnTask guildSpawnTask;
+    public GuildSpawnLocation(FileConfiguration config) {
+        String worldName = config.getString("Guild.Region.SpawnLocation.WorldName", null);
+        int spawnX = config.getInt("Guild.Region.SpawnLocation.X", 0);
+        int spawnY = config.getInt("Guild.Region.SpawnLocation.Y", 84);
+        int spawnZ = config.getInt("Guild.Region.SpawnLocation.Z", 0);
 
-    public GuildSpawnLocation(String spawnWorldName, int spawnX, int spawnY, int spawnZ) {
-        this.spawnWorldName = spawnWorldName;
+        this.spawnWorldName = worldName;
         this.spawnX = spawnX;
         this.spawnY = spawnY;
         this.spawnZ = spawnZ;
+        update();
     }
 
-    public boolean isInChunk(Player player) {
-        if (location != null) {
-            Chunk chunk = location.getChunk();
-            Chunk playerChunk = player.getChunk();
-            return chunk.getX() == playerChunk.getX() && chunk.getZ() == playerChunk.getZ();
+    public boolean isInSpawnLocation(Player player) {
+        if (spawnLocation != null) {
+            if (spawnLocation.getWorld().getName().equals(player.getWorld().getName())) {
+                Chunk chunk = spawnLocation.getChunk();
+                Chunk playerChunk = player.getChunk();
+                return chunk.getX() == playerChunk.getX() && chunk.getZ() == playerChunk.getZ();
+            }
         }
         return false;
     }
@@ -37,19 +43,23 @@ public class GuildSpawnLocation {
         if (spawnWorldName != null) {
             World world = Bukkit.getWorld(spawnWorldName);
             if (world != null) {
-                this.location = new Location(world, spawnX, spawnY, spawnZ);
+                this.spawnLocation = new Location(world, spawnX, spawnY, spawnZ);
                 return true;
             }
         }
         return false;
     }
 
-    public Location getLocation() {
-        return location;
+    public void setGuildSpawnLocation(Location location) {
+        setSpawnWorldName(location.getWorld().getName());
+        setSpawnX(location.getBlockX());
+        setSpawnY(location.getBlockY());
+        setSpawnZ(location.getBlockZ());
+        update();
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public Location getSpawnLocation() {
+        return spawnLocation;
     }
 
     public String getSpawnWorldName() {
@@ -83,4 +93,5 @@ public class GuildSpawnLocation {
     public void setSpawnZ(int spawnZ) {
         this.spawnZ = spawnZ;
     }
+
 }

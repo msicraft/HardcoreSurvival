@@ -1,6 +1,9 @@
 package me.msicraft.hardcoresurvival;
 
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -57,6 +60,16 @@ public class WorldManager {
         String mm = "0" + minutes;
         mm = mm.substring(mm.length() - 2, mm.length());
         return hours + ":" + mm + " " + ampm;
+    }
+
+    public Location getCenterChunkLocation(String worldName, int x, int z) {
+        World world = Bukkit.getWorld(worldName);
+        if (world == null) {
+            return null;
+        }
+        Location center = new Location(world, x << 4, 64, z << 4).add(8, 0, 8);
+        center.setY(center.getWorld().getHighestBlockYAt(center) + 1);
+        return center;
     }
 
 }

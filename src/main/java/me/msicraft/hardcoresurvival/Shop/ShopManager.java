@@ -24,7 +24,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +47,7 @@ public class ShopManager extends CustomGuiManager {
     private boolean isShopMaintenance = false;
     private ShopTask shopTask = null;
 
-    private BukkitRunnable shopCheckRunnable = null;
+    private ShopLocationTask shopLocationTask = null;
 
     public ShopManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -119,11 +118,11 @@ public class ShopManager extends CustomGuiManager {
         }
         loadShopData();
 
-        if (shopCheckRunnable != null) {
-            shopCheckRunnable.cancel();
-            shopCheckRunnable = null;
+        if (shopLocationTask != null) {
+            shopLocationTask.cancel();
+            shopLocationTask = null;
         }
-        shopCheckRunnable = new ShopLocationTask(plugin, this);
+        shopLocationTask = new ShopLocationTask(plugin, this);
 
         if (shopTask != null) {
             shopTask.cancel();
@@ -153,11 +152,11 @@ public class ShopManager extends CustomGuiManager {
             shopRegion.setCenterZ(centerZ);
             shopRegion.setRadius(radius);
         }
-        if (shopCheckRunnable != null) {
-            shopCheckRunnable.cancel();
-            shopCheckRunnable = null;
+        if (shopLocationTask != null) {
+            shopLocationTask.cancel();
+            shopLocationTask = null;
         }
-        shopCheckRunnable = new ShopLocationTask(plugin, this);
+        shopLocationTask = new ShopLocationTask(plugin, this);
     }
 
     public void registerShopItem(ShopItem shopItem) {
@@ -280,14 +279,14 @@ public class ShopManager extends CustomGuiManager {
         }
     }
 
-    public void buyShopItem(Player player, String id, int amount) {
+    public void buyShopItem(Player player, String id, int amount, double multiplier) {
         ShopItem shopItem = getShopItem(id);
         if (shopItem != null) {
             if (!shopItem.hasEnoughStock(amount)) {
                 player.sendMessage(ChatColor.RED + "아이템의 재고가 부족합니다");
                 return;
             }
-            double totalPrice = shopItem.getPrice(true) * amount;
+            double totalPrice = shopItem.getPrice(true) * amount * multiplier;
             double playerBalance = plugin.getEconomy().getBalance(player);
             if (playerBalance < totalPrice) {
                 player.sendMessage(ChatColor.RED + "충분한 돈이 없습니다");
@@ -303,18 +302,19 @@ public class ShopManager extends CustomGuiManager {
                 player.getInventory().addItem(itemStack);
             }
             player.sendMessage(ChatColor.GREEN + "아이템을 구매하였습니다");
+            player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "-" + totalPrice + " (" + multiplier + ")");
 
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("ShopItem-Buy", "Player: " + player.getName(),
                         " ItemType: " + shopItem.getItemType().name() + " | Id: " + shopItem.getId()
-                                + " | Amount: " + amount + " | TotalPrice: " + totalPrice);
+                                + " | Amount: " + amount + " | TotalPrice: " + totalPrice + " | Multiplier: " + multiplier);
             }
         } else {
             player.sendMessage(ChatColor.RED + "해당 아이템이 존재하지 않습니다");
         }
     }
 
-    public void sellShopItem(Player player) {
+    public void sellShopItem(Player player, double multiplier) {
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
         SellItem[] sellItems = (SellItem[]) playerData.getTempData("ShopGui_SellItems", null);
         if (sellItems != null) {
@@ -330,15 +330,17 @@ public class ShopManager extends CustomGuiManager {
                     }
                 }
             }
+            totalPrice = totalPrice * multiplier;
             plugin.getEconomy().depositPlayer(player, totalPrice);
             playerData.setTempData("ShopGui_SellItems", null);
 
             player.sendMessage(ChatColor.GREEN + "모든 아이템이 판매되었습니다.");
+            player.sendMessage(ChatColor.BOLD + "" + ChatColor.BLUE + "+" + totalPrice + " (" + multiplier + ")");
             openShopInventory(player, ShopGui.Type.SELL);
 
             if (plugin.useDebug()) {
                 MessageUtil.sendDebugMessage("ShopItem-Sell", "Player: " + player.getName(),
-                        "TotalPrice: " + totalPrice);
+                        "TotalPrice: " + totalPrice + " | Multiplier: " + multiplier);
             }
         } else {
             player.sendMessage(ChatColor.RED + "판매할 아이템이 없습니다.");

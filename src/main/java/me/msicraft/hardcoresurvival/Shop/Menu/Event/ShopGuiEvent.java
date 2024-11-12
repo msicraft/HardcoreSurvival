@@ -1,6 +1,8 @@
 package me.msicraft.hardcoresurvival.Shop.Menu.Event;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Shop.Data.SellItem;
@@ -149,7 +151,16 @@ public class ShopGuiEvent implements Listener {
                                 ShopItem shopItem = shopManager.getShopItem(data);
                                 if (shopItem != null) {
                                     int amount = (int) playerData.getTempData("ShopGui_" + data + "_SelectCount", 1);
-                                    shopManager.buyShopItem(player, data, amount);
+                                    double multiplier = 1.0;
+                                    if (plugin.getGuildManager().isInGuildRegion(player)) {
+                                        GuildManager guildManager = plugin.getGuildManager();
+                                        Guild guild = guildManager.getGuild(playerData.getGuildUUID());
+                                        if (guild != null) {
+                                            int overDueDay = guild.getGuildRegion().getOverdueDay(true);
+                                            multiplier = multiplier + guildManager.getShopPenalty(overDueDay);
+                                        }
+                                    }
+                                    shopManager.buyShopItem(player, data, amount, multiplier);
 
                                     shopManager.openShopInventory(player, ShopGui.Type.BUY);
                                 }
@@ -174,7 +185,16 @@ public class ShopGuiEvent implements Listener {
                             shopManager.openShopInventory(player, ShopGui.Type.BUY);
                         }
                         case "SellConfirm" -> {
-                            shopManager.sellShopItem(player);
+                            double multiplier = 1.0;
+                            if (plugin.getGuildManager().isInGuildRegion(player)) {
+                                GuildManager guildManager = plugin.getGuildManager();
+                                Guild guild = guildManager.getGuild(playerData.getGuildUUID());
+                                if (guild != null) {
+                                    int overDueDay = guild.getGuildRegion().getOverdueDay(true);
+                                    multiplier = multiplier - guildManager.getShopPenalty(overDueDay);
+                                }
+                            }
+                            shopManager.sellShopItem(player, multiplier);
                         }
                     }
                     return;

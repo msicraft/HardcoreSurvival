@@ -70,7 +70,7 @@ public class OfflinePlayerData {
             String path = "PersonalOption." + option.name();
             if (playerDataConfig.contains(path)) {
                 switch (option) {
-                    case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
+                    case DISPLAY_ACTIONBAR -> {
                         personalOptionMap.put(option, playerDataConfig.getBoolean(path, (boolean) option.getBaseValue()));
                     }
                 }
@@ -102,7 +102,7 @@ public class OfflinePlayerData {
             playerDataConfig.set("Guild.UUID", guildUUID.toString());
         }
 
-        playerDataConfig.set("Tags", List.of(tags));
+        playerDataConfig.set("Tags", List.copyOf(tags));
 
         Set<String> dataKeys = dataMap.keySet();
         for (String key : dataKeys) {
@@ -123,7 +123,7 @@ public class OfflinePlayerData {
             Object object = personalOptionMap.get(option);
             String path = "PersonalOption." + option.name();
             switch (option) {
-                case DISPLAY_ACTIONBAR, PRIVATE_CHEST -> {
+                case DISPLAY_ACTIONBAR -> {
                     playerDataConfig.set(path, object);
                 }
             }
@@ -141,7 +141,7 @@ public class OfflinePlayerData {
         playerDataFile.saveConfig();
     }
 
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 

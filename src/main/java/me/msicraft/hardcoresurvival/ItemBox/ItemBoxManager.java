@@ -42,7 +42,7 @@ public class ItemBoxManager {
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("ItemBox-SendItemStack-OfflinePlayer",
-                    "Player UUID: " + offlinePlayerData.getUuid()  + " | Provider: " + provider + " | ExpiredTime: " + expiredTime);
+                    "Player UUID: " + offlinePlayerData.getUUID()  + " | Provider: " + provider + " | ExpiredTime: " + expiredTime);
         }
     }
 

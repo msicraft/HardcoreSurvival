@@ -15,6 +15,7 @@ import me.msicraft.hardcoresurvival.Event.PlayerRelatedEvent;
 import me.msicraft.hardcoresurvival.Guild.Event.GuildRelatedEvent;
 import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.Guild.Menu.Event.GuildGuiEvent;
+import me.msicraft.hardcoresurvival.Guild.Menu.Event.GuildRegionGuiEvent;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.ItemBox.Menu.Event.ItemBoxGuiEvent;
 import me.msicraft.hardcoresurvival.Menu.Event.MenuGuiEvent;
@@ -151,6 +152,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
         pluginManager.registerEvents(new AuctionRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildRelatedEvent(this), this);
+        pluginManager.registerEvents(new GuildRegionGuiEvent(this), this);
     }
 
     public void registeredCommands() {

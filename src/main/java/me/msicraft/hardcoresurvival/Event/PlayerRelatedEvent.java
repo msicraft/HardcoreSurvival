@@ -2,13 +2,12 @@ package me.msicraft.hardcoresurvival.Event;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
-import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.TileState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -36,8 +35,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
@@ -253,6 +250,7 @@ public class PlayerRelatedEvent implements Listener {
         }
     }
 
+    /*
     @EventHandler(priority = EventPriority.HIGHEST)
     public void privateChestOpen(PlayerInteractEvent e) {
         Action action = e.getAction();
@@ -293,6 +291,8 @@ public class PlayerRelatedEvent implements Listener {
             }
         }
     }
+
+     */
 
     private final List<Material> fortuneBlockList = List.of(Material.COAL_ORE, Material.COPPER_ORE,
             Material.REDSTONE_ORE, Material.IRON_ORE, Material.GOLD_ORE, Material.LAPIS_ORE, Material.DIAMOND_ORE,

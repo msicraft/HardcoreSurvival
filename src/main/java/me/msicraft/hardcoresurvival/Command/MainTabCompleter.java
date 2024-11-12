@@ -48,7 +48,7 @@ public class MainTabCompleter implements TabCompleter {
                             return List.of("shop");
                         }
                         case "debug" -> {
-                            return List.of("change-nickname");
+                            return List.of("change-nickname", "set-guild-spawnlocation", "region");
                         }
                     }
                 }
@@ -77,6 +77,16 @@ public class MainTabCompleter implements TabCompleter {
                         list.add("all-players");
                         list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
                         return list;
+                    } else if (var.equalsIgnoreCase("debug")) {
+                        if (var2.equalsIgnoreCase("set-guild-spawnlocation")) {
+                            List<String> list = new ArrayList<>();
+                            plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
+                                list.add(uuid.toString());
+                            });
+                            return list;
+                        } else if (var2.equalsIgnoreCase("region")) {
+                            return List.of("info", "remove");
+                        }
                     }
                 }
                 if (args.length == 4) {
