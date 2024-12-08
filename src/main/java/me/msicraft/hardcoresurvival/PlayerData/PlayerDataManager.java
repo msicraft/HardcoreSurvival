@@ -1,13 +1,12 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
-import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.CustomHealthRegen;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import me.msicraft.hardcoresurvival.Utils.GuiUtil;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerDataFile;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -17,49 +16,91 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerDataManager {
 
     private final HardcoreSurvival plugin;
-
-    private final Map<UUID, PlayerData> playerDataMap = new ConcurrentHashMap<>();
-
+    private final Map<UUID, PlayerData> cachedMap = new ConcurrentHashMap<>();
     private final List<UUID> streamerList = new ArrayList<>();
-    private final List<UUID> whiteList = new ArrayList<>();
-
-    private boolean useWhiteList = false;
-    private String whitelistMessage = ChatColor.RED + "접속 권한이 없습니다";
+    private final CustomHealthRegen customHealthRegen;
 
     public PlayerDataManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
+        this.customHealthRegen = new CustomHealthRegen();
+
+        customHealthRegen.setBase(plugin.getConfig().getDouble("Setting.CustomHealthRegen.BaseRegen", -1));
+        customHealthRegen.setTaskSeconds(plugin.getConfig().getInt("Setting.CustomHealthRegen.Seconds", -1));
+        customHealthRegen.setDisableVanillaRegen(plugin.getConfig().getBoolean("Setting.CustomHealthRegen.DisableVanillaRegen", false));
+        customHealthRegen.setMinFoodLevel(plugin.getConfig().getInt("Setting.CustomHealthRegen.MinFoodLevel", 6));
 
         plugin.getConfig().getStringList("Streamer.List").forEach(s -> {
             UUID uuid = UUID.fromString(s);
             streamerList.add(uuid);
         });
 
-        List<String> uuidList = plugin.getConfig().getStringList("Whitelist.List");
-        for (String uuidString : uuidList) {
-            UUID uuid = UUID.fromString(uuidString);
-            whiteList.add(uuid);
-        }
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            File file = new File(plugin.getDataFolder() + File.separator + PlayerDataFile.FOLDER_NAME);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            String[] fileNames = file.list();
+            if (fileNames != null) {
+                for (String fileName : fileNames) {
+                    if (fileName.endsWith(".yml")) {
+                        fileName = fileName.replace(".yml", "");
+                        UUID uuid = UUID.fromString(fileName);
+
+                        PlayerData playerData = new PlayerData(uuid);
+                        cachedMap.put(uuid, playerData);
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                            playerData.loadData();
+                            playerData.setLastCachedTime(System.currentTimeMillis());
+                        });
+                    }
+                }
+                if (plugin.useDebug()) {
+                    MessageUtil.sendDebugMessage("Load-PlayerData", "Loaded " + cachedMap.size() + " PlayerData");
+                }
+            } else {
+                if (plugin.useDebug()) {
+                    MessageUtil.sendDebugMessage("Empty-PlayerData", "None PlayerData");
+                }
+            }
+        });
     }
 
     public void reloadVariables() {
-        this.useWhiteList = plugin.getConfig().contains("Whitelist.Enabled") && plugin.getConfig().getBoolean("Whitelist.Enabled");
-        String wMessage = plugin.getConfig().getString("Whitelist.Message", null);
-        if (wMessage != null) {
-            this.whitelistMessage = MessageUtil.translateColorCodes(wMessage);
+        FileConfiguration config = plugin.getConfig();
+
+        customHealthRegen.setBase(config.getDouble("Setting.CustomHealthRegen.BaseRegen", -1));
+        customHealthRegen.setTaskSeconds(config.getInt("Setting.CustomHealthRegen.Seconds", -1));
+        customHealthRegen.setDisableVanillaRegen(config.getBoolean("Setting.CustomHealthRegen.DisableVanillaRegen", false));
+        customHealthRegen.setMinFoodLevel(config.getInt("Setting.CustomHealthRegen.MinFoodLevel", 6));
+    }
+
+    public PlayerData getPlayerData(UUID uuid) {
+        PlayerData playerData = null;
+        if (cachedMap.containsKey(uuid)) {
+            playerData = cachedMap.get(uuid);
+            playerData.setLastCachedTime(System.currentTimeMillis());
         }
+        return playerData;
+    }
+
+    public PlayerData getPlayerData(Player player) {
+        return getPlayerData(player.getUniqueId());
+    }
+
+    public PlayerData createPlayerData(UUID uuid) {
+        PlayerData playerData = new PlayerData(uuid);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, playerData::loadData);
+        playerData.setLastCachedTime(System.currentTimeMillis());
+
+        cachedMap.put(uuid, playerData);
 
         if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("WhiteList loaded successfully", "Size: " + whiteList.size());
+            MessageUtil.sendDebugMessage("Create-PlayerData", "UUID: " + uuid);
         }
+        return playerData;
     }
 
     public void saveData() {
-        List<String> whiteList = new ArrayList<>();
-        getWhiteListUUIDs().forEach(uuid -> {
-            whiteList.add(uuid.toString());
-        });
-        plugin.getConfig().set("Whitelist.List", whiteList);
-
         List<String> streamerList = new ArrayList<>();
         getStreamerList().forEach(uuid -> {
             streamerList.add(uuid.toString());
@@ -67,86 +108,16 @@ public class PlayerDataManager {
         plugin.getConfig().set("Streamer.List", streamerList);
 
         plugin.saveConfig();
-    }
 
-    public void registerPlayerData(Player player, PlayerData playerData) {
-        playerDataMap.put(player.getUniqueId(), playerData);
-    }
-
-    public void unregisterPlayerData(Player player) {
-        PlayerData playerData = getPlayerData(player);
-        playerDataMap.remove(player.getUniqueId());
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            Bukkit.getPluginManager().callEvent(new PlayerDataUnLoadEvent(player, playerData));
-        });
-    }
-
-    public PlayerData getPlayerData(Player player) {
-        return getPlayerData(player.getUniqueId());
-    }
-
-    public PlayerData getPlayerData(UUID uuid) {
-        return playerDataMap.get(uuid);
-    }
-
-    public Set<UUID> getUUIDSets() {
-        return playerDataMap.keySet();
-    }
-
-    public List<String> getPlayerFileNames() {
-        File file = new File(plugin.getDataFolder() + File.separator + "PlayerData");
-        String[] fileNames = file.list();
-        if (fileNames != null) {
-            List<String> list = new ArrayList<>(fileNames.length);
-            for (String fileName : fileNames) {
-                if (fileName.endsWith(".yml")) {
-                    list.add(fileName.replace(".yml", ""));
-                }
-            }
-            return list;
+        Set<UUID> playerUUIDs = cachedMap.keySet();
+        for (UUID uuid : playerUUIDs) {
+            PlayerData playerData = cachedMap.get(uuid);
+            playerData.saveData();
         }
-        return GuiUtil.EMPTY_LORE;
     }
 
-    public boolean hasWhiteList(OfflinePlayer offlinePlayer) {
-        return hasWhiteList(offlinePlayer.getUniqueId());
-    }
-
-    public boolean hasWhiteList(Player player) {
-        return hasWhiteList(player.getUniqueId());
-    }
-
-    public boolean hasWhiteList(UUID uuid) {
-        return whiteList.contains(uuid);
-    }
-
-    public void addWhiteList(Player player) {
-        addWhiteList(player.getUniqueId());
-    }
-
-    public void addWhiteList(UUID uuid) {
-        whiteList.add(uuid);
-    }
-
-    public void removeWhiteList(Player player) {
-        removeWhiteList(player.getUniqueId());
-    }
-
-    public void removeWhiteList(UUID uuid) {
-        whiteList.remove(uuid);
-    }
-
-    public boolean isUseWhiteList() {
-        return useWhiteList;
-    }
-
-    public String getWhitelistMessage() {
-        return whitelistMessage;
-    }
-
-    public List<UUID> getWhiteListUUIDs() {
-        return whiteList;
+    public Set<UUID> getPlayerUUIDs() {
+        return cachedMap.keySet();
     }
 
     public void addStreamer(UUID uuid) {
@@ -163,6 +134,10 @@ public class PlayerDataManager {
 
     public List<UUID> getStreamerList() {
         return streamerList;
+    }
+
+    public CustomHealthRegen getCustomHealthRegen() {
+        return customHealthRegen;
     }
 
 }

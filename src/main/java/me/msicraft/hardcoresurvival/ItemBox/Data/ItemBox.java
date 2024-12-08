@@ -12,11 +12,11 @@ public class ItemBox {
     public ItemBox() {
     }
 
-    public void addItemBoxStack(ItemBoxStack itemBoxStack) {
+    public synchronized void addItemBoxStack(ItemBoxStack itemBoxStack) {
         list.add(itemBoxStack);
     }
 
-    public boolean removeItemBoxStack(int index) {
+    public synchronized boolean removeItemBoxStack(int index) {
         if (index >= 0 && index < list.size()) {
             list.remove(index);
             return true;
@@ -41,7 +41,7 @@ public class ItemBox {
             int slot = player.getInventory().firstEmpty();
             if (slot != -1) {
                 player.getInventory().addItem(itemBoxStack.getItemStack());
-                list.remove(index);
+                removeItemBoxStack(index);
                 return true;
             }
             return false;

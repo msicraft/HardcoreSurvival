@@ -87,7 +87,7 @@ public class GuildRelatedEvent implements Listener {
                     if ((boolean) guildRegion.getRegionOption(RegionOptions.BLOCK_BREAK)) {
                         if (!guild.isMember(player)) {
                             e.setCancelled(true);
-                            player.sendMessage(ChatColor.RED + "다른 길드의 땅의 블록은 파괴 불가능합니다");
+                            player.sendMessage(ChatColor.RED + "다른 길드 땅의 블록은 파괴 불가능합니다");
                         }
                     }
                 }
@@ -115,7 +115,7 @@ public class GuildRelatedEvent implements Listener {
                     if ((boolean) guildRegion.getRegionOption(RegionOptions.BLOCK_PLACE)) {
                         if (!guild.isMember(player)) {
                             e.setCancelled(true);
-                            player.sendMessage(ChatColor.RED + "다른 길드의 땅에는 블록을 설치할 수 없습니다");
+                            player.sendMessage(ChatColor.RED + "다른 길드 땅에는 블록을 설치할 수 없습니다");
                         }
                     }
                 }

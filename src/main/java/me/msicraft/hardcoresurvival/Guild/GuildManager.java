@@ -1,33 +1,29 @@
 package me.msicraft.hardcoresurvival.Guild;
 
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildDataFile;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
-import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
-import me.msicraft.hardcoresurvival.Guild.Data.RegionOptions;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
-import me.msicraft.hardcoresurvival.PlayerData.File.PlayerDataFile;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GuildManager {
 
     private final HardcoreSurvival plugin;
-    private final Map<UUID, Guild> guildMap = new HashMap<>(); //leader-uuid, guild
+    private final Map<UUID, Guild> guildMap = new ConcurrentHashMap<>();
 
     private final Map<Integer, Integer> regionPriceMap = new HashMap<>();
     private final Map<Integer, Double> shopPenaltyMap = new HashMap<>();
@@ -37,27 +33,35 @@ public class GuildManager {
     private int regionProtectRadius = 150;
     private int regionPaySeconds = 86400;
 
+    private int prefixChangePrice = -1;
+    private int baseInvitePrice;
+    private int perInvitePrice;
+
     public GuildManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
 
-        new BukkitRunnable() {
-            private int count = 0;
-            @Override
-            public void run() {
-                Set<UUID> guildUUIDs = guildMap.keySet();
-                for (UUID uuid : guildUUIDs) {
-                    Guild guild = guildMap.get(uuid);
-                    GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
-                    if (guildSpawnLocation.getSpawnLocation() == null) {
-                        guildSpawnLocation.update();
-                    }
-                }
-                count++;
-                if (count > 60) {
-                    cancel();
+        File file = new File(plugin.getDataFolder() + File.separator + GuildDataFile.FOLDER_NAME);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String[] fileNames = file.list();
+        if (fileNames != null) {
+            for (String fileName : fileNames) {
+                if (fileName.endsWith(".yml")) {
+                    fileName = fileName.replace(".yml", "");
+                    UUID uuid = UUID.fromString(fileName);
+                    Guild guild = Guild.loadGuild(uuid);
+                    guildMap.put(uuid, guild);
                 }
             }
-        }.runTaskTimer(plugin, 100L, 100L);
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("Load-Guild", "Loaded " + guildMap.size() + " Guild");
+            }
+        } else {
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("Empty-Guild", "None Guild");
+            }
+        }
     }
 
     public void reloadVariables() {
@@ -65,6 +69,10 @@ public class GuildManager {
         this.maxInviteCount = mainConfig.getInt("Streamer.MaxInviteCount", -1);
         this.regionProtectRadius = mainConfig.getInt("Streamer.RegionProtectRadius", 150);
         this.regionPaySeconds = mainConfig.getInt("Streamer.RegionPaySeconds", 86400);
+
+        this.baseInvitePrice = mainConfig.getInt("Streamer.BaseInvitePrice", 200000);
+        this.perInvitePrice = mainConfig.getInt("Streamer.PerInvitePrice", 10000);
+        this.prefixChangePrice = mainConfig.getInt("Streamer.PrefixChangePrice", -1);
 
         regionWorldNames.addAll(mainConfig.getStringList("Streamer.RegionWorld"));
 
@@ -94,63 +102,11 @@ public class GuildManager {
         }
     }
 
-    public void loadGuild() {
-        plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
-            PlayerDataFile playerDataFile = new PlayerDataFile(uuid);
-            Guild guild = new Guild(uuid, playerDataFile);
-            guildMap.put(uuid, guild);
-        });
-
-        if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("Guild loaded", "Size: " + guildMap.size());
-        }
-    }
-
     public void saveGuild() {
         Set<UUID> guildIds = guildMap.keySet();
         for (UUID uuid : guildIds) {
             Guild guild = guildMap.get(uuid);
-
-            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-            FileConfiguration config = offlinePlayerData.getPlayerDataFile().getConfig();
-            config.set("Guild.InviteCount", guild.getInviteCount());
-
-            List<String> memberList = new ArrayList<>();
-            guild.getMembers().forEach(memberUUID -> {
-                memberList.add(memberUUID.toString());
-            });
-            config.set("Guild.MemberList", memberList);
-
-            List<String> tempKickFormatList = new ArrayList<>();
-            guild.getTempKickList().forEach(tempKickUUID -> {
-                long time = guild.getTempKickTime(tempKickUUID);
-                String format = tempKickUUID + ":" + time;
-                tempKickFormatList.add(format);
-            });
-            config.set("Guild.TempKickList", tempKickFormatList);
-
-            GuildRegion guildRegion = guild.getGuildRegion();
-            guildRegion.worldNameSets().forEach(s -> {
-                List<String> regionFormatList = guildRegion.getBuyRegionToFormatList(s);
-                config.set("Guild.Region.BuyRegion." + s, regionFormatList);
-            });
-
-            config.set("Guild.Region.LastRegionPayTime", guildRegion.getLastRegionPayTime());
-
-            GuildSpawnLocation guildSpawnLocation = guildRegion.getGuildSpawnLocation();
-            config.set("Guild.Region.SpawnLocation.WorldName", guildSpawnLocation.getSpawnWorldName());
-            config.set("Guild.Region.SpawnLocation.X", guildSpawnLocation.getSpawnX());
-            config.set("Guild.Region.SpawnLocation.Y", guildSpawnLocation.getSpawnY());
-            config.set("Guild.Region.SpawnLocation.Z", guildSpawnLocation.getSpawnZ());
-
-            RegionOptions[] regionOptions = RegionOptions.values();
-            for (RegionOptions option : regionOptions) {
-                Object o = guildRegion.getRegionOption(option);
-                String path = "Guild.Region.RegionOptions." + option.name();
-                config.set(path, o);
-            }
-
-            offlinePlayerData.getPlayerDataFile().saveConfig();
+            guild.save();
         }
 
         if (plugin.useDebug()) {
@@ -158,11 +114,18 @@ public class GuildManager {
         }
     }
 
+    public Guild createGuild(UUID leader) {
+        UUID guildUUID = UUID.randomUUID();
+        Guild guild = Guild.createGuild(guildUUID, leader);
+        registerGuild(guild);
+        return guild;
+    }
+
     public void buyRegion(Player player, Guild guild, Location location, double balance) {
         GuildRegion guildRegion = guild.getGuildRegion();
         Chunk chunk = location.getChunk();
         PersistentDataContainer chunkData = chunk.getPersistentDataContainer();
-        chunkData.set(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING, guild.getLeader().toString());
+        chunkData.set(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING, guild.getGuildUUID().toString());
 
         plugin.getEconomy().withdrawPlayer(player, balance);
         if (guildRegion.getLastRegionPayTime() == -1) {
@@ -203,71 +166,94 @@ public class GuildManager {
         return maxInviteCount;
     }
 
-    public void registerGuild(UUID leaderUUID, Guild guild) {
-        guildMap.put(leaderUUID, guild);
+    private void registerGuild(Guild guild) {
+        guildMap.put(guild.getGuildUUID(), guild);
     }
 
-    public Guild getGuild(UUID leaderUUID) {
-        return guildMap.getOrDefault(leaderUUID, null);
+    public Guild getGuild(UUID guildUUID) {
+        if (guildUUID == null) {
+            return null;
+        }
+        if (guildMap.containsKey(guildUUID)) {
+            return guildMap.get(guildUUID);
+        }
+        return null;
     }
 
-    public void removeGuild(UUID leaderUUID) {
-        guildMap.remove(leaderUUID);
+    public Guild getGuild(Player player) {
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+        if (playerData != null) {
+            return getGuild(playerData.getGuildUUID());
+        }
+        return null;
     }
 
-    public boolean inviteGuild(Player leader, OfflinePlayer viewer) {
+    public void removeGuild(UUID guildUUID) {
+        guildMap.remove(guildUUID);
+        if (guildMap.containsKey(guildUUID)) {
+            Guild guild = guildMap.get(guildUUID);
+            guild.getMembers().forEach(memberUUID -> {
+                OfflinePlayer memberO = Bukkit.getOfflinePlayer(memberUUID);
+                if (memberO.isOnline()) {
+                    memberO.getPlayer().kick(Component.text(ChatColor.RED + "길드가 해체되었습니다"));
+                }
+                PlayerData memberData = plugin.getPlayerDataManager().getPlayerData(memberUUID);
+                memberData.setGuildUUID(null);
+            });
+            guild.getGuildRegion().getGuildChunks().forEach(guildChunk -> {
+                Location location = plugin.getWorldManager().getCenterChunkLocation(guildChunk.getWorldName(),
+                        guildChunk.getChunkPair().getV1(), guildChunk.getChunkPair().getV2());
+                Chunk chunk = location.getChunk();
+                PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                    dataContainer.remove(GuildRegion.GUILD_REGION_KEY);
+                }
+            });
+        }
+    }
+
+    public boolean inviteGuild(Player leader, OfflinePlayer offlinePlayer) {
         PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
-        if (playerDataManager.hasWhiteList(viewer)) {
-            leader.sendMessage(ChatColor.RED + "이미 등록된 플레이어입니다");
+        UUID targetUUID = offlinePlayer.getUniqueId();
+        PlayerData playerData = playerDataManager.getPlayerData(targetUUID);
+        if (playerData == null) {
+            leader.sendMessage(Component.text(ChatColor.RED + "존재하지 않는 플레이어입니다"));
             return false;
         }
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(viewer.getUniqueId());
-        offlinePlayerData.loadData();
-        offlinePlayerData.setGuildUUID(leader.getUniqueId());
-        offlinePlayerData.saveData();
 
-        plugin.getPlayerDataManager().addWhiteList(viewer.getUniqueId());
+        Guild guild = getGuild(leader);
+        if (guild == null) {
+            return false;
+        }
+        guild.addMember(targetUUID);
+        guild.addInviteCount(1);
 
-        Guild guild = getGuild(leader.getUniqueId());
-        guild.addMember(viewer.getUniqueId());
+        playerData.setGuildUUID(guild.getGuildUUID());
 
-        leader.sendMessage(ChatColor.GREEN + "접속권한이 추가되었습니다");
-        leader.sendMessage(ChatColor.GREEN + "Player: " + viewer.getName());
+        leader.sendMessage(ChatColor.GREEN + "해당 플레이어를 길드에 초대하였습니다");
+        leader.sendMessage(ChatColor.GREEN + "플레이어: " + playerData.getLastName());
         return true;
     }
 
     public void kickGuild(Player leader, OfflinePlayer target) {
         PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
-        if (!playerDataManager.hasWhiteList(target)) {
-            leader.sendMessage(ChatColor.RED + "이미 접속권한이 없는 플레이어입니다");
-            return;
-        }
         if (target.isOnline()) {
-            target.getPlayer().kick(Component.text("스트리머에 의해 추방당하였습니다"));
+            target.getPlayer().kick(Component.text("길드장에 의해 추방당하였습니다"));
         }
-        playerDataManager.removeWhiteList(target.getUniqueId());
-        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(target.getUniqueId());
-        offlinePlayerData.loadData();
-        offlinePlayerData.setGuildUUID(null);
-        offlinePlayerData.saveData();
+        PlayerData playerData = playerDataManager.getPlayerData(target.getUniqueId());
+        playerData.setGuildUUID(null);
 
-        plugin.getPlayerDataManager().removeWhiteList(target.getUniqueId());
-
-        Guild guild = getGuild(leader.getUniqueId());
+        Guild guild = getGuild(leader);
         guild.removeMember(target.getUniqueId());
+        guild.addInviteCount(-1);
 
-        leader.sendMessage(ChatColor.GREEN + "접속권한이 제거되었습니다");
-        leader.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
+        leader.sendMessage(ChatColor.GREEN + "길드에서 추방하였습니다");
+        leader.sendMessage(ChatColor.GREEN + "플레이어: " + target.getName());
     }
 
     public void tempKickGuild(Player leader, OfflinePlayer target, int seconds) {
-        PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
-        if (!playerDataManager.hasWhiteList(target)) {
-            leader.sendMessage(ChatColor.RED + "이미 접속권한이 없는 플레이어입니다");
-            return;
-        }
         UUID targetUUID = target.getUniqueId();
-        Guild guild = getGuild(leader.getUniqueId());
+        Guild guild = getGuild(leader);
         if (guild == null) {
             leader.sendMessage(ChatColor.RED + "잘못된 {g-uuid} 입니다");
             return;
@@ -276,7 +262,7 @@ public class GuildManager {
             if (guild.isTempKickMember(targetUUID)) {
                 guild.removeTempKickMember(targetUUID);
                 leader.sendMessage(ChatColor.GREEN + "해당 플레이어의 임시 추방이 취소되었습니다");
-                leader.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
+                leader.sendMessage(ChatColor.GREEN + "플레이어: " + target.getName());
             } else {
                 leader.sendMessage(ChatColor.RED + "해당 플레이어는 임시 추방 상태가 아닙니다");
             }
@@ -285,11 +271,11 @@ public class GuildManager {
         guild.applyTempKick(targetUUID, seconds);
         String leftTime = TimeUtil.getTimeToFormat(guild.getTempKickTime(targetUUID));
         if (target.isOnline()) {
-            target.getPlayer().kick(Component.text("스트리머에 의해 임시 추방당하였습니다\n만료 기간: " + leftTime));
+            target.getPlayer().kick(Component.text("길드장에 의해 임시 추방당하였습니다\n만료 기간: " + leftTime));
         }
 
         leader.sendMessage(ChatColor.GREEN + "해당 플레이어가 임시추방 되었습니다");
-        leader.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
+        leader.sendMessage(ChatColor.GREEN + "플레이어: " + target.getName());
         leader.sendMessage(ChatColor.GREEN + "만료 기간: " + leftTime);
     }
 
@@ -317,7 +303,26 @@ public class GuildManager {
         return shopPenaltyMap.keySet();
     }
 
-    public boolean isInGuildRegion(Player player) {
+    public boolean isInOwnGuildRegion(Location location, Player checkPlayer, boolean checkExpired) {
+        Chunk chunk = location.getChunk();
+        PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+        if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+            String guildRegionKey = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+            if (guildRegionKey != null) {
+                Guild guild = getGuild(UUID.fromString(guildRegionKey));
+                if (guild != null) {
+                    if (checkExpired) {
+                        return guild.isMember(checkPlayer) && guild.getGuildRegion().getOverdueDay(false) == 0;
+                    } else {
+                        return guild.isMember(checkPlayer);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isInOwnGuildRegion(Player player) {
         Location location = player.getLocation();
         Chunk chunk = location.getChunk();
         PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
@@ -331,6 +336,40 @@ public class GuildManager {
             }
         }
         return false;
+    }
+
+    public boolean isGuildRegion(Location location, boolean expired) {
+        Chunk chunk = location.getChunk();
+        PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+        if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+            String guildRegionKey = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+            if (guildRegionKey != null) {
+                Guild guild = getGuild(UUID.fromString(guildRegionKey));
+                if (guild != null) {
+                    if (expired) {
+                        return guild.getGuildRegion().getOverdueDay(false) == 0;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Set<UUID> getGuildUUIDs() {
+        return guildMap.keySet();
+    }
+
+    public int getBaseInvitePrice() {
+        return baseInvitePrice;
+    }
+
+    public int getPerInvitePrice() {
+        return perInvitePrice;
+    }
+
+    public int getPrefixChangePrice() {
+        return prefixChangePrice;
     }
 
 }

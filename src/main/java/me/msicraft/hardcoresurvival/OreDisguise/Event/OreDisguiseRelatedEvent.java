@@ -55,7 +55,7 @@ public class OreDisguiseRelatedEvent implements Listener {
                     }
                 } else {
                     if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("PlayerBlockBreak-Summon Fail RandomChance",
+                        MessageUtil.sendDebugMessage("PlayerBlockBreak-Summon Fail",
                                 "InternalName: " + internalName +" | Player: " + player.getName(),
                                 "Location: " + lS);
                     }

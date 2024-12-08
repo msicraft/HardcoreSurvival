@@ -1,17 +1,25 @@
 Debug: false
 Setting:
+  BackupTicks: 36000
   DisableEntityVehicleEnter: true
   DisableBoneMeal: true
   MendingEnchantChance: 0.01
   DisableBedExplode: true
   DisableTrade: true
+  CustomHealthRegen:
+    DisableVanillaRegen: true
+    BaseRegen: 1.5
+    Seconds: 3
+    MinFoodLevel: 6
   DeathPenalty:
     Enabled: true
-    BalancePercent: 0.25
+    BalancePercent: 0.5
+    RemoveChanceForSlot: 0.75
     WorldList:
       world:
         - DISABLED
       world_nether:
+        - CHEST
         - INVENTORY
         - BALANCE
       world_the_end:
@@ -30,13 +38,14 @@ Setting:
     world_nether: "#d32a00[지옥]"
     world_the_end: "#ff1af9[엔더]"
   ExtraEnchantItemDamage:
-    Mending: 1
-    Infinity: 1
+    Mending: 5
+    Infinity: 5
+    Fortune: 5
   ChangeWorldMessage:
     world_nether: "&c네더는 매우 위험한 장소입니다. 충분한 준비를 한 후 도전해주세요"
   DisableUse:
     Enabled: true
-    List:
+    RightClick:
       - chest_minecart
       - oak_chest_boat
       - bamboo_chest_raft
@@ -47,6 +56,37 @@ Setting:
       - dark_oak_chest_boat
       - mangrove_chest_boat
       - cherry_chest_boat
+      - hopper_minecart
+      - tnt
+      - observer
+      - tnt_minecart
+      - beacon
+      - hopper
+      - dispenser
+      - dropper
+      - Grindstone
+    ShiftRightClick:
+      - chest_minecart
+      - oak_chest_boat
+      - bamboo_chest_raft
+      - spruce_chest_boat
+      - birch_chest_boat
+      - jungle_chest_boat
+      - acacia_chest_boat
+      - dark_oak_chest_boat
+      - mangrove_chest_boat
+      - cherry_chest_boat
+      - hopper_minecart
+      - tnt
+      - observer
+      - tnt_minecart
+      - beacon
+      - hopper
+      - dispenser
+      - dropper
+      - Grindstone
+    LeftClick: []
+    ShiftLeftClick: []
   OreDisguise: # Use MythicMobs
     Enabled: true
     List:
@@ -102,9 +142,12 @@ Setting:
         InternalName: "Disguise_NetherGoldOre"
         Chance: 0.05
 Streamer:
+  BaseInvitePrice: 150000
+  PerInvitePrice: 20000
   RegionProtectRadius: 150
-  MaxInviteCount: 5
+  MaxInviteCount: 10
   RegionPaySeconds: 86400
+  PrefixChangePrice: 50000
   RegionWorld:
     - iris_world
   RegionPrice:
@@ -129,8 +172,4 @@ Streamer:
     '8': 0.4
     '9': 0.45
     '10': 0.5
-  List:
-Whitelist:
-  Enabled: true
-  Message: "&c접속 권한이 없습니다."
   List:

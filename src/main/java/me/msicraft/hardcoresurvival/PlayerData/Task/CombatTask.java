@@ -12,9 +12,8 @@ public class CombatTask extends BukkitRunnable {
 
     public CombatTask(PlayerData playerData) {
         this.playerData = playerData;
-        if (playerData.getPlayer().isOnline()) {
-            this.runTaskTimer(HardcoreSurvival.getPlugin(), 20L, 20L);
-        }
+
+        this.runTaskTimer(HardcoreSurvival.getPlugin(), 20L, 20L);
     }
 
     public void update() {
@@ -23,10 +22,10 @@ public class CombatTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (!playerData.getPlayer().isOnline()) {
+        if (playerData.getPlayer() == null) {
             this.close();
         } else {
-            long c = (long) (HardcoreSurvival.getPlugin().getCombatSeconds() * 1000L);
+            long c = HardcoreSurvival.getPlugin().getCombatSeconds() * 1000L;
             if (this.lastHit + c < System.currentTimeMillis()) {
                 this.close();
             }

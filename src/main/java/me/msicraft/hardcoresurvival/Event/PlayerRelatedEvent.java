@@ -1,13 +1,12 @@
 package me.msicraft.hardcoresurvival.Event;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
+import me.msicraft.hardcoresurvival.Data.DisableActionType;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -26,7 +25,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.DecoratedPotInventory;
@@ -59,7 +57,7 @@ public class PlayerRelatedEvent implements Listener {
     private double mendingEnchantChance = 0.0;
     private boolean disableBedExplode = false;
     private boolean disableUse;
-    private final Set<Material> disableUseMaterials = new HashSet<>();
+    private final Map<DisableActionType, Set<Material>> disableUseMaterialMap = new HashMap<>();
     private int shieldCooldownTick = -1;
     private double reduceArrowDamage = 1;
 
@@ -74,14 +72,23 @@ public class PlayerRelatedEvent implements Listener {
         this.disableBedExplode = config.contains("Setting.DisableBedExplode") && config.getBoolean("Setting.DisableBedExplode");
         this.disableUse = config.contains("Setting.DisableUse.Enabled") && config.getBoolean("Setting.DisableUse.Enabled");
         this.shieldCooldownTick = config.contains("Setting.ShieldCooldownTick") ? config.getInt("Setting.ShieldCooldownTick") : -1;
-        config.getStringList("Setting.DisableUse.List").forEach(materialName -> {
-            Material material = Material.getMaterial(materialName.toUpperCase());
-            if (material != null) {
-                disableUseMaterials.add(material);
-            } else {
-                MessageUtil.sendDebugMessage("DisableUse-Can't Load Material", "Material: " + materialName);
+
+        DisableActionType[] disableActionTypes = DisableActionType.values();
+        for (DisableActionType actionType : disableActionTypes) {
+            if (!disableUseMaterialMap.containsKey(actionType)) {
+                disableUseMaterialMap.put(actionType, new HashSet<>());
             }
-        });
+            String path = "Setting.DisableUse." + actionType.getPath();
+            config.getStringList(path).forEach(materialName -> {
+                Material material = Material.getMaterial(materialName.toUpperCase());
+                if (material != null) {
+                    disableUseMaterialMap.get(actionType).add(material);
+                } else {
+                    MessageUtil.sendDebugMessage("DisableUse-Can't Load Material", "ActionType: " + actionType.name() + "Material: " + materialName);
+                }
+            });
+        }
+
         this.reduceArrowDamage = config.contains("Setting.ReduceArrowDamage") ? config.getDouble("Setting.ReduceArrowDamage") : 1;
 
         ConfigurationSection extraEnchantSection = config.getConfigurationSection("Setting.ExtraEnchantItemDamage");
@@ -167,6 +174,7 @@ public class PlayerRelatedEvent implements Listener {
         }
     }
 
+    /*
     @EventHandler
     public void disableBedExplode(PlayerInteractEvent e) {
         Player player = e.getPlayer();
@@ -193,6 +201,8 @@ public class PlayerRelatedEvent implements Listener {
         }
     }
 
+     */
+
     @EventHandler
     public void disableUse(PlayerInteractEvent e) {
         if (disableUse) {
@@ -200,25 +210,43 @@ public class PlayerRelatedEvent implements Listener {
             if (player.isOp()) {
                 return;
             }
-            Action action = e.getAction();
-            if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
-                ItemStack itemStack = e.getItem();
-                if (itemStack != null) {
-                    if (disableUseMaterials.contains(itemStack.getType())) {
-
-                        e.setCancelled(true);
-                        player.sendMessage(ChatColor.RED + "해당 아이템은 사용할 수 없습니다");
-
-                        if (plugin.useDebug()) {
-                            MessageUtil.sendDebugMessage("DisableUse",
-                                    "Player: " + player.getName(), "Item: " + itemStack.getType().name());
+            ItemStack itemStack = e.getItem();
+            if (itemStack != null) {
+                Action action = e.getAction();
+                Set<Material> sets;
+                switch (action) {
+                    case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> {
+                        if (player.isSneaking()) {
+                            sets = disableUseMaterialMap.get(DisableActionType.SHIFT_LEFT_CLICK);
+                        } else {
+                            sets = disableUseMaterialMap.get(DisableActionType.LEFT_CLICK);
                         }
+                    }
+                    case RIGHT_CLICK_AIR, RIGHT_CLICK_BLOCK -> {
+                        if (player.isSneaking()) {
+                            sets = disableUseMaterialMap.get(DisableActionType.SHIFT_RIGHT_CLICK);
+                        } else {
+                            sets = disableUseMaterialMap.get(DisableActionType.RIGHT_CLICK);
+                        }
+                    }
+                    default -> {
+                        sets = new HashSet<>(0);
+                    }
+                }
+                if (sets.contains(itemStack.getType())) {
+                    e.setCancelled(true);
+                    player.sendMessage(ChatColor.RED + "해당 아이템은 사용할 수 없습니다");
+
+                    if (plugin.useDebug()) {
+                        MessageUtil.sendDebugMessage("DisableUse",
+                                "Player: " + player.getName(), "Item: " + itemStack.getType().name() + " | ActionType: " + action.name());
                     }
                 }
             }
         }
     }
 
+    /*
     @EventHandler(priority = EventPriority.HIGHEST)
     public void disableTabComplete(PlayerCommandSendEvent e) {
         if (e.getPlayer().isOp()) {
@@ -226,6 +254,8 @@ public class PlayerRelatedEvent implements Listener {
         }
         e.getCommands().clear();
     }
+
+     */
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void applyShieldCooldown(EntityDamageByEntityEvent e) {
@@ -319,20 +349,13 @@ public class PlayerRelatedEvent implements Listener {
                         itemStack.setAmount(1);
                     } else {
                         int amount = 1;
-                        for (int i = 0; i < fortuneLevel; i++) {
+                        int attemptCount = (int) (fortuneLevel * 1.5);
+                        for (int i = 0; i < attemptCount; i++) {
                             if (Math.random() < 0.05) {
                                 amount++;
                             }
                         }
                         itemStack.setAmount(amount);
-                        if (itemMeta instanceof Damageable damageable) {
-                            int v = amount * 5;
-                            if (damageable.hasDamage()) {
-                                damageable.setDamage(damageable.getDamage() + v);
-                            } else {
-                                damageable.setDamage(v);
-                            }
-                        }
                     }
                 }
             }

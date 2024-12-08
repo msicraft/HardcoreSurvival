@@ -2,7 +2,6 @@ package me.msicraft.hardcoresurvival.Menu.Event;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.msicraft.hardcoresurvival.Guild.Menu.GuildGui;
-import me.msicraft.hardcoresurvival.Guild.Menu.GuildRegionGui;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
@@ -82,64 +81,6 @@ public class MenuGuiEvent implements Listener {
             Bukkit.getScheduler().runTask(plugin, ()-> {
                 Bukkit.getServer().dispatchCommand(player, "ah sell " + price);
             });
-            return;
-        }
-        String nickName_first = (String) playerData.getTempData("NickName_First", null);
-        if (nickName_first != null) {
-            e.setCancelled(true);
-            String message = PlainTextComponentSerializer.plainText().serialize(e.message());
-            if (message.equalsIgnoreCase("cancel")) {
-                playerData.removeTempData("NickName_First");
-                Bukkit.getScheduler().runTask(plugin, ()-> {
-                    openMainMenu(player);
-                });
-                return;
-            }
-            String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.equalsIgnoreCase("Unknown")) {
-                player.sendMessage(ChatColor.RED + "사용할 수 없는 닉네임 입니다");
-            } else {
-                if (nickName.length() > 10) {
-                    player.sendMessage(ChatColor.RED + "10 자리를 초과하였습니다");
-                } else {
-                    playerData.setData("NickName", nickName);
-                    player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
-                }
-            }
-            playerData.removeTempData("NickName_First");
-            Bukkit.getScheduler().runTask(plugin, ()-> {
-                openMainMenu(player);
-            });
-            return;
-
-        }
-        String nickName_Change = (String) playerData.getTempData("NickName_Change", null);
-        if (nickName_Change != null) {
-            e.setCancelled(true);
-            String message = PlainTextComponentSerializer.plainText().serialize(e.message());
-            if (message.equalsIgnoreCase("cancel")) {
-                playerData.removeTempData("NickName_Change");
-                Bukkit.getScheduler().runTask(plugin, ()-> {
-                    openMainMenu(player);
-                });
-                return;
-            }
-            String nickName = message.replaceAll("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]", "");
-            if (nickName.equalsIgnoreCase("Unknown")) {
-                player.sendMessage(ChatColor.RED + "사용할 수 없는 닉네임 입니다");
-            } else {
-                if (nickName.length() > 10) {
-                    player.sendMessage(ChatColor.RED + "10 자리를 초과하였습니다");
-                } else {
-                    playerData.setData("NickName", nickName);
-                    player.sendMessage(ChatColor.GREEN + "닉네임: " + nickName);
-                }
-            }
-            playerData.removeTempData("NickName_Change");
-            Bukkit.getScheduler().runTask(plugin, ()-> {
-                openMainMenu(player);
-            });
-            return;
         }
     }
 
@@ -185,6 +126,10 @@ public class MenuGuiEvent implements Listener {
                                         }
                                     }
                                 }
+                                case "mmoinv" -> {
+                                    player.closeInventory();
+                                    Bukkit.getServer().dispatchCommand(player, "mmoinventory");
+                                }
                                 case "fish-shop" -> {
                                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),
                                             "cfishing open market " + player.getName() + " --silent");
@@ -193,6 +138,10 @@ public class MenuGuiEvent implements Listener {
                                     GuildGui guildGui = (GuildGui) playerData.getCustomGui(GuiType.GUILD);
                                     player.openInventory(guildGui.getInventory());
                                     guildGui.setMain();
+                                }
+                                case "Pets" -> {
+                                    player.closeInventory();
+                                    Bukkit.getServer().dispatchCommand(player, "pets");
                                 }
                                 case "auction" -> {
                                     if (e.isLeftClick()) {
@@ -206,35 +155,6 @@ public class MenuGuiEvent implements Listener {
                                         player.closeInventory();
                                         playerData.setTempData("Menu_auction_sell", "none");
                                     }
-                                }
-                                case "NickName-First" -> {
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    player.sendMessage(ChatColor.GRAY + "닉네임을 입력해주세요.");
-                                    player.sendMessage(ChatColor.GRAY + "숫자,영어,한글 만 사용가능합니다");
-                                    player.sendMessage(ChatColor.GRAY + "최대 10자리(공백 포함)");
-                                    player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    player.closeInventory();
-                                    playerData.setTempData("NickName_First", "none");
-                                }
-                                case "NickName-Change" -> {
-                                    player.sendMessage(ChatColor.RED + "현재 이용 불가능합니다");
-                                    /*
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    player.sendMessage(ChatColor.GRAY + "변경할 닉네임을 입력해주세요.");
-                                    player.sendMessage(ChatColor.GRAY + "숫자 영어 한글 만 사용가능합니다");
-                                    player.sendMessage(ChatColor.GRAY + "최대 6자리(공백 포함)");
-                                    player.sendMessage(ChatColor.GRAY + "'cancel' 입력시 취소");
-                                    player.sendMessage(ChatColor.GRAY + "========================================");
-                                    player.closeInventory();
-                                    playerData.setTempData("NickName_Change", "none");
-
-                                     */
-                                }
-                                case "GuildRegion" -> {
-                                    GuildRegionGui guildRegionGui = (GuildRegionGui) playerData.getCustomGui(GuiType.GUILD_REGION);
-                                    player.openInventory(guildRegionGui.getInventory());
-                                    guildRegionGui.setMain();
                                 }
                             }
                         }

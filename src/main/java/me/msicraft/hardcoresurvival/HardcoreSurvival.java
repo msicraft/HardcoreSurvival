@@ -26,6 +26,8 @@ import me.msicraft.hardcoresurvival.PlayerData.Event.PlayerDataRelatedEvent;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Menu.Event.ShopGuiEvent;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
+import me.msicraft.hardcoresurvival.Task.BackupTask;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -59,6 +61,7 @@ public final class HardcoreSurvival extends JavaPlugin {
     private boolean useDebug = false;
     private int playerTaskTick = 20;
     private int combatSeconds = 10;
+    private BackupTask backupTask;
 
     private Economy economy;
     private Chat chat;
@@ -118,22 +121,12 @@ public final class HardcoreSurvival extends JavaPlugin {
         reloadVariables();
 
         getServer().getConsoleSender().sendMessage(PREFIX + ChatColor.GREEN + "플러그인이 활성화 되었습니다");
-
-        guildManager.loadGuild();
     }
 
     @Override
     public void onDisable() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-            if (playerData == null) {
-                continue;
-            }
-            playerData.saveData();
-        }
-
-        shopManager.saveShopData();
         playerDataManager.saveData();
+        shopManager.saveShopData();
         guildManager.saveGuild();
     }
 
@@ -173,6 +166,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         customItemManager.reloadVariables();
         guildManager.reloadVariables();
 
+        MessageUtil.reloadVariables(this);
         EntityRelatedEvent.getInstance().reloadVariables();
         PlayerRelatedEvent.getInstance().reloadVariables();
 
@@ -188,6 +182,16 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
 
         shopManager.reloadVariables();
+
+        int backupTaskTicks = getConfig().getInt("Setting.BackupTicks", -1);
+        if (backupTask != null) {
+            backupTask.cancel();
+            backupTask = null;
+        }
+        if (backupTaskTicks != -1) {
+            backupTask = new BackupTask(this);
+            backupTask.runTaskTimerAsynchronously(this, 20 * 30, backupTaskTicks);
+        }
     }
 
     private void createConfigFile() {
@@ -226,7 +230,7 @@ public final class HardcoreSurvival extends JavaPlugin {
         RegisteredServiceProvider<T> provider = Bukkit.getServer().getServicesManager().getRegistration(classz);
         if (provider == null)
             return null;
-        return provider.getProvider() != null ? (T) provider.getProvider() : null;
+        return provider.getProvider() != null ? provider.getProvider() : null;
     }
 
     public AuctionManager getAuctionManager() {

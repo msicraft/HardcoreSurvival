@@ -1,0 +1,16 @@
+GuildUUID: #guild uuid
+Leader: #leader uuid
+Prefix: ""
+SubLeader: []
+InviteCount: 0
+MemberList: []
+TempKickList: []
+Region:
+  LastRegionPayTime: -1
+  SpawnLocation:
+    WorldName: world
+    X: 0
+    Y: 64
+    Z: 0
+  BuyRegion: []
+  RegionOptions: []

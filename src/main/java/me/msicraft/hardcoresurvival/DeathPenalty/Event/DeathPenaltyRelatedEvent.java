@@ -3,13 +3,14 @@ package me.msicraft.hardcoresurvival.DeathPenalty.Event;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
-import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.TileState;
@@ -25,7 +26,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class DeathPenaltyRelatedEvent implements Listener {
 
@@ -38,7 +38,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
     }
 
     @EventHandler
-    public void chestOwnerEvent(PlayerInteractEvent e) {
+    public void spawnChestOwnerEvent(PlayerInteractEvent e) {
         Action action = e.getAction();
         if (action == Action.RIGHT_CLICK_BLOCK) {
             Player player = e.getPlayer();
@@ -46,11 +46,11 @@ public class DeathPenaltyRelatedEvent implements Listener {
             if (chestBlock != null && deathPenaltyManager.isContainerMaterial(chestBlock.getType())) {
                 if (chestBlock.getState() instanceof TileState tileState) {
                     PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
-                    String owner = dataContainer.get(deathPenaltyManager.getBlockOwnerKey(), PersistentDataType.STRING);
+                    String owner = dataContainer.get(DeathPenaltyManager.CHEST_OWNER_KEY, PersistentDataType.STRING);
                     if (owner == null) {
                         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
                         playerData.getDeathPenaltyChestLog().addLocation(chestBlock.getLocation());
-                        dataContainer.set(deathPenaltyManager.getBlockOwnerKey(), PersistentDataType.STRING, player.getUniqueId().toString());
+                        dataContainer.set(DeathPenaltyManager.CHEST_OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
                         tileState.update();
 
                         if (plugin.useDebug()) {
@@ -74,7 +74,6 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
                 if (playerData == null) {
                     e.setCancelled(true);
-                    MessageUtil.sendPlayerDataLoadingMessage(player);
                     return;
                 }
                 Location location = placedBlock.getLocation();
@@ -92,34 +91,17 @@ public class DeathPenaltyRelatedEvent implements Listener {
                                             "Place Player: " + player.getName());
                                 }
                                 if (otherChestLocation.getBlock().getState() instanceof TileState tileState) {
-                                    String owner = tileState.getPersistentDataContainer().get(deathPenaltyManager.getBlockOwnerKey(), PersistentDataType.STRING);
+                                    String owner = tileState.getPersistentDataContainer().get(DeathPenaltyManager.CHEST_OWNER_KEY, PersistentDataType.STRING);
                                     if (owner != null) {
                                         UUID uuid = UUID.fromString(owner);
-                                        OfflinePlayer ownerPlayer = Bukkit.getOfflinePlayer(uuid);
-                                        if (ownerPlayer.isOnline()) {
-                                            PlayerData ownerPlayerData = plugin.getPlayerDataManager().getPlayerData((Player) ownerPlayer);
+                                        PlayerData ownerPlayerData = plugin.getPlayerDataManager().getPlayerData(uuid);
+                                        if (ownerPlayerData != null) {
                                             ownerPlayerData.getDeathPenaltyChestLog().addLocation(location);
                                             if (plugin.useDebug()) {
-                                                MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OtherChest",
+                                                MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OwnerChest",
                                                         "Place Player: " + player.getName(),
-                                                        "Original Chest Owner: " + ownerPlayer.getName() + " | Status: online");
+                                                        "Owner Chest Owner: " + ownerPlayerData.getLastName());
                                             }
-                                        } else {
-                                            CompletableFuture<OfflinePlayerData> future = CompletableFuture.supplyAsync(() -> {
-                                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                                offlinePlayerData.loadData();
-                                                return offlinePlayerData;
-                                            });
-                                            future.thenAccept(offlinePlayerData -> {
-                                                offlinePlayerData.getDeathPenaltyChestLog().addLocation(location);
-                                                offlinePlayerData.saveData();
-
-                                                if (plugin.useDebug()) {
-                                                    MessageUtil.sendDebugMessage("DeathPenaltyChestLog-OtherChestPlace-OtherChest",
-                                                            "Place Player: " + player.getName(),
-                                                            "Original Chest Owner: " + ownerPlayer.getName() + " | Status: offline");
-                                                }
-                                            });
                                         }
                                     } else {
                                         if (plugin.useDebug()) {
@@ -136,7 +118,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 }
 
                 if (placedBlock.getState() instanceof TileState tileState) {
-                    tileState.getPersistentDataContainer().set(deathPenaltyManager.getBlockOwnerKey(), PersistentDataType.STRING, player.getUniqueId().toString());
+                    tileState.getPersistentDataContainer().set(DeathPenaltyManager.CHEST_OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
                     tileState.update();
                 }
 
@@ -195,7 +177,7 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 String chestOwner = deathPenaltyManager.getChestOwner(block);
                 if (chestOwner != null) {
                     if (!chestOwner.equalsIgnoreCase(player.getUniqueId().toString())) {
-                        player.sendMessage(ChatColor.RED + "잠겨있는 상자는 파괴가 불가능합니다");
+                        player.sendMessage(ChatColor.RED + "해당 상자는 파괴가 불가능합니다");
                         e.setCancelled(true);
                         return;
                     }
@@ -223,9 +205,9 @@ public class DeathPenaltyRelatedEvent implements Listener {
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
             boolean ignoreDeathPenalty = (boolean) playerData.getData("IgnoreDeathPenalty", false);
-            if (ignoreDeathPenalty) {
-            } else {
+            if (!ignoreDeathPenalty) {
                 playerData.setData("DeathWorldName", player.getWorld().getName());
+                playerData.setData("DeathLastFoodLevel", player.getFoodLevel());
             }
 
             e.setKeepInventory(true);
@@ -269,13 +251,8 @@ public class DeathPenaltyRelatedEvent implements Listener {
                         GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
                         Location guildSpawnLoc = guildSpawnLocation.getSpawnLocation();
                         if (guildSpawnLoc != null) {
-                            Chunk chunk = guildSpawnLoc.getChunk();
-                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
-                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
-                                String guildRegionKey = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
-                                if (guildRegionKey != null && guildRegionKey.equals(guildUUID.toString())) {
-                                    spawnLocation = guildSpawnLoc;
-                                }
+                            if (plugin.getGuildManager().isInOwnGuildRegion(guildSpawnLoc, player, true)) {
+                                spawnLocation = guildSpawnLoc;
                             }
                         }
                     }

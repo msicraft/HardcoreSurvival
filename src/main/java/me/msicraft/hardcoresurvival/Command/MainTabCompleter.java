@@ -39,7 +39,7 @@ public class MainTabCompleter implements TabCompleter {
                             return List.copyOf(plugin.getCustomItemManager().getInternalNames());
                         }
                         case "streamer" -> {
-                            return List.of("add", "remove", "list");
+                            return List.of("add", "remove", "list", "create-for-player");
                         }
                         case "itembox" -> {
                             return List.of("give");
@@ -48,7 +48,7 @@ public class MainTabCompleter implements TabCompleter {
                             return List.of("shop");
                         }
                         case "debug" -> {
-                            return List.of("change-nickname", "set-guild-spawnlocation", "region");
+                            return List.of("guild", "region", "playerdata");
                         }
                     }
                 }
@@ -71,21 +71,23 @@ public class MainTabCompleter implements TabCompleter {
                                 list.add(uuid.toString());
                             });
                             return list;
+                        } else if (var2.equalsIgnoreCase("create-for-player")) {
+                            return List.of("<leader_player>");
                         }
                     } else if (var.equalsIgnoreCase("itembox")) {
                         List<String> list = new ArrayList<>();
                         list.add("all-players");
-                        list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
+                        plugin.getPlayerDataManager().getPlayerUUIDs().forEach(uuid -> {
+                            list.add(uuid.toString());
+                        });
                         return list;
                     } else if (var.equalsIgnoreCase("debug")) {
-                        if (var2.equalsIgnoreCase("set-guild-spawnlocation")) {
-                            List<String> list = new ArrayList<>();
-                            plugin.getPlayerDataManager().getStreamerList().forEach(uuid -> {
-                                list.add(uuid.toString());
-                            });
-                            return list;
+                        if (var2.equalsIgnoreCase("guild")) {
+                            return List.of("spawnlocation", "prefix");
                         } else if (var2.equalsIgnoreCase("region")) {
                             return List.of("info", "remove");
+                        } else if (var2.equalsIgnoreCase("playerdata")) {
+                            return List.of("tags");
                         }
                     }
                 }
@@ -98,7 +100,9 @@ public class MainTabCompleter implements TabCompleter {
                             if (var3.equalsIgnoreCase("log-to-ItemBox")) {
                                 List<String> list = new ArrayList<>();
                                 list.add("all-players");
-                                list.addAll(plugin.getPlayerDataManager().getPlayerFileNames());
+                                plugin.getPlayerDataManager().getPlayerUUIDs().forEach(uuid -> {
+                                    list.add(uuid.toString());
+                                });
                                 return list;
                             }
                         }
@@ -110,18 +114,50 @@ public class MainTabCompleter implements TabCompleter {
                             }
                             return list;
                         } else if (var2.equalsIgnoreCase("edit")) {
-                            return List.of("UseStaticPrice", "UnlimitStock", "BasePrice", "Price", "Stock", "DisableSell");
+                            return List.of("UseStaticPrice", "UnlimitStock", "BasePrice", "Price", "Stock", "DisableSell", "Category");
                         }
                     } else if (var.equalsIgnoreCase("itembox")) {
                         return List.of("<expiredSeconds>");
+                    } else if (var.equalsIgnoreCase("streamer")) {
+                        if (var2.equalsIgnoreCase("create-for-player")) {
+                            return List.of("<member_1:member_2>");
+                        }
+                    } else if (var.equalsIgnoreCase("debug")) {
+                        if (var2.equalsIgnoreCase("guild")) {
+                            if (var3.equalsIgnoreCase("spawnlocation") || var3.equalsIgnoreCase("prefix")) {
+                                List<String> list = new ArrayList<>();
+                                plugin.getGuildManager().getGuildUUIDs().forEach(uuid -> {
+                                    list.add(uuid.toString());
+                                });
+                                return list;
+                            }
+                        } else if (var2.equalsIgnoreCase("playerdata")) {
+                            if (var3.equalsIgnoreCase("tags")) {
+                                return List.of("list", "add", "remove");
+                            }
+                        }
                     }
                 }
                 if (args.length == 5) {
                     String var = args[0];
                     String var2 = args[1];
+                    String var3 = args[2];
+                    String var4 = args[3];
                     if (var.equalsIgnoreCase("shop")) {
                         if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
                             return List.of("<basePrice>");
+                        } else if (var2.equalsIgnoreCase("edit")) {
+                            List<String> list = new ArrayList<>();
+                            for (ShopItem.Category category : ShopItem.Category.values()) {
+                                list.add(category.name());
+                            }
+                            return list;
+                        }
+                    } else if (var.equalsIgnoreCase("debug")) {
+                        if (var2.equalsIgnoreCase("guild")) {
+                            if (var3.equalsIgnoreCase("prefix")) {
+                                return List.of("get", "set");
+                            }
                         }
                     }
                 }

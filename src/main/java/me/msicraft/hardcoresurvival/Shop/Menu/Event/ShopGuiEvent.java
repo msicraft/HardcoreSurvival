@@ -144,6 +144,22 @@ public class ShopGuiEvent implements Listener {
                             shopManager.openShopInventory(player, ShopGui.Type.SELL);
                         }
                         case "Page" -> {
+                            ShopItem.Category selectCategory = ShopItem.Category.valueOf((String) playerData.getTempData("Shop_Category", "NONE"));
+                            ShopItem.Category[] categories = ShopItem.Category.values();
+                            int currentOrder = selectCategory.getOrder();
+                            int nextOrder = currentOrder + 1;
+                            int maxOrder = ShopItem.Category.values().length - 1;
+                            if (nextOrder > maxOrder) {
+                                nextOrder = 0;
+                            }
+                            for (ShopItem.Category category : categories) {
+                                if (category.getOrder() == nextOrder) {
+                                    playerData.setTempData("Shop_Category", category.name());
+                                    break;
+                                }
+                            }
+
+                            shopManager.openShopInventory(player, ShopGui.Type.BUY);
                             return;
                         }
                         default -> {
@@ -152,13 +168,17 @@ public class ShopGuiEvent implements Listener {
                                 if (shopItem != null) {
                                     int amount = (int) playerData.getTempData("ShopGui_" + data + "_SelectCount", 1);
                                     double multiplier = 1.0;
-                                    if (plugin.getGuildManager().isInGuildRegion(player)) {
-                                        GuildManager guildManager = plugin.getGuildManager();
-                                        Guild guild = guildManager.getGuild(playerData.getGuildUUID());
-                                        if (guild != null) {
-                                            int overDueDay = guild.getGuildRegion().getOverdueDay(true);
-                                            multiplier = multiplier + guildManager.getShopPenalty(overDueDay);
+                                    if (playerData.getGuildUUID() != null) {
+                                        if (plugin.getGuildManager().isInOwnGuildRegion(player)) {
+                                            GuildManager guildManager = plugin.getGuildManager();
+                                            Guild guild = guildManager.getGuild(playerData.getGuildUUID());
+                                            if (guild != null) {
+                                                int overDueDay = guild.getGuildRegion().getOverdueDay(true);
+                                                multiplier = multiplier + guildManager.getShopPenalty(overDueDay);
+                                            }
                                         }
+                                    } else {
+                                        multiplier = multiplier + shopManager.getNoGuildShopPenalty();
                                     }
                                     shopManager.buyShopItem(player, data, amount, multiplier);
 
@@ -186,13 +206,17 @@ public class ShopGuiEvent implements Listener {
                         }
                         case "SellConfirm" -> {
                             double multiplier = 1.0;
-                            if (plugin.getGuildManager().isInGuildRegion(player)) {
-                                GuildManager guildManager = plugin.getGuildManager();
-                                Guild guild = guildManager.getGuild(playerData.getGuildUUID());
-                                if (guild != null) {
-                                    int overDueDay = guild.getGuildRegion().getOverdueDay(true);
-                                    multiplier = multiplier - guildManager.getShopPenalty(overDueDay);
+                            if (playerData.getGuildUUID() != null) {
+                                if (plugin.getGuildManager().isInOwnGuildRegion(player)) {
+                                    GuildManager guildManager = plugin.getGuildManager();
+                                    Guild guild = guildManager.getGuild(playerData.getGuildUUID());
+                                    if (guild != null) {
+                                        int overDueDay = guild.getGuildRegion().getOverdueDay(true);
+                                        multiplier = multiplier - guildManager.getShopPenalty(overDueDay);
+                                    }
                                 }
+                            } else {
+                                multiplier = multiplier - shopManager.getNoGuildShopPenalty();
                             }
                             shopManager.sellShopItem(player, multiplier);
                         }

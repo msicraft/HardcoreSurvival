@@ -1,4 +1,4 @@
-package me.msicraft.hardcoresurvival.Shop.File;
+package me.msicraft.hardcoresurvival.Data;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -8,20 +8,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class ShopDataFile {
+public class MessageDataFile {
 
     private final HardcoreSurvival plugin;
     private FileConfiguration dataConfig = null;
     private File configFile = null;
 
-    public ShopDataFile(HardcoreSurvival plugin) {
+    public MessageDataFile(HardcoreSurvival plugin) {
         this.plugin = plugin;
         saveDefaultConfig();
     }
 
     public void reloadConfig() {
         if (this.configFile == null)
-            this.configFile = new File(plugin.getDataFolder(), "shopData.yml");
+            this.configFile = new File(plugin.getDataFolder(), "messages.yml");
 
         this.dataConfig = YamlConfiguration.loadConfiguration(this.configFile);
 
@@ -55,10 +55,10 @@ public class ShopDataFile {
 
     public void saveDefaultConfig() {
         if (this.configFile == null)
-            this.configFile = new File(plugin.getDataFolder(), "shopData.yml");
+            this.configFile = new File(plugin.getDataFolder(), "messages.yml");
 
         if (!this.configFile.exists()) {
-            plugin.saveResource("shopData.yml", false);
+            plugin.saveResource("messages.yml", false);
         }
     }
 

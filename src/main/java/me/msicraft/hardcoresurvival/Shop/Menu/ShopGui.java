@@ -39,7 +39,7 @@ public class ShopGui extends CustomGui {
     public ShopGui(HardcoreSurvival plugin, PlayerData playerData) {
         this.plugin = plugin;
         this.playerData = playerData;
-        this.gui = Bukkit.createInventory(this, 54, Component.text("Shop"));
+        this.gui = Bukkit.createInventory(this, 54, Component.text("상점"));
     }
 
     public void setGui(Player player, Type type) {
@@ -54,6 +54,22 @@ public class ShopGui extends CustomGui {
                 setShopSellInv(player);
             }
         }
+    }
+
+    private List<String> getPageLore(ShopItem.Category selectCategory) {
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.YELLOW + "클릭시 카테고리를 변경합니다");
+        lore.add("");
+        ShopItem.Category[] categories = ShopItem.Category.values();
+        for (ShopItem.Category category : categories) {
+            if (category == selectCategory) {
+                lore.add(ChatColor.GRAY + "- " + ChatColor.UNDERLINE + category.getDisplayName());
+            } else {
+                lore.add(ChatColor.DARK_GRAY + "- " + category.getDisplayName());
+            }
+        }
+
+        return lore;
     }
 
     public void setShopBuyInv(Player player) {
@@ -74,8 +90,10 @@ public class ShopGui extends CustomGui {
         int guiCount = 0;
         int lastCount = page * 45;
 
+        ShopItem.Category selectCategory = ShopItem.Category.valueOf((String) playerData.getTempData("Shop_Category", "NONE"));
+
         String pageS = "페이지: " + (page + 1) + "/" + ((maxSize / 45) + 1);
-        itemStack = GuiUtil.createItemStack(Material.BOOK, pageS, GuiUtil.EMPTY_LORE, -1, BUY_KEY, "Page");
+        itemStack = GuiUtil.createItemStack(Material.BOOK, pageS, getPageLore(selectCategory), -1, BUY_KEY, "Page");
         gui.setItem(49, itemStack);
 
         for (int a = lastCount; a < maxSize; a++) {
@@ -84,6 +102,12 @@ public class ShopGui extends CustomGui {
             if (shopItem != null) {
                 if (shopItem.getPrice(false) <= 0) {
                     continue;
+                }
+                ShopItem.Category category = shopItem.getCategory();
+                if (category != ShopItem.Category.ALL) {
+                    if (shopItem.getCategory() != selectCategory) {
+                        continue;
+                    }
                 }
                 int selectCount = (int) playerData.getTempData("ShopGui_" + internalName + "_SelectCount", 1);
                 ItemStack cloneStack = new ItemStack(shopItem.getItemStack());

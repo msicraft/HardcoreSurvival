@@ -3,12 +3,12 @@ package me.msicraft.hardcoresurvival.API.CustomEvent;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.OfflinePlayer;
 
-public class PlayerDataUnLoadEvent extends HardcoreSurvivalEvent {
+public class PlayerDataLoadEndEvent extends HardcoreSurvivalEvent {
 
     private final OfflinePlayer offlinePlayer;
     private final PlayerData playerData;
 
-    public PlayerDataUnLoadEvent(OfflinePlayer offlinePlayer, PlayerData playerData) {
+    public PlayerDataLoadEndEvent(OfflinePlayer offlinePlayer, PlayerData playerData) {
         this.offlinePlayer = offlinePlayer;
         this.playerData = playerData;
     }
@@ -20,4 +20,5 @@ public class PlayerDataUnLoadEvent extends HardcoreSurvivalEvent {
     public PlayerData getPlayerData() {
         return playerData;
     }
+
 }

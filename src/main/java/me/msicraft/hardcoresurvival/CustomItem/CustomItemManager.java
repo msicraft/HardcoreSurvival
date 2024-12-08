@@ -1,7 +1,7 @@
 package me.msicraft.hardcoresurvival.CustomItem;
 
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
-import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
+import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItemDataFile;
 import me.msicraft.hardcoresurvival.CustomItem.Item.GuildInviteScroll;
 import me.msicraft.hardcoresurvival.CustomItem.Item.ProtectDeathPenalty;
 import me.msicraft.hardcoresurvival.CustomItem.Item.ReturnScroll;

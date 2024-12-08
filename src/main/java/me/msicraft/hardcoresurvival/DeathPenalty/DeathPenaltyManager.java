@@ -2,19 +2,21 @@ package me.msicraft.hardcoresurvival.DeathPenalty;
 
 import fr.maxlego08.zauctionhouse.api.AuctionItem;
 import fr.maxlego08.zauctionhouse.api.AuctionManager;
+import io.lumine.mythic.lib.api.item.NBTItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import me.msicraft.hardcoresurvival.Utils.GuiUtil;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
@@ -30,18 +32,18 @@ public class DeathPenaltyManager {
     private final HardcoreSurvival plugin;
     private boolean isEnabled = false;
     private double balancePercent = 0;
+    private double removeChanceForSlot = 1.0;
 
     private final Map<String, Set<ActionType>> worldActionMap = new HashMap<>();
 
     public DeathPenaltyManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
-
-        this.blockOwnerKey = new NamespacedKey(HardcoreSurvival.getPlugin(), "Block_Owner");
     }
 
     public void reloadVariables() {
         this.isEnabled = plugin.getConfig().contains("Setting.DeathPenalty.Enabled") && plugin.getConfig().getBoolean("Setting.DeathPenalty.Enabled");
         this.balancePercent = plugin.getConfig().contains("Setting.DeathPenalty.BalancePercent") ? plugin.getConfig().getDouble("Setting.DeathPenalty.BalancePercent") : 0;
+        this.removeChanceForSlot = plugin.getConfig().contains("Setting.DeathPenalty.RemoveChanceForSlot")? plugin.getConfig().getDouble("Setting.DeathPenalty.RemoveChanceForSlot") : 1.0;
 
         ConfigurationSection worldActionSection = plugin.getConfig().getConfigurationSection("Setting.DeathPenalty.WorldList");
         if (worldActionSection != null) {
@@ -87,9 +89,12 @@ public class DeathPenaltyManager {
         return materialName.contains("CHEST") || materialName.contains("SHULKER_BOX") || materialName.contains("BARREL");
     }
 
+    private final List<Integer> armorSlots = List.of(36, 37, 38, 39);
+
     public void applyDeathPenalty(PlayerData playerData) {
         String deathWorldName = (String) playerData.getData("DeathWorldName", "world");
         Player player = playerData.getPlayer();
+        player.setFoodLevel((int) playerData.getData("DeathLastFoodLevel", 20));
         Set<ActionType> sets = getWorldActionTypes(deathWorldName);
         for (ActionType actionType : sets) {
             switch (actionType) {
@@ -98,8 +103,37 @@ public class DeathPenaltyManager {
                 case INVENTORY -> {
                     player.setLevel(0);
                     player.setExp(0);
-                    player.getInventory().clear();
                     player.getEnderChest().clear();
+                    int max = player.getInventory().getSize();
+                    for (int i = 0; i<max; i++) {
+                        ItemStack itemStack = player.getInventory().getItem(i);
+                        if (itemStack != null && itemStack.getType() != Material.AIR) {
+                            if (armorSlots.contains(i)) {
+                                if (itemStack.getItemMeta() instanceof Damageable damageable) {
+                                    NBTItem nbtItem = NBTItem.get(itemStack);
+                                    int maxDamage;
+                                    if (nbtItem.hasTag("MMOITEMS_MAX_ITEM_DAMAGE")) {
+                                        maxDamage = (int) nbtItem.getDouble("MMOITEMS_MAX_ITEM_DAMAGE");
+                                    } else {
+                                        maxDamage = itemStack.getType().getMaxDurability();
+                                    }
+                                    int applyDamage = (int) (maxDamage * 0.2);
+                                    if (damageable.hasDamage()) {
+                                        applyDamage = damageable.getDamage() + applyDamage;
+                                    }
+                                    if (applyDamage > maxDamage) {
+                                        applyDamage = maxDamage - 1;
+                                    }
+                                    damageable.setDamage(applyDamage);
+                                    itemStack.setItemMeta(damageable);
+                                }
+                            } else {
+                                if (Math.random() <= removeChanceForSlot) {
+                                    player.getInventory().setItem(i, GuiUtil.AIR_STACK);
+                                }
+                            }
+                        }
+                    }
                 }
                 case BALANCE -> {
                     double balance = plugin.getEconomy().getBalance(player);
@@ -112,7 +146,13 @@ public class DeathPenaltyManager {
                 }
                 case CHEST -> {
                     DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
-                    deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
+                    Set<Location> locations = deathPenaltyChestLog.getChestLocationSets();
+                    Set<Location> ignoredLocations = new HashSet<>(locations.size());
+                    for (Location location : locations) {
+                        if (plugin.getGuildManager().isInOwnGuildRegion(location, player, true)) {
+                            ignoredLocations.add(location);
+                            continue;
+                        }
                         Block block = location.getBlock();
                         String materialName = block.getType().name();
                         if (materialName.contains("CHEST")) {
@@ -128,8 +168,11 @@ public class DeathPenaltyManager {
                             barrel.getInventory().clear();
                             block.setType(Material.AIR);
                         }
-                    });
+                    }
                     deathPenaltyChestLog.reset();
+                    for (Location location : ignoredLocations) {
+                        deathPenaltyChestLog.addLocation(location);
+                    }
                 }
                 case ITEMBOX -> {
                     ItemBox itemBox = playerData.getItemBox();
@@ -153,6 +196,7 @@ public class DeathPenaltyManager {
             }
         }
         playerData.setData("DeathWorldName", null);
+        playerData.setData("DeathLastFoodLevel", null);
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("Apply DeathPenalty",
@@ -160,9 +204,9 @@ public class DeathPenaltyManager {
         }
     }
 
-    public void sendChestLogToItemBox(OfflinePlayerData offlinePlayerData) {
+    public void sendChestLogToItemBox(PlayerData playerData) {
         ItemBoxManager itemBoxManager = plugin.getItemBoxManager();
-        DeathPenaltyChestLog deathPenaltyChestLog = offlinePlayerData.getDeathPenaltyChestLog();
+        DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
         deathPenaltyChestLog.getChestLocationSets().forEach(location -> {
             Block block = location.getBlock();
             if (location.getWorld() != null) {
@@ -171,21 +215,21 @@ public class DeathPenaltyManager {
                     Chest chest = (Chest) block.getState();
                     ItemStack[] itemStacks = chest.getBlockInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
+                        itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 } else if (materialName.contains("SHULKER_BOX")) {
                     ShulkerBox shulkerBox = (ShulkerBox) block.getState();
                     ItemStack[] itemStacks = shulkerBox.getInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
+                        itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 } else if (materialName.contains("BARREL")) {
                     Barrel barrel = (Barrel) block.getState();
                     ItemStack[] itemStacks = barrel.getInventory().getContents();
                     for (ItemStack itemStack : itemStacks) {
-                        itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", -1);
+                        itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", -1);
                     }
                     block.setType(Material.AIR);
                 }
@@ -261,18 +305,14 @@ public class DeathPenaltyManager {
         return new Location(world, x, y, z);
     }
 
-    private final NamespacedKey blockOwnerKey;
-
-    public NamespacedKey getBlockOwnerKey() {
-        return blockOwnerKey;
-    }
+    public static final NamespacedKey CHEST_OWNER_KEY = new NamespacedKey(HardcoreSurvival.getPlugin(), "ChestOwner");
 
     public String getChestOwner(Block block) {
         if (block != null && isContainerMaterial(block.getType())) {
             if (block.getState() instanceof TileState tileState) {
                 PersistentDataContainer dataContainer = tileState.getPersistentDataContainer();
-                if (dataContainer.has(blockOwnerKey, PersistentDataType.STRING)) {
-                    return dataContainer.get(blockOwnerKey, PersistentDataType.STRING);
+                if (dataContainer.has(CHEST_OWNER_KEY, PersistentDataType.STRING)) {
+                    return dataContainer.get(CHEST_OWNER_KEY, PersistentDataType.STRING);
                 }
             }
         }
@@ -280,7 +320,7 @@ public class DeathPenaltyManager {
     }
 
     public Set<ActionType> getWorldActionTypes(String worldName) {
-        return worldActionMap.getOrDefault(worldName, new HashSet<>(0));
+        return worldActionMap.getOrDefault(worldName, Collections.emptySet());
     }
 
 }

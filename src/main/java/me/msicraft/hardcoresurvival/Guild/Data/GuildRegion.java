@@ -20,21 +20,20 @@ public class GuildRegion {
 
     private final Map<RegionOptions, Object> regionOptionsMap = new HashMap<>();
 
-    //private int freeRegionBuyCount = 0;
-
-    public GuildRegion(FileConfiguration config) {
+    public GuildRegion(GuildDataFile guildDataFile) {
+        FileConfiguration config = guildDataFile.getConfig();
         this.guildSpawnLocation = new GuildSpawnLocation(config);
 
-        this.lastRegionPayTime = config.getLong("Guild.Region.LastRegionPayTime", -1);
+        this.lastRegionPayTime = config.getLong("Region.LastRegionPayTime", -1);
 
-        ConfigurationSection buyRegionSection = config.getConfigurationSection("Guild.Region.BuyRegion");
+        ConfigurationSection buyRegionSection = config.getConfigurationSection("Region.BuyRegion");
         if (buyRegionSection == null) {
             buyRegionMap.clear();
         } else {
             Set<String> worldKeys = buyRegionSection.getKeys(false);
             for (String worldName : worldKeys) {
                 List<Pair<Integer, Integer>> list = new ArrayList<>();
-                String path = "Guild.Region.BuyRegion." + worldName;
+                String path = "Region.BuyRegion." + worldName;
                 config.getStringList(path).forEach(s -> {
                     String[] split = s.split(":");
                     int x = Integer.parseInt(split[0]);
@@ -47,7 +46,7 @@ public class GuildRegion {
 
         RegionOptions[] regionOptions = RegionOptions.values();
         for (RegionOptions option : regionOptions) {
-            String path = "Guild.Region.RegionOptions." + option.name();
+            String path = "Region.RegionOptions." + option.name();
             Object o = config.get(path, option.getBaseValue());
             regionOptionsMap.put(option, o);
         }
@@ -129,7 +128,7 @@ public class GuildRegion {
         return lastRegionPayTime;
     }
 
-    public synchronized void setLastRegionPayTime(long lastRegionPayTime) {
+    public void setLastRegionPayTime(long lastRegionPayTime) {
         this.lastRegionPayTime = lastRegionPayTime;
     }
 

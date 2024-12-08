@@ -6,7 +6,6 @@ import fr.maxlego08.zauctionhouse.api.event.events.AuctionPostBuyEvent;
 import fr.maxlego08.zauctionhouse.api.event.events.AuctionRetrieveEvent;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -21,7 +20,7 @@ import java.util.UUID;
 
 public class AuctionRelatedEvent implements Listener {
 
-    private final HardcoreSurvival plugin;;
+    private final HardcoreSurvival plugin;
 
     public AuctionRelatedEvent(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -40,7 +39,7 @@ public class AuctionRelatedEvent implements Listener {
 
         int emptySlot = player.getInventory().firstEmpty();
         if (emptySlot == -1) {
-            player.sendMessage(ChatColor.RED + "인벤토리에 빈공간이 없어서 회수한 아이템이 바닥에 떨어졌습니다");
+            player.sendMessage(ChatColor.RED + "인벤토리에 빈공간이 없어서 경매장으로 부터 회수한 아이템이 바닥에 떨어졌습니다");
             player.getWorld().dropItem(player.getLocation(), clone);
         } else {
             player.getInventory().addItem(clone);
@@ -61,16 +60,10 @@ public class AuctionRelatedEvent implements Listener {
         UUID ownerUUID = auctionItem.getSellerUniqueId();
         long expiredTime = System.currentTimeMillis() + (1000L * 172800);
         ItemBoxStack itemBoxStack = new ItemBoxStack(clone, System.currentTimeMillis(), "[경매장]", expiredTime);
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(ownerUUID);
+        playerData.getItemBox().addItemBoxStack(itemBoxStack);
         if (offlinePlayer.isOnline()) {
-            Player onlinePlayer = offlinePlayer.getPlayer();
-            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(ownerUUID);
-            playerData.getItemBox().addItemBoxStack(itemBoxStack);
-            onlinePlayer.sendMessage(Component.text(ChatColor.GREEN + "경매장에서 만료된 아이템이 아이템우편함으로 전송되었습니다"));
-        } else {
-            OfflinePlayerData offlinePlayerData = new OfflinePlayerData(ownerUUID);
-            offlinePlayerData.loadData();
-            offlinePlayerData.getItemBox().addItemBoxStack(itemBoxStack);
-            offlinePlayerData.saveData();
+            offlinePlayer.getPlayer().sendMessage(Component.text(ChatColor.GREEN + "경매장에서 만료된 아이템이 아이템우편함으로 전송되었습니다"));
         }
     }
 
@@ -87,7 +80,7 @@ public class AuctionRelatedEvent implements Listener {
 
         int emptySlot = player.getInventory().firstEmpty();
         if (emptySlot == -1) {
-            player.sendMessage(ChatColor.RED + "인벤토리에 빈공간이 없어서 구매한 아이템이 바닥에 떨어졌습니다");
+            player.sendMessage(ChatColor.RED + "인벤토리에 빈공간이 없어서 경매장으로부터 구매한 아이템이 바닥에 떨어졌습니다");
             player.getWorld().dropItem(player.getLocation(), clone);
         } else {
             player.getInventory().addItem(clone);

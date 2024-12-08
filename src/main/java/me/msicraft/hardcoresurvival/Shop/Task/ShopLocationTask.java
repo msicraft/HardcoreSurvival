@@ -10,7 +10,6 @@ public class ShopLocationTask extends BukkitRunnable {
 
     private final HardcoreSurvival plugin;
     private final ShopManager shopManager;
-    private int count = 0;
 
     public ShopLocationTask(HardcoreSurvival plugin, ShopManager shopManager) {
         this.plugin = plugin;
@@ -28,14 +27,9 @@ public class ShopLocationTask extends BukkitRunnable {
         }
         if (shopRegion.update()) {
             cancel();
-            if (HardcoreSurvival.getPlugin().useDebug()) {
-                MessageUtil.sendDebugMessage("Shop CenterLocation update", "Shop region: " + shopRegion.toString());
+            if (plugin.useDebug()) {
+                MessageUtil.sendDebugMessage("Shop CenterLocation update", "Shop region: " + shopRegion);
             }
-            return;
-        }
-        count++;
-        if (count > 300) {
-            cancel();
         }
     }
 }

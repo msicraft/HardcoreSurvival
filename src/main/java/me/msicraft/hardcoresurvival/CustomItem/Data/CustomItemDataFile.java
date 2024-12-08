@@ -1,4 +1,4 @@
-package me.msicraft.hardcoresurvival.CustomItem.File;
+package me.msicraft.hardcoresurvival.CustomItem.Data;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.configuration.file.FileConfiguration;

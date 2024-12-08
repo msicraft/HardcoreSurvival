@@ -1,6 +1,5 @@
 package me.msicraft.hardcoresurvival.CustomItem.Data;
 
-import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;

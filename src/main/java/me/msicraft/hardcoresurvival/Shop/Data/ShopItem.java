@@ -12,18 +12,27 @@ public class ShopItem {
     }
 
     public enum Category {
-        FARM("농사"), CONSUMABLE("소모품"), ECONOMY("화폐"),
-        EQUIPMENT("장비"), NONE("기타");
+        ALL("전체", 0), NONE("기타", 1),
+        INGOT("광석", 2), FARM("농사", 3),
+        EQUIPMENT("장비", 4), CONSUMABLE("소모품", 5),
+        ECONOMY("화폐", 6);
 
         private final String displayName;
+        private final int order;
 
-        Category(String displayName) {
+        Category(String displayName, int order) {
             this.displayName = displayName;
+            this.order = order;
         }
 
         public String getDisplayName() {
             return displayName;
         }
+
+        public int getOrder() {
+            return order;
+        }
+
     }
 
     private final String id;
@@ -38,8 +47,10 @@ public class ShopItem {
 
     private boolean disableSell = false;
 
+    private Category category;
+
     public ShopItem(ItemType itemType, boolean useStaticPrice, boolean unlimitStock,
-                    ItemStack itemStack, String id, int stock, int basePrice, int price, boolean disableSell) {
+                    ItemStack itemStack, String id, int stock, int basePrice, int price, boolean disableSell, Category category) {
         this.itemType = itemType;
         this.useStaticPrice = useStaticPrice;
         this.unlimitStock = unlimitStock;
@@ -49,6 +60,7 @@ public class ShopItem {
         this.basePrice = basePrice;
         this.price = price;
         this.disableSell = disableSell;
+        this.category = category;
     }
 
     public void updatePrice(ShopManager shopManager) {
@@ -193,7 +205,15 @@ public class ShopItem {
                 ", basePrice=" + basePrice +
                 ", price=" + price +
                 ", DisableSell=" + disableSell +
-                '}';
+                ", Category=" + category.getDisplayName() + "}";
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
 }

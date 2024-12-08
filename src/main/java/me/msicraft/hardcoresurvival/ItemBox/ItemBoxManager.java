@@ -4,10 +4,8 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.ItemBox.Menu.ItemBoxGui;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemBoxManager {
@@ -30,19 +28,6 @@ public class ItemBoxManager {
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("ItemBox-SendItemStack-Player",
                     "Player: " + playerData.getPlayer().getName() + " | Provider: " + provider + " | ExpiredTime: " + expiredTime);
-        }
-    }
-
-    public void sendItemStackToItemBox(OfflinePlayerData offlinePlayerData, ItemStack itemStack, String provider, long expiredTime) {
-        if (itemStack == null || itemStack.getType() == Material.AIR) {
-            return;
-        }
-        ItemBoxStack itemBoxStack = new ItemBoxStack(itemStack, System.currentTimeMillis(), provider, expiredTime);
-        offlinePlayerData.getItemBox().addItemBoxStack(itemBoxStack);
-
-        if (plugin.useDebug()) {
-            MessageUtil.sendDebugMessage("ItemBox-SendItemStack-OfflinePlayer",
-                    "Player UUID: " + offlinePlayerData.getUUID()  + " | Provider: " + provider + " | ExpiredTime: " + expiredTime);
         }
     }
 

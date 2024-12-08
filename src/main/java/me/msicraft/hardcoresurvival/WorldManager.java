@@ -8,7 +8,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +15,6 @@ public class WorldManager {
 
     private final HardcoreSurvival plugin;
     private final Map<String, String> worldNameMap = new HashMap<>();
-    private final Set<String> unUseWorldNameSet = new HashSet<>();
 
     public WorldManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
@@ -58,7 +56,7 @@ public class WorldManager {
         }
         if (hours == 0) hours = 12;
         String mm = "0" + minutes;
-        mm = mm.substring(mm.length() - 2, mm.length());
+        mm = mm.substring(mm.length() - 2);
         return hours + ":" + mm + " " + ampm;
     }
 

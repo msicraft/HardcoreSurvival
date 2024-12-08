@@ -24,7 +24,7 @@ public class MenuGui extends CustomGui {
 
     public MenuGui(PlayerData playerData) {
         this.playerData = playerData;
-        this.gui = Bukkit.createInventory(this, 54, Component.text("Menu"));
+        this.gui = Bukkit.createInventory(this, 54, Component.text("메뉴"));
     }
 
     public void setMain() {
@@ -34,25 +34,18 @@ public class MenuGui extends CustomGui {
                 MENU_KEY, "personal-settings");
         gui.setItem(0, itemStack);
 
-        String nickName = (String) playerData.getData("NickName", null);
-        if (nickName == null) {
-            itemStack = GuiUtil.createItemStack(Material.NAME_TAG, "닉네임 변경",
-                    List.of(ChatColor.WHITE + "최초 1회 무료 변경 가능합니다"), -1,
-                    MENU_KEY, "NickName-First");
-            gui.setItem(2, itemStack);
-        } else {
-            itemStack = GuiUtil.createItemStack(Material.NAME_TAG, "닉네임 변경",
-                    List.of(ChatColor.WHITE + "현재 이용 불가능합니다"), -1,
-                    MENU_KEY, "NickName-Change");
-            gui.setItem(2, itemStack);
-        }
-
-        itemStack = GuiUtil.createItemStack(Material.CAULDRON, "길드 땅", GuiUtil.EMPTY_LORE, -1, MENU_KEY, "GuildRegion");
-        gui.setItem(10, itemStack);
-
         itemStack = GuiUtil.createItemStack(Material.HOPPER, "아이템 우편함", GuiUtil.EMPTY_LORE, -1,
                 MENU_KEY, "item-box");
         gui.setItem(11, itemStack);
+
+        if (playerData.getGuildUUID() != null) {
+            itemStack = GuiUtil.createItemStack(Material.PLAYER_HEAD, "길드", GuiUtil.EMPTY_LORE, -1,
+                    MENU_KEY, "Guild");
+            gui.setItem(10, itemStack);
+        }
+
+        itemStack = GuiUtil.createItemStack(Material.PAPER, "장신구 인벤토리", GuiUtil.EMPTY_LORE, -1, MENU_KEY, "mmoinv");
+        gui.setItem(9, itemStack);
 
         itemStack = GuiUtil.createItemStack(Material.ENDER_CHEST, "경매장",
                 List.of(ChatColor.YELLOW + "좌 클릭: 열기", ChatColor.YELLOW + "우 클릭: 아이템 등록"), -1,
@@ -61,9 +54,13 @@ public class MenuGui extends CustomGui {
 
         Location location = playerData.getPlayer().getLocation();
         if (HardcoreSurvival.getPlugin().getShopManager().getShopRegion().contains(location)
-                || HardcoreSurvival.getPlugin().getGuildManager().isInGuildRegion(playerData.getPlayer())) {
-            itemStack = GuiUtil.createItemStack(Material.CHEST, "상점", GuiUtil.EMPTY_LORE, -1,
-                    MENU_KEY, "shop");
+                || HardcoreSurvival.getPlugin().getGuildManager().isInOwnGuildRegion(location, playerData.getPlayer(), false)) {
+            double shopPenalty = HardcoreSurvival.getPlugin().getShopManager().getNoGuildShopPenalty();
+            itemStack = GuiUtil.createItemStack(Material.CHEST, "상점",
+                    List.of(ChatColor.YELLOW + "길드에 속해있지 않을시 페널티가 발생합니다",
+                            ChatColor.RED + "구매: + " + (shopPenalty * 100.0),
+                            ChatColor.BLUE + "판매: - " + (shopPenalty * 100.0)),
+                    -1, MENU_KEY, "shop");
             gui.setItem(19, itemStack);
 
             itemStack = GuiUtil.createItemStack(Material.BARREL, "물고기 판매 상점", GuiUtil.EMPTY_LORE, -1,
@@ -71,11 +68,9 @@ public class MenuGui extends CustomGui {
             gui.setItem(20, itemStack);
         }
 
-        if (HardcoreSurvival.getPlugin().getPlayerDataManager().isStreamer(playerData.getPlayer().getUniqueId())) {
-            itemStack = GuiUtil.createItemStack(Material.PLAYER_HEAD, "시청자 관리", GuiUtil.EMPTY_LORE, -1,
-                    MENU_KEY, "Guild");
-            gui.setItem(1, itemStack);
-        }
+        itemStack = GuiUtil.createItemStack("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmFkYzA0OGE3Y2U3OGY3ZGFkNzJhMDdkYTI3ZDg1YzA5MTY4ODFlNTUyMmVlZWQxZTNkYWYyMTdhMzhjMWEifX19",
+                "펫 관리", GuiUtil.EMPTY_LORE, -1, MENU_KEY, "Pets");
+        gui.setItem(21, itemStack);
     }
 
     private static final int[] OPTION_SLOTS = new int[]{

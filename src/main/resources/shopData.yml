@@ -4,5 +4,6 @@ Setting:
   MaxPricePercent: 1.25
   MinPricePercent: 0.75
   PerValueChangeMaxPercent: 0.1
+  NoGuildShopPenalty: 0.25
 
 Items:

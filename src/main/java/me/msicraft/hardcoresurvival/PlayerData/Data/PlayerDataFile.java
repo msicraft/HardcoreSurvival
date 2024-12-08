@@ -1,4 +1,4 @@
-package me.msicraft.hardcoresurvival.PlayerData.File;
+package me.msicraft.hardcoresurvival.PlayerData.Data;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -6,23 +6,29 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 public class PlayerDataFile {
 
     private final HardcoreSurvival plugin = HardcoreSurvival.getPlugin();
 
-    private final String folderName = "PlayerData";
+    public static final String FOLDER_NAME = "PlayerData";
+    public static final String BACK_UP_FOLDER_NAME = "Backup";
 
+    private final UUID uuid;
     private File file;
     private FileConfiguration config;
 
     public PlayerDataFile(UUID uuid) {
+        this.uuid = uuid;
         String fileS = uuid + ".yml";
-        this.file = new File(plugin.getDataFolder() + File.separator + folderName, fileS);
+        this.file = new File(plugin.getDataFolder() + File.separator + FOLDER_NAME, fileS);
         if (!file.exists()) {
             createFile(uuid);
         }
@@ -39,6 +45,20 @@ public class PlayerDataFile {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean backup(File backupFolder) {
+        String fileName = uuid + ".yml";
+        File backupFile = new File(backupFolder, fileName);
+        if (!backupFile.exists()) {
+            backupFile.mkdirs();
+        }
+        File originalFile = getFile();
+        try {
+            Files.copy(originalFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException ignored) {}
+        return false;
     }
 
     public FileConfiguration getConfig() {
@@ -73,7 +93,7 @@ public class PlayerDataFile {
     public void saveDefaultConfig(Player player) {
         String fileS = player.getUniqueId() + ".yml";
         if(this.file == null) {
-            this.file = new File(plugin.getDataFolder() + File.separator + folderName, fileS);
+            this.file = new File(plugin.getDataFolder() + File.separator + FOLDER_NAME, fileS);
         }
         if(!this.file.exists()) {
             plugin.saveResource(fileS, false);

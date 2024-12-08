@@ -74,7 +74,6 @@ public class ItemBoxGuiEvent implements Listener {
                             itemBoxGui.open(playerData);
                         }
                         case "Page" -> {
-                            return;
                         }
                         case "Back" -> {
                             MenuGui menuGui = (MenuGui) playerData.getCustomGui(GuiType.MAIN);

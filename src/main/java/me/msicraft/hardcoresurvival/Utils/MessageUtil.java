@@ -1,17 +1,50 @@
 package me.msicraft.hardcoresurvival.Utils;
 
+import me.msicraft.hardcoresurvival.Data.MessageDataFile;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
 
     private MessageUtil() {}
+
+    private static MessageDataFile messageDataFile = null;
+    private static final Map<String, String> messageMap = new HashMap<>();
+
+    public static void reloadVariables(HardcoreSurvival plugin) {
+        if (messageDataFile == null) {
+            messageDataFile = new MessageDataFile(plugin);
+        }
+        messageDataFile.reloadConfig();
+
+        messageMap.clear();
+        FileConfiguration config = messageDataFile.getConfig();
+        ConfigurationSection section = config.getConfigurationSection("Messages");
+        if (section != null) {
+            Set<String> keys = section.getKeys(false);
+            for (String key : keys) {
+                String path = "Messages." + key;
+                messageMap.put(key, config.getString(path, "[Error None Message]"));
+            }
+        }
+    }
+
+    public static String getMessage(String key, boolean useColorCode) {
+        String message = messageMap.getOrDefault(key, "[Error None Message]");
+        if (useColorCode) {
+            return translateColorCodes(message);
+        }
+        return message;
+    }
 
     private static final Pattern HEX_PATTERN = Pattern.compile("#[a-fA-F0-9]{6}");
 
@@ -32,14 +65,6 @@ public class MessageUtil {
             matcher = HEX_PATTERN.matcher(message);
         }
         return message;
-    }
-
-    public static void sendPlayerDataLoadingMessage(CommandSender sender) {
-        if (sender instanceof Player player) {
-            player.sendMessage(ChatColor.RED + "데이터 로딩 중입니다. 행동에 제약이 걸릴 수 있습니다");
-        } else {
-            sender.sendMessage(ChatColor.RED + "해당 플레이어의 데이터를 로딩중입니다");
-        }
     }
 
 }

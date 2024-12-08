@@ -7,9 +7,9 @@ import me.msicraft.hardcoresurvival.Menu.Data.CustomGuiManager;
 import me.msicraft.hardcoresurvival.Menu.Data.GuiType;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Shop.Data.SellItem;
+import me.msicraft.hardcoresurvival.Shop.Data.ShopDataFile;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopRegion;
-import me.msicraft.hardcoresurvival.Shop.File.ShopDataFile;
 import me.msicraft.hardcoresurvival.Shop.Menu.ShopGui;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopLocationTask;
 import me.msicraft.hardcoresurvival.Shop.Task.ShopTask;
@@ -43,6 +43,8 @@ public class ShopManager extends CustomGuiManager {
     private double perValueChangeMaxPercent = 0.0;
     private ShopRegion shopRegion = null;
     private int radius = 10;
+
+    private double noGuildShopPenalty = 0;
 
     private boolean isShopMaintenance = false;
     private ShopTask shopTask = null;
@@ -101,6 +103,8 @@ public class ShopManager extends CustomGuiManager {
         this.maxPricePercent = config.getDouble("Setting.MaxPricePercent", 0.0);
         this.minPricePercent = config.getDouble("Setting.MinPricePercent", 0.0);
         this.perValueChangeMaxPercent = config.getDouble("Setting.PerValueChangeMaxPercent", 0.0);
+
+        this.noGuildShopPenalty = config.getDouble("Setting.NoGuildShopPenalty", 0.0);
 
         String centerWorldName = config.getString("Setting.CenterLocation.WorldName", null);
         int centerX = config.getInt("Setting.CenterLocation.X", 0);
@@ -184,6 +188,7 @@ public class ShopManager extends CustomGuiManager {
                 int price = config.getInt(path + ".Price", -1);
                 int stock = config.getInt(path + ".Stock", 0);
                 boolean disableSell = config.getBoolean(path + ".DisableSell", false);
+                ShopItem.Category category = ShopItem.Category.valueOf(config.getString(path + ".Category", "NONE").toUpperCase());
                 ItemStack itemStack = null;
                 ShopItem shopItem;
                 switch (itemType) {
@@ -224,8 +229,9 @@ public class ShopManager extends CustomGuiManager {
                     shopItem.setPrice(price);
                     shopItem.setStock(stock);
                     shopItem.setDisableSell(disableSell);
+                    shopItem.setCategory(category);
                 } else {
-                    shopItem = new ShopItem(itemType, useStaticPrice, unlimitStock, itemStack, key, stock, basePrice, price, disableSell);
+                    shopItem = new ShopItem(itemType, useStaticPrice, unlimitStock, itemStack, key, stock, basePrice, price, disableSell, category);
                 }
                 shopItemMap.put(key, shopItem);
                 internalNameList.add(key);
@@ -253,6 +259,7 @@ public class ShopManager extends CustomGuiManager {
             config.set(path + ".Price", shopItem.getPrice(false));
             config.set(path + ".Stock", shopItem.getStock());
             config.set(path + ".DisableSell", shopItem.isDisableSell());
+            config.set(path + ".Category", shopItem.getCategory().name());
             ItemStack itemStack = shopItem.getItemStack();
             switch (shopItem.getItemType()) {
                 case VANILLA -> {
@@ -410,4 +417,7 @@ public class ShopManager extends CustomGuiManager {
         return shopRegion;
     }
 
+    public double getNoGuildShopPenalty() {
+        return noGuildShopPenalty;
+    }
 }

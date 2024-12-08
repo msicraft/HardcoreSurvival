@@ -52,7 +52,7 @@ public class CustomItemRelatedEvent implements Listener {
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("Cancel GuildInviteScroll", "Player: " + player);
+                        MessageUtil.sendDebugMessage("Cancel-GuildInviteScroll", "Player: " + player);
                     }
                 });
                 return;
@@ -63,18 +63,18 @@ public class CustomItemRelatedEvent implements Listener {
 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("Use GuildInviteScroll", "Player: " + player.getName(), "Target: " + offlinePlayer.getName());
+                        MessageUtil.sendDebugMessage("Use-GuildInviteScroll", "Player: " + player.getName(), "Target: " + offlinePlayer.getName());
                     }
                 });
             } else {
-                CustomItem customItem = plugin.getCustomItemManager().getCustomItem(itemId);
-                if (customItem != null) {
-                    player.getInventory().addItem(customItem.getItemStack());
-                }
-
                 Bukkit.getScheduler().runTask(plugin, () -> {
+                    CustomItem customItem = plugin.getCustomItemManager().getCustomItem(itemId);
+                    if (customItem != null) {
+                        player.getInventory().addItem(customItem.getItemStack());
+                    }
+
                     if (plugin.useDebug()) {
-                        MessageUtil.sendDebugMessage("Cancel GuildInviteScroll-already exist player",
+                        MessageUtil.sendDebugMessage("Cancel-GuildInviteScroll-{already exist player}",
                                 "Player: " + player, "Target: " + offlinePlayer.getName());
                     }
                 });

@@ -37,7 +37,7 @@ public class GuildRegionGui extends CustomGui {
         this.plugin = plugin;
         this.guild = plugin.getGuildManager().getGuild(playerData.getGuildUUID());
         this.playerData = playerData;
-        this.gui = Bukkit.createInventory(this, 54, Component.text("Guild-Region"));
+        this.gui = Bukkit.createInventory(this, 54, Component.text("땅 관리"));
     }
 
     public void setMain() {
@@ -54,7 +54,7 @@ public class GuildRegionGui extends CustomGui {
         itemStack = GuiUtil.createItemStack(Material.BARRIER, "뒤로", GuiUtil.EMPTY_LORE, -1, MAIN_KEY, "Back");
         gui.setItem(45, itemStack);
 
-        itemStack = GuiUtil.createItemStack(Material.PAPER, "땅 설정", GuiUtil.EMPTY_LORE, -1, MAIN_KEY, "RegionOptions");
+        itemStack = GuiUtil.createItemStack(Material.PAPER, "땅 옵션 설정", GuiUtil.EMPTY_LORE, -1, MAIN_KEY, "RegionOptions");
         gui.setItem(46, itemStack);
 
         List<String> guildSpawnLore = new ArrayList<>();

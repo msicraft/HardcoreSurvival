@@ -1,17 +1,14 @@
 package me.msicraft.hardcoresurvival.API;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 public class PAPIExpansion extends PlaceholderExpansion {
 
@@ -42,17 +39,16 @@ public class PAPIExpansion extends PlaceholderExpansion {
             Player onlineP = player.getPlayer();
             if (onlineP != null) {
                 switch (params) {
-                    case "nickname" -> {
-                        UUID uuid = onlineP.getUniqueId();
-                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
-                        String s = (String) playerData.getData("NickName", null);
-                        if (s == null) {
-                            return "Unknown";
+                    case "guild_prefix" -> {
+                        Guild guild = plugin.getGuildManager().getGuild(onlineP);
+                        if (guild == null) {
+                            return "X";
                         }
-                        if (plugin.getPlayerDataManager().isStreamer(uuid)) {
-                            return ChatColor.DARK_GREEN + s + ChatColor.WHITE;
+                        String prefix = guild.getPrefix();
+                        if (prefix == null) {
+                            return "X";
                         }
-                        return s;
+                        return prefix;
                     }
                     case "worldname" -> {
                         return plugin.getWorldManager().getCurrentWorldName(onlineP.getWorld().getName());

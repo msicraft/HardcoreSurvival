@@ -32,7 +32,7 @@ public class GuildRegionOptionGui extends CustomGui {
         this.plugin = plugin;
         this.playerData = playerData;
         this.guild = plugin.getGuildManager().getGuild(playerData.getGuildUUID());
-        this.gui = Bukkit.createInventory(this, 54, Component.text("Guild-RegionOptions"));
+        this.gui = Bukkit.createInventory(this, 54, Component.text("땅 옵션"));
     }
 
     private static final int[] OPTION_SLOTS = new int[]{

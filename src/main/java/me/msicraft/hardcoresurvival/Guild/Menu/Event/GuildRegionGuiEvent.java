@@ -64,10 +64,6 @@ public class GuildRegionGuiEvent implements Listener {
             if (guildUUID == null) {
                 player.closeInventory();
                 player.sendMessage(ChatColor.RED + "길드가 존재하지 않습니다");
-
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("Can't access guild region gui", "Player: " + player.getName());
-                }
                 return;
             }
             Guild guild = guildManager.getGuild(guildUUID);
@@ -75,7 +71,7 @@ public class GuildRegionGuiEvent implements Listener {
                 player.closeInventory();
 
                 if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("Unknown guild UUID (guild region)", "Player: " + player.getName());
+                    MessageUtil.sendDebugMessage("Unknown guild (guild region)", "Player: " + player.getName(), "GuildUUID: " + guildUUID);
                 }
                 return;
             }
@@ -185,7 +181,7 @@ public class GuildRegionGuiEvent implements Listener {
                             }
                             String guildRegionUUID = chunkData.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
                             if (guildRegionUUID != null) {
-                                if (guildRegionUUID.equals(guild.getLeader().toString())) {
+                                if (guildRegionUUID.equals(guild.getGuildUUID().toString())) {
                                     GuildSpawnLocation guildSpawnLocation = guildRegion.getGuildSpawnLocation();
                                     guildSpawnLocation.setGuildSpawnLocation(location);
 
@@ -262,14 +258,10 @@ public class GuildRegionGuiEvent implements Listener {
                 return;
             }
             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-            Guild guild = guildManager.getGuild(player.getUniqueId());
+            Guild guild = guildManager.getGuild(playerData.getGuildUUID());
             if (guild == null) {
                 player.closeInventory();
-                player.sendMessage(ChatColor.RED + "권한이 없습니다");
-
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("Can't access guild region options gui", "Player: " + player.getName());
-                }
+                player.sendMessage(ChatColor.RED + "길드가 존재하지 않습니다");
                 return;
             }
             GuildRegion guildRegion = guild.getGuildRegion();

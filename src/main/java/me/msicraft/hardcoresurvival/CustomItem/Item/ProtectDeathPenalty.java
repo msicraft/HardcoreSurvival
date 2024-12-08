@@ -1,7 +1,7 @@
 package me.msicraft.hardcoresurvival.CustomItem.Item;
 
 import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
-import me.msicraft.hardcoresurvival.CustomItem.File.CustomItemDataFile;
+import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItemDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

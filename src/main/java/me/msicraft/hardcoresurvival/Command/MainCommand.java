@@ -8,17 +8,19 @@ import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildDataFile;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
 import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
-import me.msicraft.hardcoresurvival.PlayerData.Data.OfflinePlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
+import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -33,7 +35,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class MainCommand implements CommandExecutor {
@@ -62,45 +66,102 @@ public class MainCommand implements CommandExecutor {
                         if (!sender.isOp()) {
                             return false;
                         }
-                        if (sender instanceof Player player) {
-                            Location location = player.getLocation();
-                            Chunk chunk = location.getChunk();
-                            PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
-                            if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
-                                dataContainer.remove(GuildRegion.GUILD_REGION_KEY);
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                            long start = System.currentTimeMillis();
+                            Bukkit.getConsoleSender().sendMessage("플레이어/길드 데이터 백업중...");
+                            String folderName = TimeUtil.getTimeToFormat("yyyy-MM-dd-HH_mm_ss", start);
+                            File playerBackupFolder = new File(plugin.getDataFolder()
+                                    + File.separator + PlayerDataFile.FOLDER_NAME
+                                    + File.separator + PlayerDataFile.BACK_UP_FOLDER_NAME
+                                    + File.separator + folderName);
+                            if (!playerBackupFolder.exists()) {
+                                playerBackupFolder.mkdirs();
                             }
-                        }
+                            PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
+                            Set<UUID> uuids = playerDataManager.getPlayerUUIDs();
+                            int success = 0;
+                            int fail = 0;
+                            for (UUID uuid : uuids) {
+                                PlayerData playerData = playerDataManager.getPlayerData(uuid);
+                                playerData.saveData();
+
+                                if (playerData.getPlayerDataFile().backup(playerBackupFolder)) {
+                                    success++;
+                                } else {
+                                    fail++;
+                                }
+                            }
+                            long end = System.currentTimeMillis();
+                            Bukkit.getConsoleSender().sendMessage("플에이어 데이터 백업완료 | 성공: " + success
+                                    + " | 실패: " + fail
+                                    + " | " + (end - start) + "ms");
+                            success = 0;
+                            fail = 0;
+
+                            File guildBackupFolder = new File(plugin.getDataFolder()
+                                    + File.separator + GuildDataFile.FOLDER_NAME
+                                    + File.separator + GuildDataFile.BACK_UP_FOLDER_NAME
+                                    + File.separator + folderName);
+                            if (!guildBackupFolder.exists()) {
+                                guildBackupFolder.mkdirs();
+                            }
+                            GuildManager guildManager = plugin.getGuildManager();
+                            Set<UUID> guildUUIDs = guildManager.getGuildUUIDs();
+                            for (UUID uuid : guildUUIDs) {
+                                Guild guild = guildManager.getGuild(uuid);
+                                guild.save();
+
+                                if (guild.getGuildDataFile().backup(guildBackupFolder)) {
+                                    success++;
+                                } else {
+                                    fail++;
+                                }
+                            }
+                            end = System.currentTimeMillis();
+                            Bukkit.getConsoleSender().sendMessage("길드 데이터 백업완료 | 성공: " + success
+                                    + " | 실패: " + fail
+                                    + " | " + (end - start) + "ms");
+                        });
                     }
                     case "debug" -> { //hs debug []
                         if (!sender.isOp()) {
                             return false;
                         }
                         switch (args[1]) {
-                            case "change-nickname" -> {
-                                Player player = Bukkit.getPlayer(args[2]);
-                                if (player != null) {
-                                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
-
-                                    int max = args.length;
-                                    StringBuilder nickName = new StringBuilder();
-                                    for (int i = 3; i < max; i++) {
-                                        nickName.append(args[i]).append(" ");
-                                    }
-                                    playerData.setData("NickName", nickName.toString());
-                                    sender.sendMessage(ChatColor.GREEN + "변경된 닉네임: " + nickName.toString());
+                            case "guild" -> { // <guild_uuid> [spawnlocation, prefix]
+                                UUID uuid = UUID.fromString(args[3]);
+                                GuildManager guildManager = plugin.getGuildManager();
+                                Guild guild = guildManager.getGuild(uuid);
+                                if (guild == null) {
+                                    sender.sendMessage(ChatColor.RED + "존재하지 않는 길드입니다");
+                                    return false;
                                 }
-                            }
-                            case "set-guild-spawnlocation" -> {
-                                if (sender instanceof Player player) {
-                                    UUID uuid = UUID.fromString(args[2]);
-                                    GuildManager guildManager = plugin.getGuildManager();
-                                    Guild guild = guildManager.getGuild(uuid);
-                                    if (guild == null) {
-                                        sender.sendMessage(ChatColor.RED + "존재하지 않는 길드입니다");
-                                        return false;
+                                switch (args[2]) {
+                                    case "spawnlocation" -> {
+                                        if (sender instanceof Player player) {
+                                            GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
+                                            guildSpawnLocation.setGuildSpawnLocation(player.getLocation());
+                                        }
                                     }
-                                    GuildSpawnLocation guildSpawnLocation = guild.getGuildRegion().getGuildSpawnLocation();
-                                    guildSpawnLocation.setGuildSpawnLocation(player.getLocation());
+                                    case "prefix" -> { //[set, get] <value>
+                                        switch (args[4]) {
+                                            case "set" -> {
+                                                String prefix = args[5];
+                                                if (prefix.equalsIgnoreCase("null")) {
+                                                    prefix = null;
+                                                }
+                                                guild.setPrefix(prefix);
+                                                sender.sendMessage(ChatColor.GREEN + "GuildUUID: " + uuid);
+                                                sender.sendMessage(ChatColor.GREEN + "Prefix: " + prefix);
+                                                return true;
+                                            }
+                                            case "get" -> {
+                                                sender.sendMessage(ChatColor.GREEN + "GuildUUID: " + uuid);
+                                                sender.sendMessage(ChatColor.GREEN + "Prefix: " + ChatColor.WHITE + guild.getPrefix());
+                                                return true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             case "region" -> {
@@ -143,6 +204,51 @@ public class MainCommand implements CommandExecutor {
                                             }
                                         }
                                         return true;
+                                    }
+                                }
+                            }
+                            case "playerdata" -> {
+                                switch (args[2]) {
+                                    case "tags" -> { //[list, add, remove] <player>
+                                        Player target = Bukkit.getPlayer(args[4]);
+                                        if (target == null) {
+                                            sender.sendMessage("존재하지 않는 플레이어입니다");
+                                            return false;
+                                        }
+                                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target);
+                                        if (playerData == null) {
+                                            sender.sendMessage("플레이어 데이터가 존재하지 않습니다");
+                                            return false;
+                                        }
+                                        switch (args[3]) {
+                                            case "list" -> {
+                                                sender.sendMessage(ChatColor.GREEN + "Tags: ");
+                                                for (String tag : playerData.getTags()) {
+                                                    sender.sendMessage(ChatColor.GRAY + "- " + tag);
+                                                }
+                                                return true;
+                                            }
+                                            case "add" -> {
+                                                String tag = args[5];
+                                                if (playerData.getTags().contains(tag)){
+                                                    sender.sendMessage(ChatColor.RED + "이미 존재하는 태그입니다");
+                                                    return false;
+                                                }
+                                                playerData.addTag(tag);
+                                                sender.sendMessage("태그 '" + tag + "'을 추가하였습니다");
+                                                return true;
+                                            }
+                                            case "remove" -> {
+                                                String tag = args[5];
+                                                if (!playerData.getTags().contains(tag)){
+                                                    sender.sendMessage(ChatColor.RED + "존재하지 않는 태그입니다");
+                                                    return false;
+                                                }
+                                                playerData.removeTag(tag);
+                                                sender.sendMessage("태그 '" + tag + "'을 제거하였습니다");
+                                                return true;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -225,22 +331,67 @@ public class MainCommand implements CommandExecutor {
                         }
                         UUID uuid = player.getUniqueId();
                         sender.sendMessage("Player: " + player.getName());
-                        TextComponent textComponent = Component.text("UUID: " + uuid).
+                        TextComponent uuidTextComponent = Component.text("UUID: " + uuid).
                                 clickEvent(ClickEvent.suggestCommand(uuid.toString()));
-                        sender.sendMessage(textComponent);
+                        sender.sendMessage(uuidTextComponent);
+
+                        UUID guildUUID = plugin.getPlayerDataManager().getPlayerData(player).getGuildUUID();
+                        String guildUUIDs = "";
+                        if (guildUUID == null) {
+                            guildUUIDs = "";
+                        }
+                        TextComponent guildUUIDTextComponent = Component.text("GuildUUID: " + guildUUIDs).
+                                clickEvent(ClickEvent.suggestCommand(guildUUIDs));
+                        sender.sendMessage(guildUUIDTextComponent);
                         return true;
                     }
-                    case "playerdata" -> { //hs playerdata <online_player> [get, edit] [variable]
-                        if (!sender.isOp()) {
-                            return false;
-                        }
-                    }
-                    case "streamer" -> { //hs streamer [add, remove, list] <target> //스트리머 용
+                    case "streamer" -> { //hs streamer [add, remove, list] <target>
                         if (!sender.isOp()) {
                             return false;
                         }
                         PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
                         switch (args[1]) {
+                            case "create-for-player" -> { //hs streamer create-for-player <leader> [member_1:member_2] 일반 플레이어용 길드 생성
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
+                                UUID uuid = offlinePlayer.getUniqueId();
+                                if (playerDataManager.isStreamer(uuid)) {
+                                    sender.sendMessage(ChatColor.RED + "해당 플레이어는 이미 스트리머로 등록되어있습니다 -> " + offlinePlayer.getName());
+                                    return false;
+                                }
+                                playerDataManager.addStreamer(uuid);
+
+                                try {
+                                    String[] memberNames = args[3].split(":");
+                                    Guild guild = plugin.getGuildManager().createGuild(uuid);
+
+                                    PlayerData playerData = playerDataManager.getPlayerData(uuid);
+                                    if (playerData == null) {
+                                        playerData = playerDataManager.createPlayerData(uuid);
+                                    }
+                                    UUID guildUUID = guild.getGuildUUID();
+                                    playerData.setGuildUUID(guildUUID);
+
+                                    for (String memberName : memberNames) {
+                                        OfflinePlayer memberPlayer = Bukkit.getOfflinePlayer(memberName);
+                                        UUID memberUUID = memberPlayer.getUniqueId();
+                                        PlayerData memberData = playerDataManager.getPlayerData(memberUUID);
+                                        if (memberData == null) {
+                                            memberData = playerDataManager.createPlayerData(memberUUID);
+                                        }
+                                        memberData.setGuildUUID(guildUUID);
+                                        guild.addMember(memberUUID);
+                                    }
+
+                                    sender.sendMessage(ChatColor.GREEN + "해당 플레이어에 대한 길드가 생성되었습니다");
+                                    sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
+                                    sender.sendMessage(ChatColor.GREEN + "UUID: " + uuid);
+                                    sender.sendMessage(ChatColor.GREEN + "Guild-UUID: " + guild.getGuildUUID());
+                                    sender.sendMessage(ChatColor.GREEN + "멤버: " + memberNames[0] + ", " + memberNames[1]);
+                                    return true;
+                                } catch (ArrayIndexOutOfBoundsException ex) {
+                                    sender.sendMessage("hs streamer create-for-player <leader> [member_1:member_2] (일반 플레이어용 길드 생성)");
+                                }
+                            }
                             case "add" -> {
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
                                 UUID uuid = offlinePlayer.getUniqueId();
@@ -248,19 +399,19 @@ public class MainCommand implements CommandExecutor {
                                     sender.sendMessage(ChatColor.RED + "해당 플레이어는 이미 스트리머로 등록되어있습니다 -> " + offlinePlayer.getName());
                                     return false;
                                 }
-                                playerDataManager.addWhiteList(uuid);
                                 playerDataManager.addStreamer(uuid);
-                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머로 등록되었습니다");
-                                sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
-                                sender.sendMessage(ChatColor.GREEN + "UUID: " + uuid.toString());
-                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                offlinePlayerData.loadData();
-                                offlinePlayerData.setGuildUUID(offlinePlayer.getUniqueId());
-                                offlinePlayerData.saveData();
 
-                                Guild guild = new Guild(uuid, offlinePlayerData.getPlayerDataFile());
-                                guild.addMember(uuid);
-                                plugin.getGuildManager().registerGuild(uuid, guild);
+                                Guild guild = plugin.getGuildManager().createGuild(uuid);
+                                PlayerData playerData = playerDataManager.getPlayerData(uuid);
+                                if (playerData == null) {
+                                    playerData = playerDataManager.createPlayerData(uuid);
+                                }
+                                playerData.setGuildUUID(guild.getGuildUUID());
+
+                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어에 대한 길드가 생성되었습니다");
+                                sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
+                                sender.sendMessage(ChatColor.GREEN + "UUID: " + uuid);
+                                sender.sendMessage(ChatColor.GREEN + "Guild-UUID: " + guild.getGuildUUID());
                                 return true;
                             }
                             case "remove" -> {
@@ -269,46 +420,26 @@ public class MainCommand implements CommandExecutor {
                                     sender.sendMessage(ChatColor.RED + "해당 플레이어는 스트리머에 등록되어있지 않습니다");
                                     return false;
                                 }
-                                playerDataManager.removeWhiteList(uuid);
                                 playerDataManager.removeStreamer(uuid);
-                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머에서 제거되었습니다");
-                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+
+                                PlayerData playerData = playerDataManager.getPlayerData(uuid);
+                                OfflinePlayer offlinePlayer = playerData.getOfflinePlayer();
                                 if (offlinePlayer.isOnline()) {
-                                    offlinePlayer.getPlayer().kick(Component.text(ChatColor.RED + "접속권한이 제거되었습니다"));
+                                    offlinePlayer.getPlayer().kick(Component.text(ChatColor.RED + "관리자에의해 길드가 제거되었습니다"));
                                 }
-                                OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                offlinePlayerData.loadData();
-                                offlinePlayerData.setGuildUUID(null);
-                                offlinePlayerData.saveData();
-                                Guild guild = plugin.getGuildManager().getGuild(uuid);
-                                guild.getMembers().forEach(memberUUID -> {
-                                    OfflinePlayer memberO = Bukkit.getOfflinePlayer(memberUUID);
-                                    if (memberO.isOnline()) {
-                                        memberO.getPlayer().kick(Component.text(ChatColor.RED + "스트리머의 접속권한이 제거되어 관련 플레이어의 접속권한도 제거되었습니다"));
-                                    }
-                                    OfflinePlayerData memberData = new OfflinePlayerData(memberUUID);
-                                    memberData.loadData();
-                                    memberData.setGuildUUID(null);
-                                    memberData.saveData();
-                                    playerDataManager.removeWhiteList(memberUUID);
-                                });
-                                guild.getGuildRegion().getGuildChunks().forEach(guildChunk -> {
-                                    Location location = plugin.getWorldManager().getCenterChunkLocation(guildChunk.getWorldName(),
-                                            guildChunk.getChunkPair().getV1(), guildChunk.getChunkPair().getV2());
-                                    Chunk chunk = location.getChunk();
-                                    PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
-                                    if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
-                                        dataContainer.remove(GuildRegion.GUILD_REGION_KEY);
-                                    }
-                                });
-                                plugin.getGuildManager().removeGuild(uuid);
+                                UUID guildUUID = playerData.getGuildUUID();
+                                playerData.setGuildUUID(null);
+
+                                plugin.getGuildManager().removeGuild(guildUUID);
+
+                                sender.sendMessage(ChatColor.GREEN + "해당 플레이어가 스트리머에서 제거되었습니다");
                                 return true;
                             }
                             case "list" -> {
                                 sender.sendMessage("Streamer List: ");
                                 playerDataManager.getStreamerList().forEach(uuid -> {
-                                    sender.sendMessage("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
-                                    sender.sendMessage("UUID: " + uuid.toString());
+                                    sender.sendMessage("Player: " + playerDataManager.getPlayerData(uuid).getLastName());
+                                    sender.sendMessage("UUID: " + uuid);
                                 });
                                 return true;
                             }
@@ -399,6 +530,9 @@ public class MainCommand implements CommandExecutor {
                                         case "DisableSell" -> {
                                             shopItem.setDisableSell(Boolean.parseBoolean(valueS));
                                         }
+                                        case "Category" -> {
+                                            shopItem.setCategory(ShopItem.Category.valueOf(valueS.toUpperCase()));
+                                        }
                                     }
                                     sender.sendMessage(ChatColor.GREEN + "변경되었습니다 값: " + valueS);
                                     return true;
@@ -424,7 +558,7 @@ public class MainCommand implements CommandExecutor {
                                         ShopItem.ItemType itemType = ShopItem.ItemType.valueOf(args[3].toUpperCase());
                                         int basePrice = Integer.parseInt(args[4]);
                                         ShopItem shopItem = new ShopItem(itemType, false, false, itemStack, internalName,
-                                                0, basePrice, basePrice, false);
+                                                0, basePrice, basePrice, false, ShopItem.Category.NONE);
                                         shopManager.registerShopItem(shopItem);
                                         String path = "Items." + internalName;
                                         FileConfiguration config = shopManager.getShopDataFile().getConfig();
@@ -435,6 +569,7 @@ public class MainCommand implements CommandExecutor {
                                         config.set(path + ".Price", shopItem.getPrice(false));
                                         config.set(path + ".Stock", shopItem.getStock());
                                         config.set(path + ".DisableSell", shopItem.isDisableSell());
+                                        config.set(path + ".Category", ShopItem.Category.NONE.name());
                                         switch (shopItem.getItemType()) {
                                             case VANILLA -> {
                                                 config.set(path + ".ItemStack", itemStack);
@@ -501,35 +636,22 @@ public class MainCommand implements CommandExecutor {
                                    String target = args[2];
                                    long expiredTime = System.currentTimeMillis() + (Long.parseLong(args[3]) * 1000L);
                                    if (target.equalsIgnoreCase("all-players")) {
-                                       List<String> list = plugin.getPlayerDataManager().getPlayerFileNames();
-                                       for (String uuidS : list) {
-                                           UUID uuid = UUID.fromString(uuidS);
-                                           OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                           if (offlinePlayer.isOnline()) {
-                                               PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                               itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
-                                           } else {
-                                               OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                               offlinePlayerData.loadData();
-                                               itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", expiredTime);
-                                               offlinePlayerData.saveData();
-                                           }
+                                       Set<UUID> sets = plugin.getPlayerDataManager().getPlayerUUIDs();
+                                       for (UUID uuid : sets) {
+                                           PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
+                                           itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
                                        }
-                                       sender.sendMessage(ChatColor.GREEN + "총 " + list.size() + " 명의 플레이어에게 아이템을 보냈습니다");
+                                       sender.sendMessage(ChatColor.GREEN + "총 " + sets.size() + " 명의 플레이어에게 아이템을 보냈습니다");
                                    } else {
                                        UUID uuid = UUID.fromString(target);
-                                       OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                       if (offlinePlayer.isOnline()) {
-                                           PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                           itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
-                                       } else {
-                                           OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                           offlinePlayerData.loadData();
-                                           itemBoxManager.sendItemStackToItemBox(offlinePlayerData, itemStack, "[시스템]", expiredTime);
-                                           offlinePlayerData.saveData();
+                                       PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
+                                       if (playerData == null) {
+                                           player.sendMessage(ChatColor.RED + "존재하지 않는 플레이어데이터 입니다");
+                                           return false;
                                        }
+                                       itemBoxManager.sendItemStackToItemBox(playerData, itemStack, "[시스템]", expiredTime);
                                        sender.sendMessage(ChatColor.GREEN + "해당 플레이어에게 아이템을 보냈습니다");
-                                       sender.sendMessage(ChatColor.GREEN + "Player: " + offlinePlayer.getName());
+                                       sender.sendMessage(ChatColor.GREEN + "Player: " + playerData.getLastName());
                                    }
                                }
                                default -> {
@@ -558,6 +680,10 @@ public class MainCommand implements CommandExecutor {
                                                 }
                                             }
                                             PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target);
+                                            if (playerData == null) {
+                                                sender.sendMessage(ChatColor.RED + "존재하지 않는 플레이어데이터 입니다");
+                                                return false;
+                                            }
                                             DeathPenaltyManager deathPenaltyManager = plugin.getDeathPenaltyManager();
                                             DeathPenaltyChestLog deathPenaltyChestLog = playerData.getDeathPenaltyChestLog();
                                             sender.sendMessage(ChatColor.GREEN + "Player: " + target.getName());
@@ -571,31 +697,14 @@ public class MainCommand implements CommandExecutor {
                                             DeathPenaltyManager deathPenaltyManager = plugin.getDeathPenaltyManager();
                                             String targetS = args[3];
                                             if (targetS.equalsIgnoreCase("all-players")) {
-                                                plugin.getPlayerDataManager().getPlayerFileNames().forEach(uuidS -> {
-                                                    UUID uuid = UUID.fromString(uuidS);
-                                                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                                    if (offlinePlayer.isOnline()) {
-                                                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                                        deathPenaltyManager.sendChestLogToItemBox(playerData);
-                                                    } else {
-                                                        OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                                        offlinePlayerData.loadData();
-                                                        deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
-                                                        offlinePlayerData.saveData();
-                                                    }
+                                                plugin.getPlayerDataManager().getPlayerUUIDs().forEach(uuid -> {
+                                                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
+                                                    deathPenaltyManager.sendChestLogToItemBox(playerData);
                                                 });
                                             } else {
                                                 UUID uuid = UUID.fromString(targetS);
-                                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                                if (offlinePlayer.isOnline()) {
-                                                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(offlinePlayer.getPlayer());
-                                                    deathPenaltyManager.sendChestLogToItemBox(playerData);
-                                                } else {
-                                                    OfflinePlayerData offlinePlayerData = new OfflinePlayerData(uuid);
-                                                    offlinePlayerData.loadData();
-                                                    deathPenaltyManager.sendChestLogToItemBox(offlinePlayerData);
-                                                    offlinePlayerData.saveData();
-                                                }
+                                                PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(uuid);
+                                                deathPenaltyManager.sendChestLogToItemBox(playerData);
                                             }
                                         }
                                     }
