@@ -150,6 +150,7 @@ public class GuildGuiEvent implements Listener {
             }
             Guild guild = plugin.getGuildManager().getGuild(playerData.getGuildUUID());
             if (guild != null) {
+                plugin.getEconomy().withdrawPlayer(player, price);
                 guild.setPrefix(message);
                 player.sendMessage(ChatColor.GREEN + "길드 칭호가 변경되었습니다 (" + message + ")");
             } else {

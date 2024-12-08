@@ -104,7 +104,7 @@ public class GuildRegionGui extends CustomGui {
             totalPricePerDay = 0;
         }
         pageLore.add(ChatColor.GOLD + "보유한 땅(청크) 총 비용: " + totalPricePerDay);
-        int overDueDay = guildRegion.getOverdueDay(false);
+        int overDueDay = guildRegion.getOverdueDay(true);
         pageLore.add(ChatColor.GOLD + "연체 횟수: " + overDueDay);
         String expiredTime;
         long lastPayTime = guildRegion.getLastRegionPayTime();
@@ -117,9 +117,7 @@ public class GuildRegionGui extends CustomGui {
         pageLore.add(ChatColor.GOLD + "만료 기간: " + expiredTime);
         pageLore.add("");
         pageLore.add(ChatColor.GRAY + "=====적용된 상점 페널티=====");
-        if (overDueDay > guildManager.getMaxShopPenalty()) {
-            overDueDay = guildManager.getMaxShopPenalty();
-        }
+
         double shopPenalty = guildManager.getShopPenalty(overDueDay) * 100.0;
         String shopPenaltyFormat = String.format("%.2f", shopPenalty);
         pageLore.add(ChatColor.GRAY + "구입 비용: " + ChatColor.GOLD + "+" + shopPenaltyFormat + "%");

@@ -132,7 +132,7 @@ public class GuildRegion {
         this.lastRegionPayTime = lastRegionPayTime;
     }
 
-    public int getOverdueDay(boolean applyMax) {
+    public int getOverdueDay(boolean applyMax) { // 0 이면 만료되지 않음
         if (getLastRegionPayTime() == -1) {
             return 0;
         }

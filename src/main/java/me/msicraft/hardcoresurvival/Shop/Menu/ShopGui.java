@@ -90,7 +90,7 @@ public class ShopGui extends CustomGui {
         int guiCount = 0;
         int lastCount = page * 45;
 
-        ShopItem.Category selectCategory = ShopItem.Category.valueOf((String) playerData.getTempData("Shop_Category", "NONE"));
+        ShopItem.Category selectCategory = ShopItem.Category.valueOf((String) playerData.getTempData("Shop_Category", "ALL"));
 
         String pageS = "페이지: " + (page + 1) + "/" + ((maxSize / 45) + 1);
         itemStack = GuiUtil.createItemStack(Material.BOOK, pageS, getPageLore(selectCategory), -1, BUY_KEY, "Page");

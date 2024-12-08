@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.Menu;
 
+import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Menu.Data.CustomGui;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PersonalOption;
@@ -55,11 +56,20 @@ public class MenuGui extends CustomGui {
         Location location = playerData.getPlayer().getLocation();
         if (HardcoreSurvival.getPlugin().getShopManager().getShopRegion().contains(location)
                 || HardcoreSurvival.getPlugin().getGuildManager().isInOwnGuildRegion(location, playerData.getPlayer(), false)) {
-            double shopPenalty = HardcoreSurvival.getPlugin().getShopManager().getNoGuildShopPenalty();
+            double shopPenalty;
+            Guild guild = HardcoreSurvival.getPlugin().getGuildManager().getGuild(playerData.getGuildUUID());
+            if (guild== null) {
+                shopPenalty = HardcoreSurvival.getPlugin().getShopManager().getNoGuildShopPenalty();
+            } else {
+                int overdue = guild.getGuildRegion().getOverdueDay(true);
+                shopPenalty = HardcoreSurvival.getPlugin().getGuildManager().getShopPenalty(overdue) * 100.0;
+            }
+            String shopPenaltyFormat = String.format("%.2f", shopPenalty);
             itemStack = GuiUtil.createItemStack(Material.CHEST, "상점",
-                    List.of(ChatColor.YELLOW + "길드에 속해있지 않을시 페널티가 발생합니다",
-                            ChatColor.RED + "구매: + " + (shopPenalty * 100.0),
-                            ChatColor.BLUE + "판매: - " + (shopPenalty * 100.0)),
+                    List.of(ChatColor.YELLOW + "길드에 속해있지 않을시 상점페널티가 발생합니다",
+                            "", ChatColor.GRAY + "=====적용된 상점 페널티=====",
+                            ChatColor.GRAY + "구매: " + ChatColor.RED + "+" + shopPenaltyFormat + "%",
+                            ChatColor.GRAY + "판매: " + ChatColor.BLUE + "-" + shopPenaltyFormat + "%"),
                     -1, MENU_KEY, "shop");
             gui.setItem(19, itemStack);
 
