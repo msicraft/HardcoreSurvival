@@ -8,23 +8,21 @@ import me.msicraft.hardcoresurvival.CustomItem.Data.CustomItem;
 import me.msicraft.hardcoresurvival.DeathPenalty.Data.DeathPenaltyChestLog;
 import me.msicraft.hardcoresurvival.DeathPenalty.DeathPenaltyManager;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
-import me.msicraft.hardcoresurvival.Guild.Data.GuildDataFile;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
 import me.msicraft.hardcoresurvival.Guild.Data.GuildSpawnLocation;
 import me.msicraft.hardcoresurvival.Guild.GuildManager;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.ItemBox.ItemBoxManager;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
-import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
 import me.msicraft.hardcoresurvival.Shop.Data.ShopItem;
 import me.msicraft.hardcoresurvival.Shop.ShopManager;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
-import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,7 +33,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -66,68 +63,67 @@ public class MainCommand implements CommandExecutor {
                         if (!sender.isOp()) {
                             return false;
                         }
-                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                            long start = System.currentTimeMillis();
-                            Bukkit.getConsoleSender().sendMessage("플레이어/길드 데이터 백업중...");
-                            String folderName = TimeUtil.getTimeToFormat("yyyy-MM-dd-HH_mm_ss", start);
-                            File playerBackupFolder = new File(plugin.getDataFolder()
-                                    + File.separator + PlayerDataFile.FOLDER_NAME
-                                    + File.separator + PlayerDataFile.BACK_UP_FOLDER_NAME
-                                    + File.separator + folderName);
-                            if (!playerBackupFolder.exists()) {
-                                playerBackupFolder.mkdirs();
-                            }
-                            PlayerDataManager playerDataManager = plugin.getPlayerDataManager();
-                            Set<UUID> uuids = playerDataManager.getPlayerUUIDs();
-                            int success = 0;
-                            int fail = 0;
-                            for (UUID uuid : uuids) {
-                                PlayerData playerData = playerDataManager.getPlayerData(uuid);
-                                playerData.saveData();
-
-                                if (playerData.getPlayerDataFile().backup(playerBackupFolder)) {
-                                    success++;
-                                } else {
-                                    fail++;
-                                }
-                            }
-                            long end = System.currentTimeMillis();
-                            Bukkit.getConsoleSender().sendMessage("플에이어 데이터 백업완료 | 성공: " + success
-                                    + " | 실패: " + fail
-                                    + " | " + (end - start) + "ms");
-                            success = 0;
-                            fail = 0;
-
-                            File guildBackupFolder = new File(plugin.getDataFolder()
-                                    + File.separator + GuildDataFile.FOLDER_NAME
-                                    + File.separator + GuildDataFile.BACK_UP_FOLDER_NAME
-                                    + File.separator + folderName);
-                            if (!guildBackupFolder.exists()) {
-                                guildBackupFolder.mkdirs();
-                            }
-                            GuildManager guildManager = plugin.getGuildManager();
-                            Set<UUID> guildUUIDs = guildManager.getGuildUUIDs();
-                            for (UUID uuid : guildUUIDs) {
-                                Guild guild = guildManager.getGuild(uuid);
-                                guild.save();
-
-                                if (guild.getGuildDataFile().backup(guildBackupFolder)) {
-                                    success++;
-                                } else {
-                                    fail++;
-                                }
-                            }
-                            end = System.currentTimeMillis();
-                            Bukkit.getConsoleSender().sendMessage("길드 데이터 백업완료 | 성공: " + success
-                                    + " | 실패: " + fail
-                                    + " | " + (end - start) + "ms");
-                        });
                     }
                     case "debug" -> { //hs debug []
                         if (!sender.isOp()) {
                             return false;
                         }
                         switch (args[1]) {
+                            case "check-chunk" -> {
+                                if (sender instanceof Player player) {
+                                    long start = System.currentTimeMillis();
+                                    int coal = 0;
+                                    int copper = 0;
+                                    int iron = 0;
+                                    int gold = 0;
+                                    int lapis = 0;
+                                    int diamond = 0;
+                                    int emerald = 0;
+                                    Chunk chunk = player.getChunk();
+                                    for(int y = -64; y <= 1024; y++) {
+                                        for(int x = 0; x <= 15; x++) {
+                                            for(int z = 0; z <= 15; z++) {
+                                                Block block = chunk.getBlock(x, y, z);
+                                                Material material = block.getType();
+                                                switch (material) {
+                                                    case COAL_ORE, DEEPSLATE_COAL_ORE -> {
+                                                        coal++;
+                                                    }
+                                                    case COPPER_ORE, DEEPSLATE_COPPER_ORE -> {
+                                                        copper++;
+                                                    }
+                                                    case IRON_ORE, DEEPSLATE_IRON_ORE -> {
+                                                        iron++;
+                                                    }
+                                                    case GOLD_ORE, DEEPSLATE_GOLD_ORE -> {
+                                                        gold++;
+                                                    }
+                                                    case LAPIS_ORE, DEEPSLATE_LAPIS_ORE -> {
+                                                        lapis++;
+                                                    }
+                                                    case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> {
+                                                        diamond++;
+                                                    }
+                                                    case EMERALD_ORE, DEEPSLATE_EMERALD_ORE -> {
+                                                        emerald++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    long end = System.currentTimeMillis();
+                                    player.sendMessage("Time: " + (end - start) + "ms");
+                                    player.sendMessage("Chunk: " + chunk.getX() + " | " + chunk.getZ());
+                                    player.sendMessage("Coal: " + coal);
+                                    player.sendMessage("Copper: " + copper);
+                                    player.sendMessage("Iron: " + iron);
+                                    player.sendMessage("Gold: " + gold);
+                                    player.sendMessage("Lapis: " + lapis);
+                                    player.sendMessage("Diamond: " + diamond);
+                                    player.sendMessage("Emerald: " + emerald);
+                                    return true;
+                                }
+                            }
                             case "guild" -> { // <guild_uuid> [spawnlocation, prefix]
                                 UUID uuid = UUID.fromString(args[3]);
                                 GuildManager guildManager = plugin.getGuildManager();
@@ -274,12 +270,11 @@ public class MainCommand implements CommandExecutor {
                         if (plugin.isMaintenance()) {
                             plugin.setMaintenance(false);
                             sender.sendMessage(ChatColor.RED + "Disable Maintenance");
-                            return true;
                         } else {
                             plugin.setMaintenance(true);
                             sender.sendMessage(ChatColor.RED + "Enable Maintenance");
-                            return true;
                         }
+                        return true;
                     }
                     case "maintenance" -> { //hs maintenance <message>
                         if (!sender.isOp()) {

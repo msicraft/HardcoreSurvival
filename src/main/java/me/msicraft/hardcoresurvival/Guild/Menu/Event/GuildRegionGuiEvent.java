@@ -231,9 +231,15 @@ public class GuildRegionGuiEvent implements Listener {
                             int x = Integer.parseInt(format[1]);
                             int z = Integer.parseInt(format[2]);
 
-                            guildManager.removeRegion(guild, worldName, x, z);
-
-                            player.sendMessage(ChatColor.GREEN + "해당 땅(청크) 계약을 취소하였습니다");
+                            Location location = player.getLocation();
+                            Chunk chunk = location.getChunk();
+                            if (worldName.equalsIgnoreCase(player.getWorld().getName()) && chunk.getX() == x && chunk.getZ() == z) {
+                                guildManager.removeRegion(guild, worldName, x, z);
+                                player.sendMessage(ChatColor.GREEN + "해당 땅(청크) 계약을 취소하였습니다");
+                            } else {
+                                player.sendMessage(ChatColor.RED + "해당 땅(청크)내에서만 계약을 취소할 수 있습니다");
+                                return;
+                            }
                             player.openInventory(guildRegionGui.getInventory());
                             guildRegionGui.setMain();
                         }

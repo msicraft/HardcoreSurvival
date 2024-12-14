@@ -7,8 +7,8 @@ import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerDataFile;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
+import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import me.msicraft.hardcoresurvival.Utils.TimeUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -16,6 +16,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class BackupTask extends BukkitRunnable {
+
+    private enum Type {
+        PLAYER_DATA, GUILD
+    }
 
     private final HardcoreSurvival plugin;
 
@@ -26,12 +30,18 @@ public class BackupTask extends BukkitRunnable {
     @Override
     public void run() {
         long start = System.currentTimeMillis();
-        Bukkit.getConsoleSender().sendMessage("플레이어/길드 데이터 백업중...");
-        String folderName = TimeUtil.getTimeToFormat("yyyy-MM-dd-HH_mm_ss", start);
-        File playerBackupFolder = new File(plugin.getDataFolder()
-                + File.separator + PlayerDataFile.FOLDER_NAME
-                + File.separator + PlayerDataFile.BACK_UP_FOLDER_NAME
-                + File.separator + folderName);
+
+        String dayFolderName = TimeUtil.getTimeToFormat("yyyy년 MM월 dd일", start);
+        String currentTimeFolderName = TimeUtil.getTimeToFormat("HH시 mm분 ss초", start);
+
+        MessageUtil.sendDebugMessage("플레이어/길드 데이터 백업중... (" + dayFolderName + "-" + currentTimeFolderName + ")");
+        File dayFolder = new File(plugin.getDataFolder() + File.separator
+                + PlayerDataFile.FOLDER_NAME + File.separator
+                + PlayerDataFile.BACK_UP_FOLDER_NAME + File.separator + dayFolderName);
+        if (!dayFolder.exists()) {
+            dayFolder.mkdirs();
+        }
+        File playerBackupFolder = new File(dayFolder.getPath() + File.separator + currentTimeFolderName);
         if (!playerBackupFolder.exists()) {
             playerBackupFolder.mkdirs();
         }
@@ -50,18 +60,22 @@ public class BackupTask extends BukkitRunnable {
             }
         }
         long end = System.currentTimeMillis();
-        Bukkit.getConsoleSender().sendMessage("플에이어 데이터 백업완료 | 성공: " + success
-                + " | 실패: " + fail
-                + " | " + (end - start) + "ms");
+        MessageUtil.sendDebugMessage("플레이어 데이터 백업완료", "성공: " + success
+                + " | 실패: " + fail +  " | " + (end - start) + "ms");
+
         success = 0;
         fail = 0;
+        start = System.currentTimeMillis();
 
-        File guildBackupFolder = new File(plugin.getDataFolder()
-                + File.separator + GuildDataFile.FOLDER_NAME
-                + File.separator + GuildDataFile.BACK_UP_FOLDER_NAME
-                + File.separator + folderName);
-        if (!guildBackupFolder.exists()) {
-            guildBackupFolder.mkdirs();
+        File guildDayFolder = new File(plugin.getDataFolder() + File.separator
+                + GuildDataFile.FOLDER_NAME + File.separator
+                + GuildDataFile.BACK_UP_FOLDER_NAME + File.separator + dayFolderName);
+        if (!guildDayFolder.exists()) {
+            guildDayFolder.mkdirs();
+        }
+        File guildTimeFolder = new File(guildDayFolder.getPath() + File.separator + currentTimeFolderName);
+        if (!guildTimeFolder.exists()) {
+            guildTimeFolder.mkdirs();
         }
         GuildManager guildManager = plugin.getGuildManager();
         Set<UUID> guildUUIDs = guildManager.getGuildUUIDs();
@@ -69,16 +83,15 @@ public class BackupTask extends BukkitRunnable {
             Guild guild = guildManager.getGuild(uuid);
             guild.save();
 
-            if (guild.getGuildDataFile().backup(guildBackupFolder)) {
+            if (guild.getGuildDataFile().backup(guildTimeFolder)) {
                 success++;
             } else {
                 fail++;
             }
         }
         end = System.currentTimeMillis();
-        Bukkit.getConsoleSender().sendMessage("길드 데이터 백업완료 | 성공: " + success
-                + " | 실패: " + fail
-                + " | " + (end - start) + "ms");
+        MessageUtil.sendDebugMessage("길드 데이터 백업완료", "성공: " + success
+                + " | 실패: " + fail +  " | " + (end - start) + "ms");
     }
 
 }

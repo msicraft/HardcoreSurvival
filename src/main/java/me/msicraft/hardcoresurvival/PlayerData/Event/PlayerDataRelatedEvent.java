@@ -5,6 +5,8 @@ import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadStartEvent;
 import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
+import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.PlayerData.Data.CustomHealthRegen;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
@@ -13,6 +15,7 @@ import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -24,6 +27,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -113,6 +117,16 @@ public class PlayerDataRelatedEvent implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " tiger");
             playerData.addTag("EcoPet_tiger");
         }
+        if (!playerData.hasTag("hs_basic_kit-1")) {
+            playerData.addTag("hs_basic_kit-1");
+            ItemBox itemBox = playerData.getItemBox();
+            long time = System.currentTimeMillis();
+            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.BREAD, 32), time, "[시스템]", -1));
+            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.LEATHER_CHESTPLATE, 1), time, "[시스템]", -1));
+            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.LEATHER_BOOTS, 1), time, "[시스템]", -1));
+            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.STONE_AXE, 1), time, "[시스템]", -1));
+            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.STONE_PICKAXE, 1), time, "[시스템]", -1));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -169,7 +183,7 @@ public class PlayerDataRelatedEvent implements Listener {
     public void healthRegen(EntityRegainHealthEvent e) {
         CustomHealthRegen customHealthRegen = playerDataManager.getCustomHealthRegen();
         if (customHealthRegen.isDisableVanillaRegen()) {
-            if (e.getEntityType() == EntityType.PLAYER || e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
+            if (e.getEntityType() == EntityType.PLAYER && e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
                 e.setCancelled(true);
             }
         }

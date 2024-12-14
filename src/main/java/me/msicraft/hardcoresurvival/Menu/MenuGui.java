@@ -37,21 +37,21 @@ public class MenuGui extends CustomGui {
 
         itemStack = GuiUtil.createItemStack(Material.HOPPER, "아이템 우편함", GuiUtil.EMPTY_LORE, -1,
                 MENU_KEY, "item-box");
-        gui.setItem(11, itemStack);
+        gui.setItem(10, itemStack);
 
         if (playerData.getGuildUUID() != null) {
             itemStack = GuiUtil.createItemStack(Material.PLAYER_HEAD, "길드", GuiUtil.EMPTY_LORE, -1,
                     MENU_KEY, "Guild");
-            gui.setItem(10, itemStack);
+            gui.setItem(12, itemStack);
         }
 
         itemStack = GuiUtil.createItemStack(Material.PAPER, "장신구 인벤토리", GuiUtil.EMPTY_LORE, -1, MENU_KEY, "mmoinv");
-        gui.setItem(9, itemStack);
+        gui.setItem(14, itemStack);
 
         itemStack = GuiUtil.createItemStack(Material.ENDER_CHEST, "경매장",
                 List.of(ChatColor.YELLOW + "좌 클릭: 열기", ChatColor.YELLOW + "우 클릭: 아이템 등록"), -1,
                 MENU_KEY, "auction");
-        gui.setItem(12, itemStack);
+        gui.setItem(19, itemStack);
 
         Location location = playerData.getPlayer().getLocation();
         if (HardcoreSurvival.getPlugin().getShopManager().getShopRegion().contains(location)
@@ -71,16 +71,16 @@ public class MenuGui extends CustomGui {
                             ChatColor.GRAY + "구매: " + ChatColor.RED + "+" + shopPenaltyFormat + "%",
                             ChatColor.GRAY + "판매: " + ChatColor.BLUE + "-" + shopPenaltyFormat + "%"),
                     -1, MENU_KEY, "shop");
-            gui.setItem(19, itemStack);
+            gui.setItem(20, itemStack);
 
             itemStack = GuiUtil.createItemStack(Material.BARREL, "물고기 판매 상점", GuiUtil.EMPTY_LORE, -1,
                     MENU_KEY, "fish-shop");
-            gui.setItem(20, itemStack);
+            gui.setItem(21, itemStack);
         }
 
         itemStack = GuiUtil.createItemStack("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmFkYzA0OGE3Y2U3OGY3ZGFkNzJhMDdkYTI3ZDg1YzA5MTY4ODFlNTUyMmVlZWQxZTNkYWYyMTdhMzhjMWEifX19",
                 "펫 관리", GuiUtil.EMPTY_LORE, -1, MENU_KEY, "Pets");
-        gui.setItem(21, itemStack);
+        gui.setItem(23, itemStack);
     }
 
     private static final int[] OPTION_SLOTS = new int[]{

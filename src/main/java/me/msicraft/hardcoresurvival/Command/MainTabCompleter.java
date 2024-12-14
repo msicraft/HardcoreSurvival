@@ -48,7 +48,7 @@ public class MainTabCompleter implements TabCompleter {
                             return List.of("shop");
                         }
                         case "debug" -> {
-                            return List.of("guild", "region", "playerdata");
+                            return List.of("guild", "region", "playerdata", "check-chunk");
                         }
                     }
                 }

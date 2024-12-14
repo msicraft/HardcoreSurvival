@@ -2,13 +2,18 @@ package me.msicraft.hardcoresurvival.API;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
+import me.msicraft.hardcoresurvival.Guild.Data.GuildRegion;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public class PAPIExpansion extends PlaceholderExpansion {
 
@@ -53,10 +58,29 @@ public class PAPIExpansion extends PlaceholderExpansion {
                     case "worldname" -> {
                         return plugin.getWorldManager().getCurrentWorldName(onlineP.getWorld().getName());
                     }
-                    case "chunkinfo" -> {
+                    case "chunk_info" -> {
                         Location location = onlineP.getLocation();
                         Chunk chunk = location.getChunk();
                         return chunk.getX() + " " + chunk.getZ();
+                    }
+                    case "chunk_owner" -> {
+                        Location location = onlineP.getLocation();
+                        Chunk chunk = location.getChunk();
+                        PersistentDataContainer dataContainer = chunk.getPersistentDataContainer();
+                        if (dataContainer.has(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING)) {
+                            String guildRegionKey = dataContainer.get(GuildRegion.GUILD_REGION_KEY, PersistentDataType.STRING);
+                            if (guildRegionKey != null) {
+                                Guild guild = plugin.getGuildManager().getGuild(UUID.fromString(guildRegionKey));
+                                if (guild != null) {
+                                    String prefix = guild.getPrefix();
+                                    if (prefix == null) {
+                                        return "[X]";
+                                    }
+                                    return "[" + prefix + "] 길드의 땅";
+                                }
+                            }
+                        }
+                        return "[X]";
                     }
                 }
             }

@@ -7,6 +7,9 @@ public class CustomHealthRegen {
     private int taskSeconds = -1;
     private int minFoodLevel = 6;
 
+    private final String extraFlatRegen = "hs_customhealthregen.flat";
+    private final String extraPercentRegen = "hs_customhealthregen.percent";
+
     public CustomHealthRegen() {
     }
 

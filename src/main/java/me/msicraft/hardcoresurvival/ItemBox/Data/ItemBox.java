@@ -1,5 +1,6 @@
 package me.msicraft.hardcoresurvival.ItemBox.Data;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -47,6 +48,23 @@ public class ItemBox {
             return false;
         }
         return false;
+    }
+
+    public void takeAll(Player player) {
+        synchronized (list) {
+            for (ItemBoxStack itemBoxStack : list) {
+                if (itemBoxStack.isExpired()) {
+                    continue;
+                }
+                int slot = player.getInventory().firstEmpty();
+                if (slot == -1) {
+                    player.sendMessage(ChatColor.RED + "인벤토리에 충분한 공간이 없습니다");
+                    return;
+                }
+                player.getInventory().setItem(slot, itemBoxStack.getItemStack());
+            }
+            list.clear();
+        }
     }
 
 }

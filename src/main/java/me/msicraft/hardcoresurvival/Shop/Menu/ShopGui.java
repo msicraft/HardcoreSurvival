@@ -103,8 +103,7 @@ public class ShopGui extends CustomGui {
                 if (shopItem.getPrice(false) <= 0) {
                     continue;
                 }
-                ShopItem.Category category = shopItem.getCategory();
-                if (category != ShopItem.Category.ALL) {
+                if (selectCategory != ShopItem.Category.ALL) {
                     if (shopItem.getCategory() != selectCategory) {
                         continue;
                     }

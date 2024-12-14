@@ -139,6 +139,7 @@ public class GuildRegionGui extends CustomGui {
             if (centerLocation == null) {
                 continue;
             }
+            lore.add(Component.text(ChatColor.GRAY + "청크: " + pair.getV1() + " " + pair.getV2()));
             lore.add(Component.text(ChatColor.GRAY + "중심 좌표"));
             lore.add(Component.text(ChatColor.GRAY + "X: " + ChatColor.GREEN + centerLocation.getBlockX()));
             lore.add(Component.text(ChatColor.GRAY + "Z: " + ChatColor.GREEN + centerLocation.getBlockZ()));
