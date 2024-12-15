@@ -6,6 +6,11 @@ Setting:
   MendingEnchantChance: 0.01
   DisableBedExplode: true
   DisableTrade: true
+  OneShotProtection:
+    Enabled: true
+    Health: 0.95
+    NoDamageTicks: 30
+    CoolDown: 5
   CustomHealthRegen:
     DisableVanillaRegen: true
     BaseRegen: 1.5

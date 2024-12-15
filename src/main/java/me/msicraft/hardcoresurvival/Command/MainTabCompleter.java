@@ -147,11 +147,13 @@ public class MainTabCompleter implements TabCompleter {
                         if (var2.equalsIgnoreCase("register") || var2.equalsIgnoreCase("unregister")) {
                             return List.of("<basePrice>");
                         } else if (var2.equalsIgnoreCase("edit")) {
-                            List<String> list = new ArrayList<>();
-                            for (ShopItem.Category category : ShopItem.Category.values()) {
-                                list.add(category.name());
+                            if (var3.equalsIgnoreCase("Category")) {
+                                List<String> list = new ArrayList<>();
+                                for (ShopItem.Category category : ShopItem.Category.values()) {
+                                    list.add(category.name());
+                                }
+                                return list;
                             }
-                            return list;
                         }
                     } else if (var.equalsIgnoreCase("debug")) {
                         if (var2.equalsIgnoreCase("guild")) {

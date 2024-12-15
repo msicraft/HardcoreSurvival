@@ -2,11 +2,14 @@ package me.msicraft.hardcoresurvival.Event;
 
 import io.lumine.mythic.bukkit.MythicBukkit;
 import me.msicraft.hardcoresurvival.Data.DisableActionType;
+import me.msicraft.hardcoresurvival.Data.OneShotProtection;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -51,6 +54,7 @@ public class PlayerRelatedEvent implements Listener {
 
     private PlayerRelatedEvent() {
         this.plugin = HardcoreSurvival.getPlugin();
+        this.oneShotProtection = new OneShotProtection();
     }
 
     private boolean disableBoneMeal = false;
@@ -64,6 +68,12 @@ public class PlayerRelatedEvent implements Listener {
     private final Map<Enchantment, Double> extraEnchantItemDamageMap = new HashMap<>();
     private final Map<String, String> changeWorldMessageMap = new HashMap<>();
 
+    private final OneShotProtection oneShotProtection;
+
+    public OneShotProtection getOneShotProtection() {
+        return oneShotProtection;
+    }
+
     public void reloadVariables() {
         FileConfiguration config = plugin.getConfig();
 
@@ -72,6 +82,11 @@ public class PlayerRelatedEvent implements Listener {
         this.disableBedExplode = config.contains("Setting.DisableBedExplode") && config.getBoolean("Setting.DisableBedExplode");
         this.disableUse = config.contains("Setting.DisableUse.Enabled") && config.getBoolean("Setting.DisableUse.Enabled");
         this.shieldCooldownTick = config.contains("Setting.ShieldCooldownTick") ? config.getInt("Setting.ShieldCooldownTick") : -1;
+
+        oneShotProtection.setEnabled(config.getBoolean("Setting.OneShotProtection.Enabled", false));
+        oneShotProtection.setHealthPercent(config.getDouble("Setting.OneShotProtection.Health", -1));
+        oneShotProtection.setNoDamageTicks(config.getInt("Setting.OneShotProtection.NoDamageTicks", 0));
+        oneShotProtection.setCooldown(config.getInt("Setting.OneShotProtection.CoolDown", 0));
 
         DisableActionType[] disableActionTypes = DisableActionType.values();
         for (DisableActionType actionType : disableActionTypes) {
@@ -435,6 +450,40 @@ public class PlayerRelatedEvent implements Listener {
             String message = changeWorldMessageMap.get(worldName);
             if (message != null) {
                 player.sendMessage(MessageUtil.translateColorCodes(message));
+            }
+        }
+    }
+
+    @EventHandler
+    public void playerOSPEvent(EntityDamageEvent e) {
+        if (oneShotProtection.isEnabled()) {
+            if (e.getEntity() instanceof Player player) {
+                if (e.getFinalDamage() >= player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+                    PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
+                    if (playerData != null) {
+                        if (oneShotProtection.isOSP(player)) {
+                            int cooldown = oneShotProtection.getCooldown();
+                            long time = System.currentTimeMillis();
+                            long lastOSP = time - (cooldown * 2000L);
+                            Object lastOSPObject = playerData.getData("LastOSPTime", null);
+                            if (lastOSPObject != null) {
+                                if (lastOSPObject instanceof Integer) {
+                                    lastOSP = ((Integer) lastOSPObject).longValue();
+                                } else if (lastOSPObject instanceof Long) {
+                                    lastOSP = (Long) lastOSPObject;
+                                }
+                            }
+                            if (time < (lastOSP + (oneShotProtection.getCooldown() * 1000L))) {
+                                return;
+                            }
+                            e.setCancelled(true);
+                            player.sendHurtAnimation(0);
+                            player.setHealth(4);
+                            player.setNoDamageTicks(oneShotProtection.getNoDamageTicks());
+                            playerData.setData("LastOSPTime", time);
+                        }
+                    }
+                }
             }
         }
     }
