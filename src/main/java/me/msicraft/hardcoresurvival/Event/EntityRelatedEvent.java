@@ -3,14 +3,12 @@ package me.msicraft.hardcoresurvival.Event;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
 import me.msicraft.hardcoresurvival.Utils.MessageUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.inventory.TradeSelectEvent;
@@ -76,11 +74,21 @@ public class EntityRelatedEvent implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void disableBreedEvent(EntityBreedEvent e) {
         double random = Math.random();
+        LivingEntity livingEntity = e.getEntity();
         if (random <= breedChance) {
-            e.setCancelled(true);
+            livingEntity.remove();
+            e.setExperience(0);
+        } else {
+            livingEntity.remove();
+            World world = livingEntity.getWorld();
+            world.spawnEntity(livingEntity.getLocation(), livingEntity.getType(), CreatureSpawnEvent.SpawnReason.COMMAND, entity -> {
+                if (entity instanceof Ageable ageable) {
+                    ageable.setBaby();
+                }
+            });
         }
     }
 
