@@ -210,6 +210,8 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 playerData.setData("DeathLastFoodLevel", player.getFoodLevel());
             }
 
+            playerData.setTempData("DeathDamageType", e.getDamageSource().getDamageType().getKey().toString());
+
             e.setKeepInventory(true);
             e.setKeepLevel(true);
             e.getDrops().clear();
@@ -229,10 +231,6 @@ public class DeathPenaltyRelatedEvent implements Listener {
                 playerData.setData("LastIgnoreDeathPenaltyTime", System.currentTimeMillis());
 
                 player.sendMessage(ChatColor.GREEN + "죽음 패널티 면역으로 인해 패널티가 적용되지않았습니다");
-
-                if (plugin.useDebug()) {
-                    MessageUtil.sendDebugMessage("DeathPenalty-Death-IgnorePenalty", "Player: " + player.getName());
-                }
             } else {
                 deathPenaltyManager.applyDeathPenalty(playerData);
             }

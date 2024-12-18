@@ -200,6 +200,8 @@ public class DeathPenaltyManager {
 
         if (plugin.useDebug()) {
             MessageUtil.sendDebugMessage("Apply DeathPenalty",
+                    "DeathDamageType: "
+                            + (playerData.getTempData("DeathDamageType") != null ? playerData.getTempData("DeathDamageType") : "Unknown"),
                     "WorldName: " + deathWorldName + " | Player: " + player.getName(), "ActionTypes: " + sets);
         }
     }

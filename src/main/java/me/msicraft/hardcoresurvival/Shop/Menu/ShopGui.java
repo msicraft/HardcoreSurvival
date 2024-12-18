@@ -119,10 +119,12 @@ public class ShopGui extends CustomGui {
                 lore.add(Component.text(ChatColor.WHITE + "현재 가격: " + shopItem.getPrice(false)
                         + " (개당 가격: " + shopItem.getPrice(true) + ") " + shopItem.getChangePercentString()));
                 if (shopItem.isUnlimitStock()) {
-                    lore.add(Component.text(ChatColor.WHITE + "남은 재고: 무제한"));
+                    lore.add(Component.text(ChatColor.WHITE + "남은 재고: ∞"));
                 } else {
                     lore.add(Component.text(ChatColor.WHITE + "남은 재고: " + shopItem.getStock()));
                 }
+                lore.add(Component.text(""));
+                lore.add(Component.text(ChatColor.GRAY + "카테고리: " + shopItem.getCategory().getDisplayName()));
                 lore.add(Component.text(""));
                 lore.add(Component.text(ChatColor.YELLOW + "선택된 개수: " + selectCount));
                 lore.add(Component.text(""));
