@@ -1,4 +1,5 @@
 package me.msicraft.hardcoresurvival.API;
 
-public class APIManager {
+public class APIManager{
+
 }

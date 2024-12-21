@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival;
 
 import fr.maxlego08.zauctionhouse.api.AuctionManager;
+import me.msicraft.hardcoresurvival.API.MythicMobs.Element.MythicMobsElementEvent;
 import me.msicraft.hardcoresurvival.API.MythicMobs.MythicMobsRegisterEvent;
 import me.msicraft.hardcoresurvival.API.PAPIExpansion;
 import me.msicraft.hardcoresurvival.API.zAuctionV3.AuctionRelatedEvent;
@@ -142,10 +143,12 @@ public final class HardcoreSurvival extends JavaPlugin {
         pluginManager.registerEvents(new ShopGuiEvent(this), this);
         pluginManager.registerEvents(new CustomItemRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildGuiEvent(this), this);
-        pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
         pluginManager.registerEvents(new AuctionRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildRelatedEvent(this), this);
         pluginManager.registerEvents(new GuildRegionGuiEvent(this), this);
+
+        pluginManager.registerEvents(new MythicMobsRegisterEvent(this), this);
+        pluginManager.registerEvents(MythicMobsElementEvent.getInstance(), this);
     }
 
     public void registeredCommands() {
@@ -182,6 +185,8 @@ public final class HardcoreSurvival extends JavaPlugin {
         }
 
         shopManager.reloadVariables();
+
+        MythicMobsElementEvent.getInstance().reloadVariables();
 
         int backupTaskTicks = getConfig().getInt("Setting.BackupTicks", -1);
         if (backupTask != null) {

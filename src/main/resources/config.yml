@@ -1,4 +1,16 @@
 Debug: false
+Compatibility:
+  MythicLib:
+    MythicMobsElement:
+      VariablesKeys:
+        - ML_FIRE:FIRE
+        - ML_ICE:ICE
+        - ML_EARTH:EARTH
+        - ML_WIND:WIND
+        - ML_THUNDER:THUNDER
+        - ML_WATER:WATER
+        - ML_DARKNESS:DARKNESS
+        - ML_LIGHTNESS:LIGHTNESS
 Setting:
   BackupTicks: 36000
   DisableEntityVehicleEnter: true
