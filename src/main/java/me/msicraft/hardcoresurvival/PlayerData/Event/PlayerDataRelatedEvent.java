@@ -5,8 +5,6 @@ import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataLoadStartEvent;
 import me.msicraft.hardcoresurvival.API.CustomEvent.PlayerDataUnLoadEvent;
 import me.msicraft.hardcoresurvival.Guild.Data.Guild;
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBox;
-import me.msicraft.hardcoresurvival.ItemBox.Data.ItemBoxStack;
 import me.msicraft.hardcoresurvival.PlayerData.Data.CustomHealthRegen;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.PlayerDataManager;
@@ -15,7 +13,6 @@ import me.msicraft.hardcoresurvival.Utils.TimeUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -27,7 +24,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -95,38 +91,16 @@ public class PlayerDataRelatedEvent implements Listener {
                 player.teleport(world.getSpawnLocation());
             }
         }
+
         playerData.resetTempData();
         playerData.setLastName(player.getName());
         playerData.setLastLogin(System.currentTimeMillis());
+
         playerData.updateTask(plugin.getPlayerTaskTick());
         playerData.setOfflinePlayer(Bukkit.getOfflinePlayer(player.getUniqueId()));
 
-        if (playerData.hasData("DeathWorldName")) {
-            plugin.getDeathPenaltyManager().applyDeathPenalty(playerData);
-        }
-
-        if (!playerData.hasTag("EcoPet_skeleton")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " skeleton");
-            playerData.addTag("EcoPet_skeleton");
-        }
-        if (!playerData.hasTag("EcoPet_elephant")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " elephant");
-            playerData.addTag("EcoPet_elephant");
-        }
-        if (!playerData.hasTag("EcoPet_tiger")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " tiger");
-            playerData.addTag("EcoPet_tiger");
-        }
-        if (!playerData.hasTag("hs_basic_kit-1")) {
-            playerData.addTag("hs_basic_kit-1");
-            ItemBox itemBox = playerData.getItemBox();
-            long time = System.currentTimeMillis();
-            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.BREAD, 32), time, "[시스템]", -1));
-            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.LEATHER_CHESTPLATE, 1), time, "[시스템]", -1));
-            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.LEATHER_BOOTS, 1), time, "[시스템]", -1));
-            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.STONE_AXE, 1), time, "[시스템]", -1));
-            itemBox.addItemBoxStack(new ItemBoxStack(new ItemStack(Material.STONE_PICKAXE, 1), time, "[시스템]", -1));
-        }
+        playerDataManager.getBasicKit().provide(playerData);
+        playerDataManager.checkTag(player, playerData);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

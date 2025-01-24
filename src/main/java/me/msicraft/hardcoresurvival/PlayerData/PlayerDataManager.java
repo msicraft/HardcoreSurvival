@@ -1,6 +1,7 @@
 package me.msicraft.hardcoresurvival.PlayerData;
 
 import me.msicraft.hardcoresurvival.HardcoreSurvival;
+import me.msicraft.hardcoresurvival.PlayerData.Data.BasicKit;
 import me.msicraft.hardcoresurvival.PlayerData.Data.CustomHealthRegen;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerData;
 import me.msicraft.hardcoresurvival.PlayerData.Data.PlayerDataFile;
@@ -19,10 +20,12 @@ public class PlayerDataManager {
     private final Map<UUID, PlayerData> cachedMap = new ConcurrentHashMap<>();
     private final List<UUID> streamerList = new ArrayList<>();
     private final CustomHealthRegen customHealthRegen;
+    private final BasicKit basicKit;
 
     public PlayerDataManager(HardcoreSurvival plugin) {
         this.plugin = plugin;
         this.customHealthRegen = new CustomHealthRegen();
+        this.basicKit = new BasicKit();
 
         customHealthRegen.setBase(plugin.getConfig().getDouble("Setting.CustomHealthRegen.BaseRegen", -1));
         customHealthRegen.setTaskSeconds(plugin.getConfig().getInt("Setting.CustomHealthRegen.Seconds", -1));
@@ -138,6 +141,29 @@ public class PlayerDataManager {
 
     public CustomHealthRegen getCustomHealthRegen() {
         return customHealthRegen;
+    }
+
+    public BasicKit getBasicKit() {
+        return basicKit;
+    }
+
+    public void checkTag(Player player, PlayerData playerData) {
+        if (playerData.hasData("DeathWorldName")) {
+            plugin.getDeathPenaltyManager().applyDeathPenalty(playerData);
+        }
+
+        if (!playerData.hasTag("EcoPet_skeleton")) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " skeleton");
+            playerData.addTag("EcoPet_skeleton");
+        }
+        if (!playerData.hasTag("EcoPet_elephant")) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " elephant");
+            playerData.addTag("EcoPet_elephant");
+        }
+        if (!playerData.hasTag("EcoPet_tiger")) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ecopets give " + player.getName() + " tiger");
+            playerData.addTag("EcoPet_tiger");
+        }
     }
 
 }
